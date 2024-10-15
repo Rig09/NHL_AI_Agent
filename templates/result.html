@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        {% if name %}
+            <h3>{{name}}</h3>  <br><br>
+                <table bgcolor="black">
+                    <tr bgcolor = "white">
+                        <th> Goals For: </th> 
+                        <th> Assists: </th> 
+                        <th> Primary Points: </th>
+                        <th> Primary Assists: </th>
+                    </tr>
+                    <tr bgcolor = "white">
+                        
+                        <td bgcolor = "inputColours[1]">{{ playerVals[1] }}</td>
+                        <td bgcolor = "inputColours[2]">{{ playerVals[2] }}</td>
+                        <td bgcolor = "inputColours[3]">{{ playerVals[3] }}</td>
+                        <td bgcolor = "inputColours[4]">{{ playerVals[4] }}</td>
+                    </tr>
+                    <tr bgcolor = "white">
+                        <td>League Percentile </td>
+                        <td>League Percentile </td>
+                        <td>League Percentile </td>
+                        <td>League Percentile </td>
+                    </tr>
+                    <tr bgcolor = 'white'>
+                        <td bgcolor = "inputColours[1]">{{Percentiles[1]}}%</td>
+                        <td bgcolor = "inputColours[2]">{{Percentiles[2]}}%</td>
+                        <td bgcolor = "inputColours[3]">{{Percentiles[3]}}%</td>
+                        <td bgcolor = "inputColours[4]">{{Percentiles[4]}}%</td>
+                    <tr bgcolor = "white">
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                    </tr>
+                    <tr bgcolor = 'white'>
+                        <td bgcolor = "inputColours[1]">{{Ranks[1]}}</td>
+                        <td bgcolor = "inputColours[2]">{{Ranks[2]}}</td>
+                        <td bgcolor = "inputColours[3]">{{Ranks[3]}}</td>
+                        <td bgcolor = "inputColours[4]">{{Ranks[4]}}</td>
+                </table> <br><br>
+                <table bgcolor="black">
+                    <tr bgcolor = "white">
+                        <th> 5v5 Goals For: </th> 
+                        <th> 5v5 Assists: </th> 
+                        <th> 5v5 Primary Points: </th>
+                        <th> 5v5 Primary Assists: </th>
+                    </tr>
+                    <tr bgcolor = "white">
+                        <td>{{ playerVals[5] }}</td>
+                        <td>{{ playerVals[6] }}</td>
+                        <td>{{ playerVals[7] }}</td>
+                        <td>{{ playerVals[8] }}</td>
+                    </tr>
+                    <tr bgcolor = "white">
+                        <td> League Percentile </td>
+                        <td> League Percentile </td>
+                        <td> League Percentile </td>
+                        <td> League Percentile </td>
+                    </tr>
+                    <tr bgcolor = 'white'>
+                        <td>{{Percentiles[5]}}%</td>
+                        <td>{{Percentiles[6]}}%</td>
+                        <td>{{Percentiles[7]}}%</td>
+                        <td>{{Percentiles[8]}}%</td>
+                    <tr bgcolor = "white">
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                    </tr>
+                    <tr bgcolor = 'white'>
+                        <td>{{Ranks[5]}}</td>
+                        <td>{{Ranks[6]}}</td>
+                        <td>{{Ranks[7]}}</td>
+                        <td>{{Ranks[8]}}</td>
+                </table> <br><br>
+                <table bgcolor = 'black'>
+                    <tr bgcolor = "white">
+                        <th> Expected Goals For </th> 
+                        <th> On Ice Expected Goals For </th> 
+                        <th> On Ice Goals For </th> 
+                        <th> On Ice Expected Goals Against </th> 
+                        <th> On Ice Goals Against </th> 
+                        <th> Expected Goals Percentage </th> 
+                        <th> Goal Percentage </th> 
+                    </tr>
+                    <tr bgcolor = "white">
+                        <td>{{ playerVals[9] }}</td>
+                        <td>{{ playerVals[10] }}</td>
+                        <td>{{ playerVals[11] }}</td>
+                        <td>{{ playerVals[12] }}</td>
+                        <td>{{ playerVals[13] }}</td>
+                        <td>{{ playerVals[14] }}</td>
+                        <td>{{ playerVals[15] }}</td>
+                    </tr>
+                    <tr bgcolor = "white">
+                        <td>League Percentile</td>
+                        <td>League Percentile</td>
+                        <td>League Percentile</td>
+                        <td>League Percentile</td>
+                        <td>League Percentile</td>
+                        <td>League Percentile</td>
+                        <td>League Percentile</td>
+                    </tr>
+                    <tr bgcolor = 'white'>
+                        <td>{{Percentiles[9]}}%</td>
+                        <td>{{Percentiles[10]}}%</td>
+                        <td>{{Percentiles[11]}}%</td>
+                        <td>{{Percentiles[12]}}%</td>
+                        <td>{{Percentiles[13]}}%</td>
+                        <td>{{Percentiles[14]}}%</td>
+                        <td>{{Percentiles[15]}}%</td>
+                    </tr>
+                    <tr bgcolor = "white">
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                        <td>League Rank</td>
+                    </tr>
+                    <tr bgcolor = 'white'>
+                        <td>{{Ranks[9]}}</td>
+                        <td>{{Ranks[10]}}</td>
+                        <td>{{Ranks[11]}}</td>
+                        <td>{{Ranks[12]}}</td>
+                        <td>{{Ranks[13]}}</td>
+                        <td>{{Ranks[14]}}</td>
+                        <td>{{Ranks[15]}}</td>
+                    </tr>
+                </table>
+        {% endif %}
+    </body>
+</html>
