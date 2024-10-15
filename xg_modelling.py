@@ -3,8 +3,10 @@ from sklearn.model_selection import train_test_split
 # from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge, Lasso
 from sklearn.ensemble import StackingRegressor
-from xgboost import XGBRegressor
 from sklearn.metrics import root_mean_squared_error
+from xgboost import XGBRegressor
+import shap
+
 
 # Load data from CSV file
 XG_data = pd.read_csv('data/xg_shot_input_2015-2023.csv')
@@ -28,6 +30,7 @@ estimators = [
     ('lasso', Lasso(alpha=0.5)),
     #('rf', RandomForestRegressor(n_estimators=100, random_state=42))
 ]
+# TODO: Model checkpoints?
 
 # Create and train the StackingRegressor
 reg = StackingRegressor(estimators=estimators, verbose=1)

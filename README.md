@@ -22,6 +22,7 @@ Leading xG models use Logistic Regression or Gradient Boosted models ([source](h
 
 ### Citations
 - Link in all python packages
+- Cite [MoneyPuck](https://moneypuck.com) data
 
 ### Authors
 Adrian Rigby, [GitHub](https://github.com/Rig09/), [LinkedIn](https://www.linkedin.com/in/adrian-rigby-9293bb272/)

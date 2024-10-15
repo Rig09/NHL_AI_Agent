@@ -3,6 +3,7 @@ Current:
     - Merge with new XG model + data format
 - Large file storage
 - Agent research + development
+- Discuss additional features from new MoneyPuck dataset
 
 Medium Term:
 - Set up repo config with Conda/Pip environment to synchronize packages.
@@ -16,10 +17,10 @@ Later:
 - Live updating of stats and XG
 - Request monitoring + managing volume of requests once hosting
 
-Possibly?
-- Heatmaps
-
 Random Ideas:
 - If you know a player's XG% you can see how that changes over game stages? (OT, 3rd period, etc). 
     Can also see how well they convert on their XG during those times.
-- Build a GUI to input a shot and see the XG from it?
+- Input a shot and see the XG from it?
+- Heatmaps
+    - Player specific 
+    - Shot type or location based
