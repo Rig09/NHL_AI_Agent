@@ -1,0 +1,15 @@
+Current
+- Large file storage
+
+Medium term
+- Agent + text-based interface
+
+Later
+- Rewrite README
+- Per60 Stats
+- Explain train/test overlap and 
+- Player cards
+- Live updating
+
+Possibly?
+- Heatmaps?

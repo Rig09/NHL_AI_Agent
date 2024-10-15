@@ -1,12 +1,8 @@
-# Expected by Whom?: NHL Expected Goals Modelling
-In this repository, we explore a variety of approaches to model expected goals (xG), which quantify the value of a hockey scoring chance. For more information on xG modelling and its history, see this article from [Evolving Hockey](https://evolving-hockey.com/blog/a-new-expected-goals-model-for-predicting-goals-in-the-nhl/).
-
-<!-- TODO: Should there be more of an explanation into xG? -->
+# NHL AI Agent
+<!-- TODO: Explain XG Context -->
+<!-- TODO: Explain AI Agent Context -->
 
 ### Data Source
-NHL play by play data was collected using the [hockey-scraper](https://github.com/HarryShomer/Hockey-Scraper/tree/master) Python package. Our modelling uses data from _TODO: START SEASON_ until the end of the 2022-23 NHL season.
-
-- How did we get the raw data? Link to section in the code?
 
 ### Data Preprocessing and Feature Extraction
 - Missing values, categorical features, which features we created.
@@ -28,6 +24,5 @@ Leading xG models use Logistic Regression or Gradient Boosted models ([source](h
 - Link in all python packages
 
 ### Authors
-Adrian Rigby, [GitHub](https://github.com/RIGBY/), [LinkedIn](https://linkedin.com/RIGBY/)
-<!-- TODO: Add Adrian's GitHub -->
+Adrian Rigby, [GitHub](https://github.com/Rig09/), [LinkedIn](https://www.linkedin.com/in/adrian-rigby-9293bb272/)
 Leo Sandler: [GitHub](https://github.com/L-Sandler/), [LinkedIn](https://www.linkedin.com/in/leo-sandler/)
