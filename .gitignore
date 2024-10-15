@@ -1,2 +1,7 @@
 *__pycache__*
+
+# TODO: Move CSVs to large file storage
 *.csv
+
+# Keeping shot data dictionary CSV in repo
+!notes/MoneyPuck_Shot_Data_Dictionary.csv

@@ -1,0 +1,25 @@
+Current:
+- App.py, home.html, allNHLStats.py, and data_processing.ipynb restructuring with new data
+    - Merge with new XG model + data format
+- Large file storage
+- Agent research + development
+
+Medium Term:
+- Set up repo config with Conda/Pip environment to synchronize packages.
+- Text-based interface for agent
+
+Later:
+- Rewrite README
+- Per60 Stats
+- Explain train/test overlap and 
+- Player cards
+- Live updating of stats and XG
+- Request monitoring + managing volume of requests once hosting
+
+Possibly?
+- Heatmaps
+
+Random Ideas:
+- If you know a player's XG% you can see how that changes over game stages? (OT, 3rd period, etc). 
+    Can also see how well they convert on their XG during those times.
+- Build a GUI to input a shot and see the XG from it?
