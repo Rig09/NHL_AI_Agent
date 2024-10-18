@@ -3,7 +3,8 @@ Current:
     - Merge with new XG model + data format
 - Large file storage
 - Agent research + development
-- Discuss additional features from new MoneyPuck dataset
+- Discuss additional features from new MoneyPuck dataset in XG Modelling
+- Note: MoneyPuck skater data only includes the last team that they played for. Does not include the same player's season split over multiple teams.
 
 Medium Term:
 - Set up repo config with Conda/Pip environment to synchronize packages.
@@ -24,3 +25,4 @@ Random Ideas:
 - Heatmaps
     - Player specific 
     - Shot type or location based
+- Team Level or Line Level Stats?
