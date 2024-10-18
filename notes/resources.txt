@@ -1,2 +1,4 @@
 Evolving Article: https://evolving-hockey.com/blog/a-new-expected-goals-model-for-predicting-goals-in-the-nhl/
 MoneyPuck Data: https://moneypuck.com/data.htm
+MoneyPuck About: https://moneypuck.com/about.htm
+NHL Ice Plotting in Python: https://thecommutesports.com/2022/08/06/creating-nhl-shot-maps-with-python/
