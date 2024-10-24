@@ -8,7 +8,7 @@ from xgboost import XGBRegressor
 import pickle
 import shap
 
-use_saved_model = 1
+use_saved_model = 0
 
 # Load data from CSV file
 XG_data = pd.read_csv('../data/xg_shot_input_2015-2023.csv')

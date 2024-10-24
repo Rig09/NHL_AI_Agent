@@ -2,7 +2,14 @@
 <!-- TODO: Explain XG Context -->
 <!-- TODO: Explain AI Agent Context -->
 
-### Data Source
+### Data Fetching
+To clone all of the necessary input data from this project, run the `data_install.sh` shell script (from the root directory).
+
+_Bash Terminal Instructions_
+```
+chmod +x data_install.sh
+./data_install.sh
+```
 
 ### Data Preprocessing and Feature Extraction
 - Missing values, categorical features, which features we created.

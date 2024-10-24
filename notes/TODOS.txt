@@ -8,6 +8,7 @@ Current:
 
 Medium Term:
 - Set up repo config with Conda/Pip environment to synchronize packages.
+- Shell script to check if the MoneyPuck input data files exist and then download them otherwise
 - Text-based interface for agent
 
 Later:
