@@ -2,13 +2,24 @@
 <!-- TODO: Explain XG Context -->
 <!-- TODO: Explain AI Agent Context -->
 
+## Repository Setup
 ### Data Fetching
 To clone all of the necessary input data from this project, run the `data_install.sh` shell script (from the root directory).
 
-_Bash Terminal Instructions_
+_Bash Terminal Code
 ```
 chmod +x data_install.sh
 ./data_install.sh
+```
+
+### Conda Environment
+To create a Conda environment with all required packages, run the following bash commands (starting from the root directory):
+
+_Bash Terminal Code_
+```
+cd env
+chmod +x ./env/setup_env.sh
+./env/setup_env.sh
 ```
 
 ### Data Preprocessing and Feature Extraction

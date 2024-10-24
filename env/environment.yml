@@ -1,0 +1,17 @@
+name: nhl_ai_agent
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - xgboost
+  - shap
+  - pip
+
+  # pip packages here
+  - pip:
+      - pickle

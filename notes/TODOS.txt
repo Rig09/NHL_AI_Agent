@@ -7,8 +7,7 @@ Current:
 - Note: MoneyPuck skater data only includes the last team that they played for. Does not include the same player's season split over multiple teams.
 
 Medium Term:
-- Set up repo config with Conda/Pip environment to synchronize packages.
-- Shell script to check if the MoneyPuck input data files exist and then download them otherwise
+- Set up repo config with Conda/Pip environment to synchronize packages. Started but not working yet
 - Text-based interface for agent
 
 Later:
