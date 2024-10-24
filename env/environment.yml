@@ -1,17 +1,16 @@
-name: nhl_ai_agent
+name: NHL_AI_AGENT
 channels:
   - defaults
   - conda-forge
 dependencies:
-  - python=3.9
-  - numpy
-  - pandas
-  - scikit-learn
-  - matplotlib
-  - xgboost
-  - shap
-  - pip
-
-  # pip packages here
-  - pip:
-      - pickle
+  - python=3.11
+  - numpy=2.1.1
+  - pandas=2.2.3
+  - scikit-learn=1.5.2
+  - matplotlib=3.9.2
+  - xgboost=2.1.1
+  - pip=24.2
+  # pip:
+  # - pip packages here
+# NOTE: Specific package versions seem to make the searching faster? May want to investigate in future
+# Started 2:21

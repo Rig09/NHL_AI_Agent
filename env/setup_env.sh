@@ -1,12 +1,18 @@
 #!/bin/bash
 
-# Name of the environment
-ENV_NAME="nhl_ai_agent"
+# Ensure Conda is available
+if ! command -v conda &> /dev/null; then
+    echo "Conda is not installed or not available in PATH."
+    exit 1
+fi
 
-# Path to the environment.yml file inside the env folder
+# Env name + yml path
+ENV_NAME="NHL_AI_AGENT"
 ENV_YML_PATH="env/environment.yml"
 
-# TODO: Deactivate any currently active conda environment???
+# Activates base environment
+source "$(conda info --base)/etc/profile.d/conda.sh" # This ensures conda is set up
+conda activate base
 
 # Check if the conda environment already exists
 if conda info --envs | grep -q "^${ENV_NAME} "; then
@@ -22,7 +28,3 @@ else
     # Create the environment if it doesn't exist
     conda env create --file $ENV_YML_PATH
 fi
-
-# Activate the environment
-echo "Activating environment..."
-conda activate $ENV_NAME

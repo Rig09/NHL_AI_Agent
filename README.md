@@ -14,12 +14,17 @@ chmod +x data_install.sh
 
 ### Conda Environment
 To create a Conda environment with all required packages, run the following bash commands (starting from the root directory):
+- Line 1 gives exec permission to the shell script
+- Lines 2 and 3 allow conda commands to be run in a bash terminal and reset the bash profile
+- Line 4 runs the script and line 5 activates the NHL_AI_AGENT Conda environment
 
 _Bash Terminal Code_
 ```
-cd env
 chmod +x ./env/setup_env.sh
+conda init bash
+source ~/.bashrc
 ./env/setup_env.sh
+conda activate NHL_AI_AGENT
 ```
 
 ### Data Preprocessing and Feature Extraction
