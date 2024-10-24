@@ -9,6 +9,7 @@ dependencies:
   - scikit-learn=1.5.2
   - matplotlib=3.9.2
   - xgboost=2.1.1
+  - ipykernel=6.29.5
   - pip=24.2
   # pip:
   # - pip packages here
