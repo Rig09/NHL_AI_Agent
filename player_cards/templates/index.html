@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Player Stats</title>
+  </head>
+  <body>
+    <h2>Player Stats Card</h2>
+    <form id="playerForm" method="POST">
+      <label for="player_name">Player Name:</label>
+      <input
+        type="text"
+        id="player_name"
+        name="player_name"
+        required
+        list="playersList"
+        autocomplete="off"
+      />
+      <datalist id="playersList"></datalist>
+
+      <label for="use_playoffs">Playoffs Only:</label>
+      <input type="checkbox" id="use_playoffs" name="use_playoffs" value="1" />
+
+      <button type="submit">Get Stats</button>
+    </form>
+
+    <h3>Player Stats</h3>
+    <table id="statsTable" border="1">
+      <thead>
+        <tr>
+          <th>Stat Name</th>
+          <th>Total</th>
+          <th>Percentile</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Data will be populated here -->
+      </tbody>
+    </table>
+
+    <script>
+      // Fetch player names for autocomplete
+      async function fetchPlayerNames() {
+        const response = await fetch("/get_player_names");
+        if (!response.ok) {
+          console.error("Error fetching player names:", response.statusText);
+          return;
+        }
+        const playerNames = await response.json();
+        const datalist = document.getElementById("playersList");
+
+        // Populate the datalist with player names
+        playerNames.forEach((name) => {
+          const option = document.createElement("option");
+          option.value = name; // Set the value of the option
+          datalist.appendChild(option);
+        });
+      }
+
+      // Call the function to fetch player names on page load
+      window.onload = fetchPlayerNames;
+
+      // Existing event listener for the form submission
+      document
+        .getElementById("playerForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(e.target);
+          const response = await fetch("/get_player_data", {
+            method: "POST",
+            body: formData,
+          });
+          if (!response.ok) {
+            console.error("Error:", response.statusText);
+            return;
+          }
+          const data = await response.json();
+
+          // Clear the existing table body
+          const tableBody = document
+            .getElementById("statsTable")
+            .querySelector("tbody");
+          tableBody.innerHTML = "";
+
+          // Populate the table with data
+          for (const [stat, values] of Object.entries(data)) {
+            const row = document.createElement("tr");
+            const statCell = document.createElement("td");
+            const totalCell = document.createElement("td");
+            const percentileCell = document.createElement("td");
+
+            statCell.textContent = stat;
+            totalCell.textContent = values.total; // Total value
+            percentileCell.textContent = values.percentile; // Rounded percentile value
+
+            row.appendChild(statCell);
+            row.appendChild(totalCell);
+            row.appendChild(percentileCell);
+            tableBody.appendChild(row);
+          }
+        });
+    </script>
+  </body>
+</html>
