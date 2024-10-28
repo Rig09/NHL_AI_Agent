@@ -8,7 +8,6 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-
 @app.route('/get_player_names', methods=['GET'])
 def get_player_names():
     # TODO: Need to tweak this for playoffs vs reg and multiple seasons

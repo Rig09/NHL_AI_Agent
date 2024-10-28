@@ -1,6 +1,4 @@
 Current:
-- App.py, home.html, allNHLStats.py, and data_processing.ipynb restructuring with new data
-    - Merge with new XG model + data format
 - Large file storage
 - Agent research + development
 - Discuss additional features from new MoneyPuck dataset in XG Modelling
@@ -12,6 +10,8 @@ Medium Term:
 
 Later:
 - Rewrite README
+- Considerations for player card efficiency (calculation, storing, frontend rendering, etc.)
+    - Player card headshots? https://assets.nhle.com/mugs/nhl/20232024/TOR/8479318.png
 - Per60 Stats
 - Explain train/test overlap and 
 - Player cards
