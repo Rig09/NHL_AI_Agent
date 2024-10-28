@@ -44,6 +44,7 @@ def get_player_card_dict(player_name, use_playoffs=False):
     # NOTE: Defensive program for 0s?
     skater_data["onIce_goalsPercentage"] = (skater_data["OnIce_F_goals"] / (skater_data["OnIce_F_goals"] + skater_data["OnIce_A_goals"])).round(2)
     skater_data["I_F_takeawaysToGiveaways"] = (skater_data["I_F_takeaways"] / skater_data["I_F_giveaways"]).round(2)
+    # 
     skater_data["I_F_assistsToGiveaways"] = (skater_data["I_F_assists"] / skater_data["I_F_giveaways"]).round(2)
 
     # Format: Stat Name, DF col

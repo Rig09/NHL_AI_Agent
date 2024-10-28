@@ -95,6 +95,17 @@
             totalCell.textContent = values.total; // Total value
             percentileCell.textContent = values.percentile; // Rounded percentile value
 
+            // Set background color based on percentile
+            const percentile = parseFloat(values.percentile); // Convert percentile to float
+            const redValue = Math.round(255 * (1 - percentile / 100)); // Red decreases with percentile
+            const blueValue = Math.round(255 * (percentile / 100)); // Blue increases with percentile
+            const backgroundColor = `rgb(${redValue}, 0, ${blueValue})`;
+
+            percentileCell.style.backgroundColor = backgroundColor;
+            percentileCell.style.color = percentile > 50 ? "white" : "black"; // Change text color for readability
+            percentileCell.style.fontWeight = "bold"; // Make text bold
+            percentileCell.style.padding = "5px"; // Add some padding
+
             row.appendChild(statCell);
             row.appendChild(totalCell);
             row.appendChild(percentileCell);
