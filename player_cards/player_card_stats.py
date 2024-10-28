@@ -10,21 +10,17 @@ def find_percentile(arr, item):
     percentile = (index + 1) / len(sorted_arr) * 100
     return round(percentile, 1)
 
-def get_player_card_dict(player_name, use_playoffs=False):
+def get_player_card_dict(player_name, season='2023', season_type='regular'):
     """
     # TODO: Fill in docstring
     # TODO: Include multiple seasons? Include stats by year?
     # NOTE: If a player plays for multiple teams in a year, there is no way to separate their year
             #  by team (using MP data)
-    # TODO: Modify so full season, reg only, and playoff only can be calculated?
+    # TODO: Modify so full season can be included?
     """
 
-    if use_playoffs == 0: # Regular season
-        skater_data = pd.read_csv("../data/skaters_regular_2023-2024.csv")
-    else:  # Playoffs
-        skater_data = pd.read_csv("../data/skaters_playoffs_2023-2024.csv")
-
-    # TODO: Check for player name in that season
+    file_path = f"../data/skaters/{season}/skaters_{season_type}_{season}.csv"
+    skater_data = pd.read_csv(file_path)
 
     # NOTE: Filtering for all situations. Will need additional processing for PP, PK
     skater_data = skater_data[skater_data["situation"] == "all"]
