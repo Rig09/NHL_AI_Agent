@@ -18,24 +18,24 @@ for YEAR in {2015..2023}; do
     SEASON_DIR="$SKATERS_DIR/$YEAR"
     mkdir -p "$SEASON_DIR"
 
-    # Define file paths
-    REGULAR_FILE="$SEASON_DIR/skaters_regular_${YEAR}-${YEAR+1}.csv"
-    PLAYOFF_FILE="$SEASON_DIR/skaters_playoffs_${YEAR}-${YEAR+1}.csv"
+    # Define file paths without the -1 suffix
+    REGULAR_FILE="$SEASON_DIR/skaters_regular_${YEAR}.csv"
+    PLAYOFF_FILE="$SEASON_DIR/skaters_playoffs_${YEAR}.csv"
     
     # Check and download the regular season file if it doesn't exist
     if [ ! -f "$REGULAR_FILE" ]; then
-        echo "Downloading skaters_regular_${YEAR}-${YEAR+1}.csv..."
+        echo "Downloading skaters_regular_${YEAR}.csv..."
         curl -o "$REGULAR_FILE" "$BASE_URL/$YEAR/regular/skaters.csv"
     else
-        echo "File skaters_regular_${YEAR}-${YEAR+1}.csv already exists."
+        echo "File skaters_regular_${YEAR}.csv already exists."
     fi
 
     # Check and download the playoffs file if it doesn't exist
     if [ ! -f "$PLAYOFF_FILE" ]; then
-        echo "Downloading skaters_playoffs_${YEAR}-${YEAR+1}.csv..."
+        echo "Downloading skaters_playoffs_${YEAR}.csv..."
         curl -o "$PLAYOFF_FILE" "$BASE_URL/$YEAR/playoffs/skaters.csv"
     else
-        echo "File skaters_playoffs_${YEAR}-${YEAR+1}.csv already exists."
+        echo "File skaters_playoffs_${YEAR}.csv already exists."
     fi
 done
 
