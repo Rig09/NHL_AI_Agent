@@ -32,3 +32,5 @@ Random Ideas:
     - Player specific 
     - Shot type or location based
 - Team Level or Line Level Stats?
+- Player similarity/comparisons
+- Player progression predictions/forecasting

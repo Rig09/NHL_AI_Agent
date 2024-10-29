@@ -123,7 +123,7 @@
             totalCell.textContent = values.total; // Total value
             percentileCell.textContent = values.percentile; // Rounded percentile value
 
-            // Set background color based on percentile (as before)
+            // Set background color based on percentile
             const percentile = parseFloat(values.percentile); // Convert percentile to float
             const redValue = Math.round(255 * (1 - percentile / 100)); // Red decreases with percentile
             const blueValue = Math.round(255 * (percentile / 100)); // Blue increases with percentile
