@@ -1,12 +1,33 @@
-# Expected by Whom?: NHL Expected Goals Modelling
-In this repository, we explore a variety of approaches to model expected goals (xG), which quantify the value of a hockey scoring chance. For more information on xG modelling and its history, see this article from [Evolving Hockey](https://evolving-hockey.com/blog/a-new-expected-goals-model-for-predicting-goals-in-the-nhl/).
+# NHL AI Agent
+<!-- TODO: Explain XG Context -->
+<!-- TODO: Explain AI Agent Context -->
 
-<!-- TODO: Should there be more of an explanation into xG? -->
+## Repository Setup
+### Data Fetching
+To clone all of the necessary input data from this project, run the `data_install.sh` shell script.
 
-### Data Source
-NHL play by play data was collected using the [hockey-scraper](https://github.com/HarryShomer/Hockey-Scraper/tree/master) Python package. Our modelling uses data from _TODO: START SEASON_ until the end of the 2022-23 NHL season.
+_Bash Terminal Code
+```
+cd data
+chmod +x data_install.sh
+./data_install.sh
+```
 
-- How did we get the raw data? Link to section in the code?
+### Conda Environment
+To create a Conda environment with all required packages, run the following bash commands (starting from the root directory):
+- Line 1 gives exec permission to the shell script
+- Lines 2 and 3 allow conda commands to be run in a bash terminal and reset the bash profile
+- Line 4 runs the script and line 5 activates the NHL_AI_AGENT Conda environment
+
+<!-- TODO: Look into making this cleaner, opening VSCode using the code command with the env set up? -->
+_Bash Terminal Code_
+```
+chmod +x ./env/setup_env.sh
+conda init bash
+source ~/.bashrc
+./env/setup_env.sh
+conda activate NHL_AI_AGENT
+```
 
 ### Data Preprocessing and Feature Extraction
 - Missing values, categorical features, which features we created.
@@ -26,8 +47,8 @@ Leading xG models use Logistic Regression or Gradient Boosted models ([source](h
 
 ### Citations
 - Link in all python packages
+- Cite [MoneyPuck](https://moneypuck.com) data
 
 ### Authors
-Adrian Rigby, [GitHub](https://github.com/RIGBY/), [LinkedIn](https://linkedin.com/RIGBY/)
-<!-- TODO: Add Adrian's GitHub -->
+Adrian Rigby, [GitHub](https://github.com/Rig09/), [LinkedIn](https://www.linkedin.com/in/adrian-rigby-9293bb272/)
 Leo Sandler: [GitHub](https://github.com/L-Sandler/), [LinkedIn](https://www.linkedin.com/in/leo-sandler/)

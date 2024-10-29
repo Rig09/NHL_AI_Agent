@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Player Stats</title>
+  </head>
+  <body>
+    <h2>Player Stats Card</h2>
+    <form id="playerForm" method="POST" autocomplete="off">
+      <label for="season">Season:</label>
+      <select id="season" name="season">
+        <!-- Populate season options from 2015 to 2023 -->
+        {% for year in range(2015, 2024) %}
+        <option value="{{ year }}">{{ year }}-{{ year+1 }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="type">Season Type:</label>
+      <select id="type" name="type">
+        <option value="regular">Regular</option>
+        <option value="playoffs">Playoffs</option>
+      </select>
+
+      <label for="player_name">Player Name:</label>
+      <input
+        type="text"
+        id="player_name"
+        name="player_name"
+        required
+        list="playersList"
+        autocomplete="off"
+      />
+      <datalist id="playersList"></datalist>
+
+      <button type="submit">Get Stats</button>
+    </form>
+
+    <h3>Player Stats</h3>
+    <div id="playerInfo" style="margin-bottom: 10px"></div>
+    <table id="statsTable" border="1">
+      <thead>
+        <tr>
+          <th>Stat Name</th>
+          <th>Total</th>
+          <th>Percentile</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      async function fetchPlayerNames() {
+        const season = document.getElementById("season").value.split("-")[0]; // Extract only the first year
+        const type = document.getElementById("type").value;
+
+        const response = await fetch(
+          `/get_player_names?season=${season}&type=${type}`
+        );
+        if (!response.ok) {
+          console.error("Error fetching player names:", response.statusText);
+          return;
+        }
+        const playerNames = await response.json();
+        const datalist = document.getElementById("playersList");
+        datalist.innerHTML = ""; // Clear previous options
+
+        playerNames.forEach((name) => {
+          const option = document.createElement("option");
+          option.value = name;
+          datalist.appendChild(option);
+        });
+      }
+
+      // Fetch player names whenever the season or type dropdown changes
+      document
+        .getElementById("season")
+        .addEventListener("change", fetchPlayerNames);
+      document
+        .getElementById("type")
+        .addEventListener("change", fetchPlayerNames);
+
+      document
+        .getElementById("playerForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(e.target);
+          const response = await fetch("/get_player_data", {
+            method: "POST",
+            body: formData,
+          });
+          if (!response.ok) {
+            console.error("Error:", response.statusText);
+            return;
+          }
+          const data = await response.json();
+
+          // Clear the existing table body
+          const tableBody = document
+            .getElementById("statsTable")
+            .querySelector("tbody");
+          tableBody.innerHTML = "";
+
+          // Display player info: name, team, and season
+          const playerInfoDiv = document.getElementById("playerInfo");
+          const playerName = formData.get("player_name");
+          const team = data.team || "N/A"; // Use the team from the data, or 'N/A' if not present
+          const season = formData.get("season"); // Get the selected season
+
+          playerInfoDiv.innerHTML = `<strong>Player:</strong> ${playerName} <strong>Team:</strong> ${team} <strong>Season:</strong> ${season}-${
+            parseInt(season) + 1
+          }`;
+
+          // Populate the table with data
+          for (const [stat, values] of Object.entries(data)) {
+            const row = document.createElement("tr");
+            const statCell = document.createElement("td");
+            const totalCell = document.createElement("td");
+            const percentileCell = document.createElement("td");
+
+            statCell.textContent = stat;
+            totalCell.textContent = values.total; // Total value
+            percentileCell.textContent = values.percentile; // Rounded percentile value
+
+            // Set background color based on percentile (as before)
+            const percentile = parseFloat(values.percentile); // Convert percentile to float
+            const redValue = Math.round(255 * (1 - percentile / 100)); // Red decreases with percentile
+            const blueValue = Math.round(255 * (percentile / 100)); // Blue increases with percentile
+            const backgroundColor = `rgb(${redValue}, 0, ${blueValue})`;
+            percentileCell.style.backgroundColor = backgroundColor;
+
+            // Set text color for readability
+            const brightness = redValue * 0.299 + 0 * 0.587 + blueValue * 0.114;
+            percentileCell.style.color = brightness < 128 ? "white" : "black";
+            percentileCell.style.fontWeight = "bold"; // Make text bold
+            percentileCell.style.padding = "5px"; // Add some padding
+
+            row.appendChild(statCell);
+            row.appendChild(totalCell);
+            row.appendChild(percentileCell);
+            tableBody.appendChild(row);
+          }
+        });
+    </script>
+  </body>
+</html>

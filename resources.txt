@@ -1,4 +1,0 @@
-Evolving Article: https://evolving-hockey.com/blog/a-new-expected-goals-model-for-predicting-goals-in-the-nhl/
-
-XG in R, from same data as us: https://rstudio-pubs-static.s3.amazonaws.com/311470_f6e88d4842da46e9941cc6547405a051.html
-- in Python: https://github.com/HarryShomer/xG-Model

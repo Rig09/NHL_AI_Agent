@@ -1,0 +1,28 @@
+Current:
+- Large file storage
+- Agent research + development
+- Discuss additional features from new MoneyPuck dataset in XG Modelling
+- Note: MoneyPuck skater data only includes the last team that they played for. Does not include the same player's season split over multiple teams.
+
+Medium Term:
+- Set up repo config with Conda/Pip environment to synchronize packages. Started but not working yet
+- Text-based interface for agent
+
+Later:
+- Rewrite README
+- Considerations for player card efficiency (calculation, storing, frontend rendering, etc.)
+    - Player card headshots? https://assets.nhle.com/mugs/nhl/20232024/TOR/8479318.png
+- Per60 Stats
+- Explain train/test overlap and 
+- Player cards
+- Live updating of stats and XG
+- Request monitoring + managing volume of requests once hosting
+
+Random Ideas:
+- If you know a player's XG% you can see how that changes over game stages? (OT, 3rd period, etc). 
+    Can also see how well they convert on their XG during those times.
+- Input a shot and see the XG from it?
+- Heatmaps
+    - Player specific 
+    - Shot type or location based
+- Team Level or Line Level Stats?
