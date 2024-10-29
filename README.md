@@ -6,7 +6,7 @@
 ### Data Fetching
 To clone all of the necessary input data from this project, run the `data_install.sh` shell script.
 
-_Bash Terminal Code
+_Bash Terminal Code_
 ```
 cd data
 chmod +x data_install.sh
@@ -17,7 +17,7 @@ chmod +x data_install.sh
 To create a Conda environment with all required packages, run the following bash commands (starting from the root directory):
 - Line 1 gives exec permission to the shell script
 - Lines 2 and 3 allow conda commands to be run in a bash terminal and reset the bash profile
-- Line 4 runs the script and line 5 activates the NHL_AI_AGENT Conda environment
+- Line 4 runs the script
 
 <!-- TODO: Look into making this cleaner, opening VSCode using the code command with the env set up? -->
 _Bash Terminal Code_
@@ -26,7 +26,6 @@ chmod +x ./env/setup_env.sh
 conda init bash
 source ~/.bashrc
 ./env/setup_env.sh
-conda activate NHL_AI_AGENT
 ```
 
 ### Data Preprocessing and Feature Extraction
