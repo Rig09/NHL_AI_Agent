@@ -11,6 +11,7 @@ Player cards
 - Considerations for player card efficiency (calculation, storing, frontend rendering, etc.)
 - Player card headshots? https://assets.nhle.com/mugs/nhl/20232024/TOR/8479318.png, or NHL API?
 - Per60 Stats
+- Correct gradient to BWR
 
 XG Modelling
 - Discuss additional features from new MoneyPuck dataset in XG Modelling
@@ -32,3 +33,5 @@ Random Ideas:
     - Player specific 
     - Shot type or location based
 - Team Level or Line Level Stats?
+- Player similarity/comparisons
+- Player progression predictions/forecasting
