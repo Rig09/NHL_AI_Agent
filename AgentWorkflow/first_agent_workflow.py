@@ -14,7 +14,7 @@ model = ChatOpenAI(model="gpt-4o")
 classification_template = ChatPromptTemplate.from_messages(
     [
         ("system", "You are a helpful assistant in information about hockey and the NHL"),
-         ("system", "that can classify the input message to tell whether someone wants statistical information about a player, a heatmap, a player card, or general NHL information"),
+        ("system", "that can classify the input message to tell whether someone wants statistical information about a player, a heatmap, a player card, or general NHL information"),
         ("human",
          "Classify the ask as, statistical information about a player, a heatmap, a player card, general NHL information, or information irrelavent to hockey and the NHL {catagory}."),
     ]
