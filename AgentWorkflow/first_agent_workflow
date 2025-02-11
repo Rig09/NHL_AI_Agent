@@ -13,8 +13,91 @@ model = ChatOpenAI(model="gpt-4o")
 # Define the feedback classification template
 classification_template = ChatPromptTemplate.from_messages(
     [
-        ("system", "You are a helpful assistant that can classify the input message to tell whether someone wants statistical information about a player, a heatmap, a player card, or general NHL information"),
+        ("system", "You are a helpful assistant in information about hockey and the NHL that can classify the input message to tell whether someone wants statistical information about a player, a heatmap, a player card, or general NHL information"),
         ("human",
-         "Classify the ask as statistical information about a player, a heatmap, a player card, or general NHL information {catagory}."),
+         "Classify the ask as, statistical information about a player, a heatmap, a player card, general NHL information, or information irrelavent to hockey or the NHL {catagory}."),
     ]
 )
+
+stat_feedback = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful assistant."),
+        (
+            "human",
+            "Thank somone for asking for statistical information. provide information about {ask}",
+        ),
+    ]
+)
+
+heat_feedback = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful assistant."),
+        (
+            "human",
+            "Thank somone for asking for a heat map. provide information about {ask}",
+        ),
+    ]
+)
+
+card_feedback = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful assistant."),
+        (
+            "human",
+            "Thank somone for asking for a player card. provide information about {ask}",
+        ),
+    ]
+)
+
+general_feedback = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful assistant."),
+        (
+            "human",
+            "Thank somone for asking for general NHL information. provide information about {ask}",
+        ),
+    ]
+)
+
+unknown_feedback = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful assistant."),
+        (
+            "human",
+            "Appologize for not understanding the ask. provide information about {ask}",
+        ),
+    ]
+)
+
+# Define the runnable branches for handling feedback
+branches = RunnableBranch(
+    (
+        lambda x: "statistical information about a player" in x,
+        stat_feedback # Positive feedback chain
+    ),
+    (
+        lambda x: "heatmap" in x,
+        heat_feedback | model | StrOutputParser()  # Negative feedback chain
+    ),
+    (
+        lambda x: "player card" in x,
+        card_feedback | model | StrOutputParser()  # Neutral feedback chain
+    ),
+    (
+        lambda x: "general NHL information" in x,
+        general_feedback | model | StrOutputParser()  # Escalate feedback chain
+    ),
+    unknown_feedback | model | StrOutputParser()  # Unknown feedback chain
+)
+
+# Create the classification chain
+classification_chain = classification_template | model | StrOutputParser()
+
+# Combine classification and response generation into one chain
+chain = classification_chain | branches
+
+ask = "What is a hockey stick?"
+
+result = chain.invoke({"catagory": ask})
+
+print(result)
