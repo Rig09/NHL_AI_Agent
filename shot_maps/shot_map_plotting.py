@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from hockey_rink import NHLRink
 
 
-def extract_player_data(player_name, season, situation, shot_result, season_type):
+def extract_shot_data(player_name, season, situation, shot_result, season_type):
     """
     Extracts shot data for a given player, season, situation, and shot result type
 
@@ -86,7 +86,8 @@ def goal_map_scatter(player_name, season, situation, season_type):
     :param season: int, season to extract data for (YYYY)
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     """
-    player_shots = extract_player_data(player_name, season, situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(player_name, season, situation, shot_result="GOAL", season_type=season_type)
+    # TODO: Defensive programming if no goals are found for the player in the given season/situation???
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
@@ -99,16 +100,19 @@ def goal_map_scatter(player_name, season, situation, season_type):
         ax=ax, draw_kw={"display_range": "offense"},
     )
 
+    # Title for the figure
+    fig.suptitle(f"{player_name} {season} Season {situation} Goals", fontsize=16)
+    # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
+
     plt.show()
     # TODO: Return type? Image or plot object?
 
 # TODO: Include heatmaps in this file
 
-
-if __name__ == "__main__":
-    # Sample function calls
-    goal_map_scatter("Auston Matthews", 2021, "5on5", "regular")
-    # goal_map_scatter("Auston Matthews", 2023, "5on4", "playoffs")
-    # goal_map_scatter("Auston Matthews", 2023, "4on5", "all")
+# Sample function calls
+# if __name__ == "__main__":
+    # goal_map_scatter("Auston Matthews", 2021, "5on5", "regular")
+    # goal_map_scatter("Auston Matthews", 2022, "5on4", "playoffs")
+    # goal_map_scatter("Travis Konecny", 2023, "4on5", "all")
     # goal_map_scatter("Connor McDavid", 2022, "all", "all")
     # goal_map_scatter("Auston Matthews", 2022, "other", "all")
