@@ -130,13 +130,13 @@ def shot_map_scatter(player_name, season, situation, season_type):
 
     # TODO Include plot title? Player photo? Team logo?
     scatter = rink.scatter(
-        "xCordAdjusted", "yCordAdjusted", data=player_shots,
+        "xCordAdjusted", "yCordAdjusted", color="color", data=player_shots,
         plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89),
         ax=ax, draw_kw={"display_range": "offense"},
     )
 
     # Title for the figure
-    fig.suptitle(f"{player_name} {season} Season {situation} Shots and Goals", fontsize=16)
+    fig.suptitle(f"{player_name} {season} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
     # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
 
     plt.show()

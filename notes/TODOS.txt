@@ -19,6 +19,7 @@ XG Modelling
 
 Environment/Setup
 - Complete shell scripts for data install and Conda environment [in progress]
+- Can env setup be made more efficient with pure pip yml? Is there a need for Conda?
 - Outline plan for tests of the setup to ensure consistency
 
 Admin
