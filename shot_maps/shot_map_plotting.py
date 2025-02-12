@@ -75,6 +75,7 @@ def extract_shot_data(player_name, season, situation, shot_result, season_type):
     # NOTE: Excluding empty net shots
     shot_data = shot_data[shot_data['shotOnEmptyNet'] == 0] # Exclude empty net
 
+    # TODO: Remove unnecessary columns from the DataFrame to reduce memory usage?
     return shot_data
 
 
@@ -96,7 +97,7 @@ def goal_map_scatter(player_name, season, situation, season_type):
     # TODO Include plot title? Player photo? Team logo?
     scatter = rink.scatter(
         "xCordAdjusted", "yCordAdjusted", data=player_shots,
-        plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89),
+        plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89), color="orange",
         ax=ax, draw_kw={"display_range": "offense"},
     )
 
@@ -107,11 +108,46 @@ def goal_map_scatter(player_name, season, situation, season_type):
     plt.show()
     # TODO: Return type? Image or plot object?
 
+
+# TODO: Add a function for better flow control. There is duplication between the shot map and goal map plotting functions
+def shot_map_scatter(player_name, season, situation, season_type):
+    """
+    Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
+    :param player_name: str, name of the NHL player to extract data for
+    :param situation: str, game situation to extract data for, between the following options (5on5, 5on4, 4on5, all, other)
+    :param season: int, season to extract data for (YYYY)
+    :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
+    """
+    player_shots = extract_shot_data(player_name, season, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+
+    fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
+    
+    rink = NHLRink(net={"visible": False})
+
+    # Plotting shots and goals in different colors
+    # NOTE: Colour mapping is not working.
+    player_shots = (player_shots.assign(color=lambda df_: df_.event.map({"SHOT": "grey", "GOAL": "orange"})))
+
+    # TODO Include plot title? Player photo? Team logo?
+    scatter = rink.scatter(
+        "xCordAdjusted", "yCordAdjusted", data=player_shots,
+        plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89),
+        ax=ax, draw_kw={"display_range": "offense"},
+    )
+
+    # Title for the figure
+    fig.suptitle(f"{player_name} {season} Season {situation} Shots and Goals", fontsize=16)
+    # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
+
+    plt.show()
+
+
 # TODO: Include heatmaps in this file
 
 # Sample function calls
 # if __name__ == "__main__":
     # goal_map_scatter("Auston Matthews", 2021, "5on5", "regular")
+    # shot_map_scatter("Auston Matthews", 2021, "5on5", "regular")
     # goal_map_scatter("Auston Matthews", 2022, "5on4", "playoffs")
     # goal_map_scatter("Travis Konecny", 2023, "4on5", "all")
     # goal_map_scatter("Connor McDavid", 2022, "all", "all")
