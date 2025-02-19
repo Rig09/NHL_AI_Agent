@@ -9,7 +9,8 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from pydantic import BaseModel, Field
 from langchain.tools import tool
 from langchain.schema.output_parser import StrOutputParser
-from imported_chain import get_chain
+#from imported_chain import get_chain
+from first_query_attempt import db, get_chain
 
 load_dotenv()
 # Initialize a ChatOpenAI model
@@ -21,7 +22,8 @@ class goal_map_scatter_schema(BaseModel):
     player_name: str = Field(title="Player Name", description="The name of the player to generate the goal map scatter plot for")
     season: str = Field(title="Season", description="The season to generate the goal map scatter plot for")
     season_type: str = Field(title="Season Type", description="The type of season, regular season or playoffs (also known as postseason). Default to regular season if not provided. to generate the goal map scatter plot for")
-    situation: str = Field(title="Situation", description="The situation which can be on the powerplay, even strength, shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for")
+    situation: str = Field(title="Situation", description="The situation which can be on the powerplay, even strength,"
+                           "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for")
 
 @tool(args_schema=goal_map_scatter_schema)
 def goal_map_scatter(player_name, season, season_type = "regular", situation = "all"): #placeholder function for goal_map_scatter
@@ -33,9 +35,9 @@ def goal_map_scatter(player_name, season, season_type = "regular", situation = "
 tools = [
     goal_map_scatter,
     Tool(
-    name="JokeTeller",
-    func=lambda input, **kwargs: chain.invoke({"input": input}),
-    description="Useful when you want to tell a joke",
+    name="StatisticsGetter",
+    func=lambda input, **kwargs: chain.invoke({"question": input}),
+    description="Useful when you want statistics about a player",
     )
 ]
 # Pull the prompt template from the hub
@@ -58,7 +60,7 @@ agent_executor = AgentExecutor.from_agent_and_tools(
 )
 
 #response = chain.invoke({"input": "Tell me a joke."})
-response = agent_executor.invoke({"input": "Tell me a joke."})
+response = agent_executor.invoke({"input": "How many goals did Sidney Crosby score in the 2023 regular season?"})
 print("Response:", response)
 
 second_response = agent_executor.invoke({"input": "Generate a goal map scatter plot for Sidney Crosby in the 2021-2022 season"})

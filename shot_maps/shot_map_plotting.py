@@ -19,7 +19,7 @@ def extract_shot_data(player_name, season, situation, shot_result, season_type):
     """
     # TODO: Segment player data into seasons to make CSV reading faster?
     # TODO: Experiment with order of filtering on CSV to optimize speed? Will this be different when using a database?
-    shot_data = pd.read_csv('../data/shots/shots_2015-2023.csv')
+    shot_data = pd.read_csv('data\shots\shots_2015-2023.csv')
 
     # Assertions to validate input
     # TODO: How will these assertions be routed with the LLM? if they fail? Are they necessary?
@@ -152,3 +152,5 @@ def shot_map_scatter(player_name, season, situation, season_type):
     # goal_map_scatter("Travis Konecny", 2023, "4on5", "all")
     # goal_map_scatter("Connor McDavid", 2022, "all", "all")
     # goal_map_scatter("Auston Matthews", 2022, "other", "all")
+
+goal_map_scatter("Auston Matthews", 2021, "5on5", "regular")
