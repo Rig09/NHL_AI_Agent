@@ -36,6 +36,39 @@ Based on the table schema below, generate a valid SQL query that answers the use
 DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
 {schema}
 
+If the user asks for an "even strength statistic," interpret it as referring to the situation "5on5".
+If the user asks for a "powerplay statistic," interpret it as referring to the situation "5on4".
+If the user asks for a "shorthanded statistic," interpret it as referring to the situation "4on5".
+If the user asks for an "all situations statistic," interpret it as referring to the situation all of these situations combined.
+If the user does not specify even strength, shorthanded, or even strength, interpret it as referring to all situations combined.
+
+Also please not that the attribute team is in short form. This may mean that someone may be asking for a statistic involving a team.
+Most of the short forms involve the first letters of the teams city. For example, the Toronto Maple Leafs would be TOR. The Los Angelas Kings would be LAK. The New York Rangers would be NYR.
+The New York Islanders would be NYI. The New Jersey Devils would be NJD. The San Jose Sharks would be SJS. The St. Louis Blues would be STL. The Tampa Bay Lightning would be TBL.
+The Vancouver Canucks would be VAN. The Vegas Golden Knights would be VGK. The Washington Capitals would be WSH. The Winnipeg Jets would be WPG. The Arizona Coyotes would be ARI. 
+The Boston Bruins would be BOS. The Buffalo Sabres would be BUF. The Calgary Flames would be CGY. The Carolina Hurricanes would be CAR. The Chicago Blackhawks would be CHI. 
+The Colorado Avalanche would be COL. The Columbus Blue Jackets would be CBJ. The Dallas Stars would be DAL. The Detroit Red Wings would be DET. The Edmonton Oilers would be EDM. 
+The Florida Panthers would be FLA. The Minnesota Wild would be MIN. The Montreal Canadiens would be MTL. The Nashville Predators would be NSH. The Ottawa Senators would be OTT. 
+The Philadelphia Flyers would be PHI. The Pittsburgh Penguins would be PIT. The Seattle Kraken would be SEA. The Anaheim Ducks would be ANA. The Los Angelas Kings would be LAK. 
+The New York Islanders would be NYI. The New Jersey Devils would be NJD. The San Jose Sharks would be SJS. The St. Louis Blues would be STL. The Tampa Bay Lightning would be TBL. The Vancouver Canucks would be VAN. The Vegas Golden Knights would be VGK. The Washington Capitals would be WSH. The Winnipeg Jets would be WPG. The Arizona Coyotes would be ARI. The Boston Bruins would be BOS. The Buffalo Sabres would be BUF. The Calgary Flames would be CGY. The Carolina Hurricanes would be CAR. The Chicago Blackhawks would be CHI. The Colorado Avalanche would be COL. The Columbus Blue Jackets would be CBJ. The Dallas Stars would be DAL. 
+The Detroit Red Wings would be DET. The Edmonton Oilers would be EDM. The Florida Panthers would be FLA. The Minnesota Wild would be MIN. The Montreal Canadiens would be MTL.
+The Nashville Predators would be NSH. The Ottawa Senators would be OTT. The Philadelphia Flyers would be PHI. The Pittsburgh Penguins would be PIT. The Seattle Kraken would be SEA. 
+The Anaheim Ducks would be ANA.
+
+When someone refrences minutes, they mean icetime. This is the amount of total time on ice a player had during the season. This value is measured in seconds. If someone requests minutes, give them the answer as the number of minutes with a remainder of seconds. So for example, 100 seconds would be 2 minutes and 40 seconds.
+
+Expected goals are a positive statistic when measuring performance, and also expected goals percentage, also known as expected goals share is desired to be as high as possible. If someone asks who leads a team in expected goals precentage, find the highest percentage that meets the requirements put into the prompt.
+
+When someone asks for expected goals or expected goals percentage, unless they specify otherwise, they are asking for even strength expected goals or expected goals percentage.
+
+Also notice that the position attribute is in short form. This means that someone may be asking for a statistic involving a position. The short forms are as follows:
+C is short for Center. L is short for Left Wing. R is short for Right Wing. D is short for Defense. Someone may also group both left wing and right wing as wingers.
+Someone may refer to a player as a center. This means they are of position C. Similarly they may ask for a defemsman. This means they are of position D. They may also ask for a winger. This means they are of position L or R. They may also ask for a forward. 
+This means they are of position C, L, or R. They may also ask for a skater. This means they are of position C, L, R, or D.
+
+
+
+
 Question: {question}
 SQL Query:
 """
@@ -89,7 +122,10 @@ full_chain = (
     | StrOutputParser()
 )
 
-#print(full_chain.invoke({"question": "How many goals did Sidney Crosby score in the 2023 regular season?"})) # Test the second chain generating natural language response
+#print(full_chain.invoke({"question": "During the 2023 regular season, what player led the NHL in on ice expected goals for percentage at even strength with a minimum of 100 minutes played. What was that expected goals percentage. How many goals did this player have? What team did he play for?"})) # Test the second chain generating natural language response
+
+#print(full_chain.invoke({"question": "What player lead the kings in expected goals percentage at even strength with a minimum of 100 minutes during the 2023 regular season? What was that percentage and how many assists did this player have?"})) # Test the second chain generating natural language response
+#print(full_chain.invoke({"question": "who lead the toronto maple leafs in 5 on 5 expected goals percentage with at least 100 minutes played in the 2023 regular season?"}))
 
 def get_chain():
     return full_chain

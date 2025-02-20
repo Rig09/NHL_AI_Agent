@@ -27,17 +27,22 @@ class goal_map_scatter_schema(BaseModel):
 
 @tool(args_schema=goal_map_scatter_schema)
 def goal_map_scatter(player_name, season, season_type = "regular", situation = "all"): #placeholder function for goal_map_scatter
-    """Returns a scatterplot of the goals scored by the player in a given situation, season type and season"""
+    """Returns a scatterplot of the goals scored by the player in a given situation, season type and season
+    if a situation is not provided, we will assume the situation to be all situations
+    if a season type is not provided, we will assume the season type to be regular season"""
     return f"Generating a scatter plot of {situation} goals for {player_name} in {season_type} season {season}"
 
-
+memory = ConversationBufferMemory(
+     memory_key="chat_history", return_messages=True)
 
 tools = [
     goal_map_scatter,
     Tool(
     name="StatisticsGetter",
     func=lambda input, **kwargs: chain.invoke({"question": input}),
-    description="Useful when you want statistics about a player",
+    description="""Useful when you want statistics about a player. Any statistical question should invoke this tool.
+                    It will perform an sql query on data from the 2023 NHL regular season. If a question about that is asked, 
+                    it will return a string with the answer to that question in natural language."""
     )
 ]
 # Pull the prompt template from the hub
@@ -48,7 +53,7 @@ prompt = hub.pull("hwchase17/openai-tools-agent")
 agent = create_tool_calling_agent(
     llm=llm,  # Language model to use
     tools=tools,  # List of tools available to the agent
-    prompt=prompt,  # Prompt template to guide the agent's responses
+    prompt=prompt,  # Prompt template to guide the agent's responses 
 )
 
 # Create the agent executor
@@ -57,11 +62,26 @@ agent_executor = AgentExecutor.from_agent_and_tools(
     tools=tools,  # List of tools available to the agent
     #verbose=True,  # Enable verbose logging
     handle_parsing_errors=True,  # Handle parsing errors gracefully
+    memory=memory,
 )
 
-#response = chain.invoke({"input": "Tell me a joke."})
-response = agent_executor.invoke({"input": "How many goals did Sidney Crosby score in the 2023 regular season?"})
-print("Response:", response)
+# response = agent_executor.invoke({"input": "How many goals did Sidney Crosby score in the 2023 regular season?"})
+# print("Response:", response)
 
-second_response = agent_executor.invoke({"input": "Generate a goal map scatter plot for Sidney Crosby in the 2021-2022 season"})
-print("Second Response:", second_response)
+# second_response = agent_executor.invoke({"input": "Generate a goal map scatter plot for Sidney Crosby in the 2021-2022 season"})
+# print("Second Response:", second_response)
+
+
+while True:
+    user_input = input("User: ")
+    if user_input.lower() == "exit":
+        break
+
+    # Add the user's message to the conversation memory
+    memory.chat_memory.add_message(HumanMessage(content=user_input))
+
+    response = agent_executor.invoke({"input": user_input})
+    print("Bot:", response["output"])
+
+    # Add the agent's response to the conversation memory
+    memory.chat_memory.add_message(AIMessage(content=response["output"]))
