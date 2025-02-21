@@ -41,7 +41,7 @@ tools = [
     name="StatisticsGetter",
     func=lambda input, **kwargs: chain.invoke({"question": input}),
     description="""Useful when you want statistics about a player. Any statistical question should invoke this tool.
-                    It will perform an sql query on data from the 2023 NHL regular season. If a question about that is asked, 
+                    It will perform an sql query on data from the 2015-2023 NHL seasons. If a question about that is asked, 
                     it will return a string with the answer to that question in natural language."""
     )
 ]
