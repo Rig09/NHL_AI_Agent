@@ -87,6 +87,10 @@ If a question is provided asking for the player who had the highest or lowest of
 THE MOST IMPORTANT THING: DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
 ONLY PROVIDE A SINGLE SQL QUERY. DO NOT INCLUDE ANYTHING ELSE.
 
+AGAIN DO NOT UNDER ANY CIRCUMSTANCES PROVIDE ANY ADDITIONAL CHARACTERS OTHER THAN THE QUERY. DO NOT PROVIDE ANYTHING ELSE. ONLY PROVIDE THE QUERY.
+
+DO NOT include ```sql or ``` in the response. DO NOT INCLUDE 'SQL:' in the response. DO NOT INCLUDE ANYTHING ELSE. ONLY PROVIDE THE QUERY.
+
 Question: {question}
 SQL Query:
 """

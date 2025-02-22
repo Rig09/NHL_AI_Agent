@@ -4,6 +4,10 @@ import pandas as pd
 # from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 from hockey_rink import NHLRink
+import urllib.request
+import urllib.error
+import hockey_rink.rink_feature
+hockey_rink.rink_feature.urllib = urllib  # Force the module to use correct imports
 
 
 def extract_shot_data(player_name, season, situation, shot_result, season_type):
@@ -79,7 +83,7 @@ def extract_shot_data(player_name, season, situation, shot_result, season_type):
     return shot_data
 
 
-def goal_map_scatter(player_name, season, situation, season_type):
+def goal_map_scatter_get(player_name, season, situation, season_type):
     """
     Generates a scatter plot of a player's goals on a hockey rink, excluding empty net goals and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -153,4 +157,4 @@ def shot_map_scatter(player_name, season, situation, season_type):
     # goal_map_scatter("Connor McDavid", 2022, "all", "all")
     # goal_map_scatter("Auston Matthews", 2022, "other", "all")
 
-goal_map_scatter("Auston Matthews", 2021, "5on5", "regular")
+#goal_map_scatter_get("Auston Matthews", 2021, "5on5", "regular")
