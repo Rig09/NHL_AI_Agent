@@ -6,5 +6,8 @@
 # TODO: Move CSVs to large file storage
 *.csv
 *.db
+
+tempCodeRunnerFile.py
+
 # Keeping shot data dictionary CSV in repo
 !notes/MoneyPuck_Shot_Data_Dictionary.csv
