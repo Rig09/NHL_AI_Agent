@@ -82,6 +82,7 @@ agent_executor = AgentExecutor.from_agent_and_tools(
 while True:
     user_input = input("User: ")
     if user_input.lower() == "exit":
+        memory.chat_memory.clear()
         break
 
     # Add the user's message to the conversation memory
