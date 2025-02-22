@@ -11,7 +11,7 @@ from langchain.tools import tool
 from langchain.schema.output_parser import StrOutputParser
 #from imported_chain import get_chain
 from first_query_attempt import db, get_chain
-from shot_maps.shot_map_plotting import goal_map_scatter_get
+from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get
 
 
 load_dotenv()
@@ -23,8 +23,10 @@ chain = get_chain()
 class goal_map_scatter_schema(BaseModel):
     player_name: str = Field(title="Player Name", description="The name of the player to generate the goal map scatter plot for")
     season: int = Field(title="Season", description="""The season to generate the goal map scatter plot for. If the season is provided 
-                        with 2 seasons, like 2020-2021, pass the first season as the argument. Pass this as ONLY the integer value. 
-                        So if the user asks for the 2022 season. Pass the argument '2022'. DO NOT PASS 'Season 2022' Pass '2022'""")
+                            with 2 seasons, like 2020-2021, pass the first season as the argument. Another way this could be done is
+                             by only using the last two numbers of the second year. For example 2020-21 means pass '2020'
+                             Pass this as ONLY the integer value. So if the user asks for the 2022 season. Pass the argument '2022'. 
+                            DO NOT PASS 'Season 2022' Pass '2022'""")
     season_type: str = Field(title="Season Type", description="""The type of season this should be past as: 'regular', 'playoffs', or 
                              'all'. Default to passing the word 'regular' if it is not specified. The playoffs can also be called the
                               postseason, this should be passed as playoffs""")
@@ -32,11 +34,19 @@ class goal_map_scatter_schema(BaseModel):
                            "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations")
 
 @tool(args_schema=goal_map_scatter_schema)
-def goal_map_scatter(player_name, season=2023, season_type = "regular", situation = "all"): #placeholder function for goal_map_scatter
+def goal_map_scatter(player_name, season=2023, season_type = "regular", situation = "all"):
     """Returns a scatterplot of the goals scored by the player in a given situation, season type and season
     if a situation is not provided, we will assume the situation to be all situations
     if a season type is not provided, we will assume the season type to be regular season"""
     goal_map_scatter_get(player_name, season, situation, season_type)
+    return "Goal map scatter plot generated successfully"
+
+@tool(args_schema=goal_map_scatter_schema)
+def shot_map_scatter(player_name, season=2023, season_type = "regular", situation = "all"):
+    """Returns a scatterplot of the shots by the player in a given situation, season type and season. It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
+    if a situation is not provided, we will assume the situation to be all situations
+    if a season type is not provided, we will assume the season type to be regular season"""
+    shot_map_scatter_get(player_name, season, situation, season_type)
     return "Goal map scatter plot generated successfully"
 
 memory = ConversationBufferMemory(
@@ -44,6 +54,7 @@ memory = ConversationBufferMemory(
 
 tools = [
     goal_map_scatter,
+    shot_map_scatter,
     Tool(
     name="StatisticsGetter",
     func=lambda input, **kwargs: chain.invoke({"question": input}),
@@ -93,3 +104,4 @@ while True:
 
     # Add the agent's response to the conversation memory
     memory.chat_memory.add_message(AIMessage(content=response["output"]))
+

@@ -114,7 +114,7 @@ def goal_map_scatter_get(player_name, season, situation, season_type):
 
 
 # TODO: Add a function for better flow control. There is duplication between the shot map and goal map plotting functions
-def shot_map_scatter(player_name, season, situation, season_type):
+def shot_map_scatter_get(player_name, season, situation, season_type):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
