@@ -86,22 +86,25 @@ agent_executor = AgentExecutor.from_agent_and_tools(
 # response = agent_executor.invoke({"input": "How many goals did Sidney Crosby score in the 2023 regular season?"})
 # print("Response:", response)
 
-# second_response = agent_executor.invoke({"input": "Generate a goal map scatter plot for Sidney Crosby in the 2021-2022 season"})
-# print("Second Response:", second_response)
+second_response = agent_executor.invoke({"input": "Generate a goal map scatter plot for Sidney Crosby in the 2021-2022 season"})
+print("Second Response:", second_response)
 
 
-while True:
-    user_input = input("User: ")
-    if user_input.lower() == "exit":
-        memory.chat_memory.clear()
-        break
+# while True:
+#     user_input = input("User: ")
+#     if user_input.lower() == "exit":
+#         memory.chat_memory.clear()
+#         break
 
-    # Add the user's message to the conversation memory
-    memory.chat_memory.add_message(HumanMessage(content=user_input))
+#     # Add the user's message to the conversation memory
+#     memory.chat_memory.add_message(HumanMessage(content=user_input))
 
-    response = agent_executor.invoke({"input": user_input})
-    print("Bot:", response["output"])
+#     response = agent_executor.invoke({"input": user_input})
+#     print("Bot:", response["output"])
 
-    # Add the agent's response to the conversation memory
-    memory.chat_memory.add_message(AIMessage(content=response["output"]))
+#     # Add the agent's response to the conversation memory
+#     memory.chat_memory.add_message(AIMessage(content=response["output"]))
 
+
+def get_agent():
+    return agent_executor

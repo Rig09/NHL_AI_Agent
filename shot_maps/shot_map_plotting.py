@@ -8,6 +8,7 @@ import urllib.request
 import urllib.error
 import hockey_rink.rink_feature
 hockey_rink.rink_feature.urllib = urllib  # Force the module to use correct imports
+import os
 
 
 def extract_shot_data(player_name, season, situation, shot_result, season_type):
@@ -109,8 +110,12 @@ def goal_map_scatter_get(player_name, season, situation, season_type):
     fig.suptitle(f"{player_name} {season} Season {situation} Goals", fontsize=16)
     # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
 
-    plt.show()
-    # TODO: Return type? Image or plot object?
+    #plt.show()
+    output_path = f"generated_images/scatterplot.png"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, format='png')
+    plt.close(fig)
+    pass
 
 
 # TODO: Add a function for better flow control. There is duplication between the shot map and goal map plotting functions
@@ -143,8 +148,11 @@ def shot_map_scatter_get(player_name, season, situation, season_type):
     fig.suptitle(f"{player_name} {season} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
     # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
 
-    plt.show()
-
+    output_path = f"generated_images/scatterplot.png"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, format='png')
+    plt.close(fig)
+    pass
 
 # TODO: Include heatmaps in this file
 
