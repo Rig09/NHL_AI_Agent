@@ -23,7 +23,7 @@ db = SQLDatabase.from_uri(db_uri)
 
 #database functions. Get information from the databases to be used in the chain
 def get_table_schema(_):
-    relevent_tables = ['SkaterStats_regular_2023']
+    relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023']
     return db.get_table_info(relevent_tables) #return the schema of the first table in the list
 
 def run_query(query):
@@ -36,13 +36,16 @@ llm = ChatOpenAI(model_name="gpt-4o", max_tokens=300)
 
 
 template = """
-Based on the table schema below, generate a valid SQL query that answers the user's question. All tables have the same schema.
+Based on the table schema below, generate a valid SQL query that answers the user's question. There are two different types of tables.
+Tables for skaters and those for goalies. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
 DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
 {schema}
 
-There is a table for regular season and playoffs in each year. Table names are using the following format:
-- Regular season → SkaterStats_regular_<year>  
-- Playoffs → SkaterStats_playoffs_<year>  
+
+For both skaters and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
+- Regular season → <playerType>Stats_regular_<year> 
+- Playoffs → <PlayerType>Stats_playoffs_<year>
+where player type refers to whether the player is a skater or a goalie. 
 
 Use correct stat terms:
 - "Even strength" → "5on5", "Power play" → "5on4", "Shorthanded" → "4on5", "All situations" → "All". If strength is not defined use 'all' Do not add the total of multiple strengths together.
@@ -117,5 +120,7 @@ full_chain = (
 #print(full_chain.invoke({"question": "who lead the toronto maple leafs in 5 on 5 expected goals percentage with at least 100 minutes played in the 2023 regular season?"}))
 
 #print(full_chain.invoke({"question": "How many goals did William Nylander score in the 2018 playoffs"}))
+
+#print(full_chain.invoke({"question": "Who had the highest goals saved above expected in the 2023 regular season"}))
 def get_chain():
     return full_chain

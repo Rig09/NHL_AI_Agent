@@ -41,6 +41,28 @@ for season in seasons:
         else:
             print(f"⚠ File not found: {csv_file}")
 
+for season in seasons:
+    for is_playoff, game_type in [(0, "regular"), (1, "playoffs")]:
+        csv_file = f"data/goalies/{season}/goalies_{game_type}_{season}.csv"
+        table_name = f"GoalieStats_{game_type}_{season}"  # Unique table name
+
+        if os.path.exists(csv_file):
+            print(f"Processing {csv_file}...")
+
+            # Load CSV into pandas DataFrame
+            df = pd.read_csv(csv_file, encoding="utf-8", low_memory=False)
+
+            # Add season and is_playoff indicator
+            df["season"] = season
+            df["is_playoff"] = is_playoff  # 0 = Regular, 1 = Playoffs
+
+            # Save to SQLite
+            df.to_sql(table_name, conn, if_exists="replace", index=False, chunksize=5000)
+            print(f"✔ Data saved in table '{table_name}'")
+        else:
+            print(f"⚠ File not found: {csv_file}")
+
+
 # Close connection
 conn.close()
 print(f"All available seasons have been processed into '{db_file}'")
