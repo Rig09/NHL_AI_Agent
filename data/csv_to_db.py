@@ -11,14 +11,19 @@ db_file = "SkatersStats.db"
 # Connect to SQLite
 conn = sqlite3.connect(db_file)
 
-# Master table name
-table_name = "SkaterStats"
+# Drop old tables (those that match the old naming scheme)
+old_tables = ["RegularSeason2015", "RegularSeason2016", "RegularSeason2017", "RegularSeason2018", "RegularSeason2019", 
+              "RegularSeason2020", "RegularSeason2021", "RegularSeason2022", "RegularSeason2023", "SkaterStats"]  # Add all obsolete names here
 
-all_data = []  # List to store data before inserting into DB
+for table in old_tables:
+    conn.execute(f"DROP TABLE IF EXISTS {table};")
+    print(f"✔ Dropped old table '{table}'")
 
+# Now process the new tables
 for season in seasons:
     for is_playoff, game_type in [(0, "regular"), (1, "playoffs")]:
         csv_file = f"data/skaters/{season}/skaters_{game_type}_{season}.csv"
+        table_name = f"SkaterStats_{game_type}_{season}"  # Ensure unique table names
 
         if os.path.exists(csv_file):
             print(f"Processing {csv_file}...")
@@ -30,18 +35,11 @@ for season in seasons:
             df["season"] = season
             df["is_playoff"] = is_playoff  # 0 = Regular, 1 = Playoffs
 
-            # Append to all_data list
-            all_data.append(df)
+            # Save to a separate table in SQLite
+            df.to_sql(table_name, conn, if_exists="replace", index=False, chunksize=5000)
+            print(f"✔ Data saved in table '{table_name}'")
         else:
             print(f"⚠ File not found: {csv_file}")
-
-# Combine all data into a single DataFrame and write to SQLite
-if all_data:
-    final_df = pd.concat(all_data, ignore_index=True)
-    final_df.to_sql(table_name, conn, if_exists="replace", index=False, chunksize=5000)
-    print(f"✔ All data saved in table '{table_name}'")
-else:
-    print("⚠ No data was processed!")
 
 # Close connection
 conn.close()
