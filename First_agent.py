@@ -12,6 +12,8 @@ from langchain.schema.output_parser import StrOutputParser
 #from imported_chain import get_chain
 from first_query_attempt import db, get_chain
 from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get
+from RAG_NHL_rules import get_rules_information
+from RAG_NHL_CBA import get_cba_information
 
 
 load_dotenv()
@@ -49,12 +51,38 @@ def shot_map_scatter(player_name, season=2023, season_type = "regular", situatio
     shot_map_scatter_get(player_name, season, situation, season_type)
     return "Goal map scatter plot generated successfully"
 
+class rag_args_schema(BaseModel):
+    query: str = Field('''The query to be excucuted by a rag system. This will be fed into a function which will provide an answer to the query based on text files relavent to the query''')
+
+@tool(args_schema=rag_args_schema)
+def rule_getter(query: str):
+    """Returns the relevant rule information based on the query. Any query about a hypothetical situation in hockey should use this tool
+    For example: 'what happens if...', preceeded by an event that could occur in a game.
+    Use this tool when the user asks about an NHL rule. For example 'can you kick a puck into 
+    the net' or 'what is offside'. This function will also return the rule numbers referenced. 
+    Please keep those in the response.
+    When THIS TOOL IS CALLED KEEP THE SPECIFIC RULE NUMBER IN THE RESPONSE 
+    for example at the end of a response it could say (RULE 48.2) keep that rule refrence"""
+    return get_rules_information(query)
+
+@tool(args_schema=rag_args_schema)
+def cba_getter(query: str):
+    """Returns the relevant CBA information based on the query. This is the collective bargaining agreement between the NHL and the NHLPA.
+    This tool should be used to answer any queries about the buissness, salary cap, or salary structure in the NHL. This includes hypothetical questions like,
+    'what happens if a team goes over the cap with bonus' 'how does revenue sharing between the players work'. This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
+    If a specific component of the CBA is refrenced keep that in the response"""
+    return get_cba_information(query)
+
+
+
 memory = ConversationBufferMemory(
      memory_key="chat_history", return_messages=True)
 
 tools = [
     goal_map_scatter,
     shot_map_scatter,
+    rule_getter,
+    cba_getter,
     Tool(
     name="StatisticsGetter",
     func=lambda input, **kwargs: chain.invoke({"question": input}),
@@ -86,9 +114,11 @@ agent_executor = AgentExecutor.from_agent_and_tools(
 # response = agent_executor.invoke({"input": "How many goals did Sidney Crosby score in the 2023 regular season?"})
 # print("Response:", response)
 
-second_response = agent_executor.invoke({"input": "Generate a goal map scatter plot for Sidney Crosby in the 2021-2022 season"})
-print("Second Response:", second_response)
+# second_response = agent_executor.invoke({"input": "Generate a goal map scatter plot for Sidney Crosby in the 2021-2022 season"})
+# print("Second Response:", second_response)
 
+#third_response = agent_executor.invoke({"input": "What is icing in hockey?"})
+#print("Third Response:", third_response)
 
 # while True:
 #     user_input = input("User: ")

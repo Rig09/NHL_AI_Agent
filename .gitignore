@@ -6,7 +6,10 @@
 # TODO: Move CSVs to large file storage
 *.csv
 *.db
-
+*.png
+*.txt
+*.bin
+*.sqlite3
 tempCodeRunnerFile.py
 
 # Keeping shot data dictionary CSV in repo

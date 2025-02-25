@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import streamlit as st
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage
 from First_agent import get_agent
 import time
 import os
@@ -26,7 +26,6 @@ for message in st.session_state.chat_history:
         with st.chat_message("Human"):
             st.markdown(message.content)
 
-
 user_query = st.chat_input("Type a message...")
 if user_query is not None and user_query.strip() != "":
     st.session_state.chat_history.append(HumanMessage(content=user_query))
@@ -37,11 +36,13 @@ if user_query is not None and user_query.strip() != "":
     with st.chat_message("AI"):
         response = NHLStatsAgent.invoke({"input": user_query})
         st.markdown(response["output"])
-        # Check if the agent's message suggests that an image was created
-        if "scatterplot" in response["output"] and os.path.exists("generated_images/scatterplot.png"):
-            time.sleep(2)  # Adjust as needed
         
-        # Display the image in Streamlit
-        st.image("generated_images/scatterplot.png")
-
+        # Check if the user query specifically requests a scatterplot
+        if "scatterplot" in user_query.lower():  # Case insensitive check for 'scatterplot'
+            if os.path.exists("generated_images/scatterplot.png"):
+                time.sleep(2)  # Adjust as needed
+                
+                # Display the scatterplot image
+                st.image("generated_images/scatterplot.png")
+        
         st.session_state.chat_history.append(AIMessage(content=response["output"]))
