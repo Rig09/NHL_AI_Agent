@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain.globals import set_verbose
-from database_init import get_table_info, run_query_mysql
+from data.database_init import get_table_info, run_query_mysql
 
 # Load environment variables
 load_dotenv()
