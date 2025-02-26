@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from langchain.tools import tool
 from langchain.schema.output_parser import StrOutputParser
 #from imported_chain import get_chain
-from first_query_attempt import db, get_chain
+from first_query_attempt import get_chain
 from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get
 from RAG_NHL_rules import get_rules_information
 from RAG_NHL_CBA import get_cba_information
@@ -20,10 +20,6 @@ from bio_info_query import get_bio_chain
 load_dotenv()
 # Initialize a ChatOpenAI model
 llm = ChatOpenAI(model="gpt-4o")
-
-chain = get_chain()
-
-bio_chain = get_chain()
 
 class goal_map_scatter_schema(BaseModel):
     player_name: str = Field(title="Player Name", description="The name of the player to generate the goal map scatter plot for")
@@ -77,48 +73,52 @@ def cba_getter(query: str):
     return get_cba_information(query)
 
 
+def get_agent(db):
+    chain = get_chain(db)
 
-memory = ConversationBufferMemory(
-     memory_key="chat_history", return_messages=True)
+    bio_chain = get_bio_chain(db)
 
-tools = [
-    goal_map_scatter,
-    shot_map_scatter,
-    rule_getter,
-    cba_getter,
-    Tool(
-    name="StatisticsGetter",
-    func=lambda input, **kwargs: chain.invoke({"question": input}),
-    description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. Any statistical question should invoke this tool.
-                    It will perform an sql query on data from the 2015-2023 NHL seasons. If a question about that is asked, 
-                    it will return a string with the answer to that question in natural language."""
-    ),
-    Tool(
-    name="Player_BIO_information",
-    func=lambda input, **kwargs: bio_chain.invoke({"question": input}),
-    description="""Useful when you want BIO information about a player, including position, handedness, height, weight, Nationality, Birthday, and team. """
+    memory = ConversationBufferMemory(
+        memory_key="chat_history", return_messages=True)
+
+    tools = [
+        goal_map_scatter,
+        shot_map_scatter,
+        rule_getter,
+        cba_getter,
+        Tool(
+        name="StatisticsGetter",
+        func=lambda input, **kwargs: chain.invoke({"question": input}),
+        description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. Any statistical question should invoke this tool.
+                        It will perform an sql query on data from the 2015-2023 NHL seasons. If a question about that is asked, 
+                        it will return a string with the answer to that question in natural language."""
+        ),
+        Tool(
+        name="Player_BIO_information",
+        func=lambda input, **kwargs: bio_chain.invoke({"question": input}),
+        description="""Useful when you want BIO information about a player, including position, handedness, height, weight, Nationality, Birthday, and team. """
+        )
+    ]
+    # Pull the prompt template from the hub
+    prompt = hub.pull("hwchase17/openai-tools-agent")
+
+    # Create the ReAct agent using the create_tool_calling_agent function
+    # This function sets up an agent capable of calling tools based on the provided prompt.
+    agent = create_tool_calling_agent(
+        llm=llm,  # Language model to use
+        tools=tools,  # List of tools available to the agent
+        prompt=prompt,  # Prompt template to guide the agent's responses 
     )
-]
-# Pull the prompt template from the hub
-prompt = hub.pull("hwchase17/openai-tools-agent")
 
-# Create the ReAct agent using the create_tool_calling_agent function
-# This function sets up an agent capable of calling tools based on the provided prompt.
-agent = create_tool_calling_agent(
-    llm=llm,  # Language model to use
-    tools=tools,  # List of tools available to the agent
-    prompt=prompt,  # Prompt template to guide the agent's responses 
-)
-
-# Create the agent executor
-agent_executor = AgentExecutor.from_agent_and_tools(
-    agent=agent,  # The agent to execute
-    tools=tools,  # List of tools available to the agent
-    #verbose=True,  # Enable verbose logging
-    handle_parsing_errors=True,  # Handle parsing errors gracefully
-    memory=memory,
-)
-
+    # Create the agent executor
+    agent_executor = AgentExecutor.from_agent_and_tools(
+        agent=agent,  # The agent to execute
+        tools=tools,  # List of tools available to the agent
+        #verbose=True,  # Enable verbose logging
+        handle_parsing_errors=True,  # Handle parsing errors gracefully
+        memory=memory,
+    )
+    return agent_executor
 # response = agent_executor.invoke({"input": "How many goals did Sidney Crosby score in the 2023 regular season?"})
 # print("Response:", response)
 
@@ -142,7 +142,3 @@ agent_executor = AgentExecutor.from_agent_and_tools(
 
 #     # Add the agent's response to the conversation memory
 #     memory.chat_memory.add_message(AIMessage(content=response["output"]))
-
-
-def get_agent():
-    return agent_executor
