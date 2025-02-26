@@ -32,7 +32,7 @@ def run_query(query):
 #print(run_query("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
 # Initialize LLM
-llm = ChatOpenAI(model_name="gpt-4o", max_tokens=300)
+llm = ChatOpenAI(model_name="gpt-4o")
 
 
 template = """

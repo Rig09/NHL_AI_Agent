@@ -22,7 +22,7 @@ for table in old_tables:
     print(f"✔ Dropped old table '{table}'")
 
 # Function to process CSV files and save to SQLite
-def process_csv(file_path, table_name, season, is_playoff):
+def process_csv(file_path, table_name, season=None, is_playoff=None):
     if os.path.exists(file_path):
         print(f"Processing {file_path}...")
         df = pd.read_csv(file_path, encoding="utf-8", low_memory=False)
@@ -68,6 +68,8 @@ for season in seasons:
         else:
             print(f"⚠ File not found: {lines_csv}")
 
+data_bio = "data/bio_information/allPlayersLookup.csv"
+process_csv(data_bio, "BIO_Info")
 # Close connection
 conn.close()
 print(f"All available seasons have been processed into '{db_file}'")

@@ -7,6 +7,12 @@ import os
 
 load_dotenv()
 
+
+# @st.cache_resource
+# def load_agent():
+#     from First_agent import get_agent  # Import inside function to avoid reload issues
+#     return get_agent()
+
 NHLStatsAgent = get_agent()
 
 if "chat_history" not in st.session_state:
@@ -40,7 +46,7 @@ if user_query is not None and user_query.strip() != "":
         # Check if the user query specifically requests a scatterplot
         if "scatterplot" in user_query.lower():  # Case insensitive check for 'scatterplot'
             if os.path.exists("generated_images/scatterplot.png"):
-                time.sleep(2)  # Adjust as needed
+                #time.sleep(2)  # Adjust as needed
                 
                 # Display the scatterplot image
                 st.image("generated_images/scatterplot.png")
