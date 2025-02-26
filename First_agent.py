@@ -14,6 +14,7 @@ from first_query_attempt import db, get_chain
 from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get
 from RAG_NHL_rules import get_rules_information
 from RAG_NHL_CBA import get_cba_information
+from bio_info_query import get_bio_chain
 
 
 load_dotenv()
@@ -21,6 +22,8 @@ load_dotenv()
 llm = ChatOpenAI(model="gpt-4o")
 
 chain = get_chain()
+
+bio_chain = get_chain()
 
 class goal_map_scatter_schema(BaseModel):
     player_name: str = Field(title="Player Name", description="The name of the player to generate the goal map scatter plot for")
@@ -86,9 +89,14 @@ tools = [
     Tool(
     name="StatisticsGetter",
     func=lambda input, **kwargs: chain.invoke({"question": input}),
-    description="""Useful when you want statistics about a player. Any statistical question should invoke this tool.
+    description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. Any statistical question should invoke this tool.
                     It will perform an sql query on data from the 2015-2023 NHL seasons. If a question about that is asked, 
                     it will return a string with the answer to that question in natural language."""
+    ),
+    Tool(
+    name="Player_BIO_information",
+    func=lambda input, **kwargs: bio_chain.invoke({"question": input}),
+    description="""Useful when you want BIO information about a player, including position, handedness, height, weight, Nationality, Birthday, and team. """
     )
 ]
 # Pull the prompt template from the hub
