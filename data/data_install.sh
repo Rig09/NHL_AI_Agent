@@ -2,6 +2,8 @@
 
 # Base directories
 SKATERS_DIR="./skaters"
+GOALIES_DIR="./goalies"
+PAIRINGS_DIR="./pairings"
 SHOTS_DIR="./shots"
 
 # URLs for download
@@ -10,40 +12,82 @@ ZIP_URL="https://peter-tanner.com/moneypuck/downloads/shots_2015-2023.zip"
 
 # Create the main data directories if they don't exist
 mkdir -p "$SKATERS_DIR"
+mkdir -p "$GOALIES_DIR"
+mkdir -p "$PAIRINGS_DIR"
 mkdir -p "$SHOTS_DIR"
 
 # Loop through each year from 2015 to 2023
 for YEAR in {2015..2023}; do
     # Create a subfolder for each season year
-    SEASON_DIR="$SKATERS_DIR/$YEAR"
-    mkdir -p "$SEASON_DIR"
+    SEASON_SKATERS_DIR="$SKATERS_DIR/$YEAR"
+    SEASON_GOALIES_DIR="$GOALIES_DIR/$YEAR"
+    SEASON_PAIRINGS_DIR="$PAIRINGS_DIR/$YEAR"
 
-    # Define file paths without the -1 suffix
-    REGULAR_FILE="$SEASON_DIR/skaters_regular_${YEAR}.csv"
-    PLAYOFF_FILE="$SEASON_DIR/skaters_playoffs_${YEAR}.csv"
-    
-    # Check and download the regular season file if it doesn't exist
-    if [ ! -f "$REGULAR_FILE" ]; then
+    mkdir -p "$SEASON_SKATERS_DIR"
+    mkdir -p "$SEASON_GOALIES_DIR"
+    mkdir -p "$SEASON_PAIRINGS_DIR"
+
+    # Define file paths
+    SKATERS_REGULAR_FILE="$SEASON_SKATERS_DIR/skaters_regular_${YEAR}.csv"
+    SKATERS_PLAYOFF_FILE="$SEASON_SKATERS_DIR/skaters_playoffs_${YEAR}.csv"
+
+    GOALIES_REGULAR_FILE="$SEASON_GOALIES_DIR/goalies_regular_${YEAR}.csv"
+    GOALIES_PLAYOFF_FILE="$SEASON_GOALIES_DIR/goalies_playoffs_${YEAR}.csv"
+
+    PAIRINGS_REGULAR_FILE="$SEASON_PAIRINGS_DIR/pairings_regular_${YEAR}.csv"
+    PAIRINGS_PLAYOFF_FILE="$SEASON_PAIRINGS_DIR/pairings_playoffs_${YEAR}.csv"
+
+    # Download skaters data
+    if [ ! -f "$SKATERS_REGULAR_FILE" ]; then
         echo "Downloading skaters_regular_${YEAR}.csv..."
-        curl -o "$REGULAR_FILE" "$BASE_URL/$YEAR/regular/skaters.csv"
+        curl -o "$SKATERS_REGULAR_FILE" "$BASE_URL/$YEAR/regular/skaters.csv"
     else
         echo "File skaters_regular_${YEAR}.csv already exists."
     fi
 
-    # Check and download the playoffs file if it doesn't exist
-    if [ ! -f "$PLAYOFF_FILE" ]; then
+    if [ ! -f "$SKATERS_PLAYOFF_FILE" ]; then
         echo "Downloading skaters_playoffs_${YEAR}.csv..."
-        curl -o "$PLAYOFF_FILE" "$BASE_URL/$YEAR/playoffs/skaters.csv"
+        curl -o "$SKATERS_PLAYOFF_FILE" "$BASE_URL/$YEAR/playoffs/skaters.csv"
     else
         echo "File skaters_playoffs_${YEAR}.csv already exists."
+    fi
+
+    # Download goalies data
+    if [ ! -f "$GOALIES_REGULAR_FILE" ]; then
+        echo "Downloading goalies_regular_${YEAR}.csv..."
+        curl -o "$GOALIES_REGULAR_FILE" "$BASE_URL/$YEAR/regular/goalies.csv"
+    else
+        echo "File goalies_regular_${YEAR}.csv already exists."
+    fi
+
+    if [ ! -f "$GOALIES_PLAYOFF_FILE" ]; then
+        echo "Downloading goalies_playoffs_${YEAR}.csv..."
+        curl -o "$GOALIES_PLAYOFF_FILE" "$BASE_URL/$YEAR/playoffs/goalies.csv"
+    else
+        echo "File goalies_playoffs_${YEAR}.csv already exists."
+    fi
+
+    # Download pairings (lines) data
+    if [ ! -f "$PAIRINGS_REGULAR_FILE" ]; then
+        echo "Downloading pairings_regular_${YEAR}.csv..."
+        curl -o "$PAIRINGS_REGULAR_FILE" "$BASE_URL/$YEAR/regular/lines.csv"
+    else
+        echo "File pairings_regular_${YEAR}.csv already exists."
+    fi
+
+    if [ ! -f "$PAIRINGS_PLAYOFF_FILE" ]; then
+        echo "Downloading pairings_playoffs_${YEAR}.csv..."
+        curl -o "$PAIRINGS_PLAYOFF_FILE" "$BASE_URL/$YEAR/playoffs/lines.csv"
+    else
+        echo "File pairings_playoffs_${YEAR}.csv already exists."
     fi
 done
 
 # Check if shots_2015-2023.csv exists, if not download and unzip it
 ZIP_FILE="$SHOTS_DIR/shots_2015-2023.zip"
-FILE3="$SHOTS_DIR/shots_2015-2023.csv"
+SHOTS_FILE="$SHOTS_DIR/shots_2015-2023.csv"
 
-if [ ! -f "$FILE3" ]; then
+if [ ! -f "$SHOTS_FILE" ]; then
     echo "Downloading shots_2015-2023.zip..."
     curl -o "$ZIP_FILE" "$ZIP_URL"
     
