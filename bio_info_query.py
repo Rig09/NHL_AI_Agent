@@ -31,9 +31,15 @@ template = """
 Based on the table schema below, generate a valid SQL query that answers the user's question. Generate only the query do not say sql ``` before the query.
 {schema}
 
-Player positions: C = Center, L = Left Wing, R = Right Wing, D = Defenseman.  
+Player positions: C = Center, L = Left Wing, R = Right Wing, D = Defenseman, G = Goalies.  
 
 Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR".
+
+The shootsCatches attribute indicates which way a player shoots if it is a skater (C, L, R, D). This can also be refered to as handedness. For each player this is right or left.
+A user may ask which way a player shoots, return the side indicated in shootsCatches
+
+For goalies (G) someone may ask which way they catch instead of shoot. This is indicated in shootsCatches
+For goalies, this can also be refered to as southpaw (aka right), or regular (aka left).
 
 Nations are stored as abbreviations (e.g., "Canada" -> CAN). Infer references like "Canadian" -> CAN
 
