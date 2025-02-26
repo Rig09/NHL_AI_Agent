@@ -23,7 +23,7 @@ db = SQLDatabase.from_uri(db_uri)
 
 #database functions. Get information from the databases to be used in the chain
 def get_table_schema(_):
-    relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2022']
+    relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
     return db.get_table_info(relevent_tables) #return the schema of the first table in the list
 
 def run_query(query):
@@ -47,10 +47,12 @@ For both skaters and goalies there is a table for regular season and playoffs in
 - Playoffs → <PlayerType>Stats_playoffs_<year>
 where player type refers to whether the player is a skater, goalie, pairing, or line. 
 
-If someone does not specify the season type assume the season is regular
+For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
-If someone asks what 'pair' or 'pairing' they mean defensive pairing from the pairings table.
-If someone asks what 'line' they mean forward line from the lines tables.
+If someone does not specify the season type assume the season is regular.
+
+If someone asks what 'pair', 'defensive pairing', 'd pair', or 'pairing' they mean defensive pairing from the PairStats_regular_<year> or PairStats_playoffs_<year> tables.
+If someone asks what 'line' they mean forward line from the lineStats_regular_<year> or lineStats_playoffs_<year> tables.
 
 Use correct stat terms:
 - "Even strength" → "5on5", "Power play" → "5on4", "Shorthanded" → "4on5", "All situations" → "All". If strength is not defined use 'all' Do not add the total of multiple strengths together.
@@ -63,7 +65,7 @@ Expected goals percentage is a positive statistic. highest/best means the highes
 Player positions: C = Center, L = Left Wing, R = Right Wing, D = Defenseman.  
 Grouping: Forwards = (C, L, R), Skaters = (C, L, R, D).  
 
-Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR". VIDE THE QUERY.
+Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR".
 DO NOT INCLUDE ``` in the response.
 Question: {question}
 SQL Query:
