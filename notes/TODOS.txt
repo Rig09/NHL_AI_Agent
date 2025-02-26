@@ -27,6 +27,8 @@ Admin
 - Request monitoring + managing volume of requests once hosting
 
 Random Ideas:
+- Time each component of the chain while running.
+- Goalie stats
 - If you know a player's XG% you can see how that changes over game stages? (OT, 3rd period, etc). 
     Can also see how well they convert on their XG during those times.
 - Input a shot and see the XG from it?

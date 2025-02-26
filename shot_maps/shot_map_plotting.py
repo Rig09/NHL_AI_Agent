@@ -4,6 +4,11 @@ import pandas as pd
 # from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 from hockey_rink import NHLRink
+import urllib.request
+import urllib.error
+import hockey_rink.rink_feature
+hockey_rink.rink_feature.urllib = urllib  # Force the module to use correct imports
+import os
 
 
 def extract_shot_data(player_name, season, situation, shot_result, season_type):
@@ -19,7 +24,7 @@ def extract_shot_data(player_name, season, situation, shot_result, season_type):
     """
     # TODO: Segment player data into seasons to make CSV reading faster?
     # TODO: Experiment with order of filtering on CSV to optimize speed? Will this be different when using a database?
-    shot_data = pd.read_csv('../data/shots/shots_2015-2023.csv')
+    shot_data = pd.read_csv('data\shots\shots_2015-2023.csv')
 
     # Assertions to validate input
     # TODO: How will these assertions be routed with the LLM? if they fail? Are they necessary?
@@ -79,7 +84,7 @@ def extract_shot_data(player_name, season, situation, shot_result, season_type):
     return shot_data
 
 
-def goal_map_scatter(player_name, season, situation, season_type):
+def goal_map_scatter_get(player_name, season, situation, season_type):
     """
     Generates a scatter plot of a player's goals on a hockey rink, excluding empty net goals and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -105,12 +110,16 @@ def goal_map_scatter(player_name, season, situation, season_type):
     fig.suptitle(f"{player_name} {season} Season {situation} Goals", fontsize=16)
     # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
 
-    plt.show()
-    # TODO: Return type? Image or plot object?
+    #plt.show()
+    output_path = f"generated_images/scatterplot.png"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, format='png')
+    plt.close(fig)
+    pass
 
 
 # TODO: Add a function for better flow control. There is duplication between the shot map and goal map plotting functions
-def shot_map_scatter(player_name, season, situation, season_type):
+def shot_map_scatter_get(player_name, season, situation, season_type):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -139,8 +148,11 @@ def shot_map_scatter(player_name, season, situation, season_type):
     fig.suptitle(f"{player_name} {season} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
     # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
 
-    plt.show()
-
+    output_path = f"generated_images/scatterplot.png"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path, format='png')
+    plt.close(fig)
+    pass
 
 # TODO: Include heatmaps in this file
 
@@ -152,3 +164,5 @@ def shot_map_scatter(player_name, season, situation, season_type):
     # goal_map_scatter("Travis Konecny", 2023, "4on5", "all")
     # goal_map_scatter("Connor McDavid", 2022, "all", "all")
     # goal_map_scatter("Auston Matthews", 2022, "other", "all")
+
+#goal_map_scatter_get("Auston Matthews", 2021, "5on5", "regular")
