@@ -23,7 +23,7 @@ db = SQLDatabase.from_uri(db_uri)
 
 #database functions. Get information from the databases to be used in the chain
 def get_table_schema(_):
-    relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023']
+    relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
     return db.get_table_info(relevent_tables) #return the schema of the first table in the list
 
 def run_query(query):
@@ -36,8 +36,8 @@ llm = ChatOpenAI(model_name="gpt-4o", max_tokens=300)
 
 
 template = """
-Based on the table schema below, generate a valid SQL query that answers the user's question. There are two different types of tables.
-Tables for skaters and those for goalies. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
+Based on the table schema below, generate a valid SQL query that answers the user's question. There are four different types of tables.
+Tables for skaters, goalies, pairings, and lines. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
 DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
 {schema}
 
@@ -45,7 +45,14 @@ DO NOT include explanations, comments, code blocks, or duplicate queries. Return
 For both skaters and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
 - Regular season → <playerType>Stats_regular_<year> 
 - Playoffs → <PlayerType>Stats_playoffs_<year>
-where player type refers to whether the player is a skater or a goalie. 
+where player type refers to whether the player is a skater, goalie, pairing, or line. 
+
+For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
+
+If someone does not specify the season type assume the season is regular.
+
+If someone asks what 'pair', 'defensive pairing', 'd pair', or 'pairing' they mean defensive pairing from the PairStats_regular_<year> or PairStats_playoffs_<year> tables.
+If someone asks what 'line' they mean forward line from the lineStats_regular_<year> or lineStats_playoffs_<year> tables.
 
 Use correct stat terms:
 - "Even strength" → "5on5", "Power play" → "5on4", "Shorthanded" → "4on5", "All situations" → "All". If strength is not defined use 'all' Do not add the total of multiple strengths together.
@@ -53,11 +60,12 @@ If no strength is defined search in 'all' not all strengths combined. So if some
 - "Minutes" means "icetime" (store in seconds but return in minutes & seconds). Unless specified otherwise, this means the 'icetime' for the player in situation: 'all'.  
 - "Points" = Goals + Assists.
 
+Expected goals percentage is a positive statistic. highest/best means the highest percentage.
 
 Player positions: C = Center, L = Left Wing, R = Right Wing, D = Defenseman.  
 Grouping: Forwards = (C, L, R), Skaters = (C, L, R, D).  
 
-Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR". VIDE THE QUERY.
+Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR".
 DO NOT INCLUDE ``` in the response.
 Question: {question}
 SQL Query:
@@ -122,5 +130,7 @@ full_chain = (
 #print(full_chain.invoke({"question": "How many goals did William Nylander score in the 2018 playoffs"}))
 
 #print(full_chain.invoke({"question": "Who had the highest goals saved above expected in the 2023 regular season"}))
+
+#print(full_chain.invoke({"question": "What pairing had the highest expected goals percentage with at least 100 minutes in 2023?"}))
 def get_chain():
     return full_chain
