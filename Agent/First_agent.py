@@ -10,11 +10,11 @@ from pydantic import BaseModel, Field
 from langchain.tools import tool
 from langchain.schema.output_parser import StrOutputParser
 #from imported_chain import get_chain
-from first_query_attempt import get_chain
+from SQL_Chains.first_query_attempt import get_chain
 from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get
-from RAG_NHL_rules import get_rules_information
-from RAG_NHL_CBA import get_cba_information
-from bio_info_query import get_bio_chain
+from RAG_Chains.RAG_NHL_rules import get_rules_information
+from RAG_Chains.RAG_NHL_CBA import get_cba_information
+from SQL_Chains.bio_info_query import get_bio_chain
 
 
 load_dotenv()

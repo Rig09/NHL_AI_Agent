@@ -1,10 +1,10 @@
 from dotenv import load_dotenv
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
-from First_agent import get_agent
+from Agent.First_agent import get_agent
 import time
 import os
-from database_init import init_db
+from data.database_init import init_db
 
 load_dotenv()
 
