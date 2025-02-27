@@ -3,15 +3,10 @@ from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-
+from data.database_init import init_cba_db
 load_dotenv()
 
 model = ChatOpenAI(model="gpt-4o")
-
-current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-persistent_dir = os.path.join(current_dir, 'data', 'PDFS', 'chroma_db_CBA')
-
-db = Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small"))
 
 # print("\n--- Relevant Documents ---")
 # for i, doc in enumerate(relevant_docs, 1):
@@ -19,13 +14,15 @@ db = Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbedding
 #     if doc.metadata:
 #         print(f"Source: {doc.metadata.get('source', 'Unknown')}\n")
 
-retriever = db.as_retriever(
-search_type="similarity_score_threshold",
-search_kwargs={'k': 3, "score_threshold": 0.05}
-)
+db = init_cba_db()
 
         
-def get_cba_information(query: str) -> str:
+def get_cba_information(vector_db, query: str) -> str:
+    retriever = vector_db.as_retriever(
+    search_type="similarity_score_threshold",
+    search_kwargs={'k': 3, "score_threshold": 0.05}
+    )
+    
     relevant_docs = retriever.invoke(query)
 
     combined_input = (
