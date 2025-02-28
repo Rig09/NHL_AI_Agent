@@ -171,7 +171,7 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
     pass
 
 # TODO: Include heatmaps in this file
-db = init_db()
+#db = init_db()
 # Sample function calls
 # if __name__ == "__main__":
     # goal_map_scatter("Auston Matthews", 2021, "5on5", "regular")
