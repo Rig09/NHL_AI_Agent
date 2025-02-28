@@ -8,11 +8,6 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.globals import set_verbose
 from data.database_init import get_table_info, run_query_mysql, init_db
 
-# Load environment variables
-load_dotenv()
-
-set_verbose(True)
-
 def run_query(query, db):
         return run_query_mysql(query, db)
 

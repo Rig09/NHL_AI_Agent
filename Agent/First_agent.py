@@ -12,7 +12,7 @@ from langchain.schema.output_parser import StrOutputParser
 #from imported_chain import get_chain
 from SQL_Chains.first_query_attempt import get_chain
 from SQL_Chains.bio_info_query import get_bio_chain
-from data.database_init import init_db, init_cba_db, init_rules_db
+from data.database_init import init_db
 
 def get_agent(db, api_key):
 
