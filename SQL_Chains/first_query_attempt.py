@@ -70,6 +70,10 @@ def get_chain(db):
     Grouping: Forwards = (C, L, R), Skaters = (C, L, R, D).  
 
     Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR".
+
+    Someone May request stats from a range of seasons like 'How many goals did Connor Mcdavid score from the 2018-19 season to the 2022-23 season' This means query the db and find the total for Every season in between those two inclusive. 
+    In that example then, you would query for the total goals in the 2018, 2019, 2020, 2021, and 2022 seasons.
+
     DO NOT INCLUDE ``` in the response.
     Question: {question}
     SQL Query:

@@ -65,8 +65,8 @@ def get_agent(db):
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
             description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. Any statistical question should invoke this tool.
-                            It will perform an sql query on data from the 2015-2023 NHL seasons. If a question about that is asked, 
-                            it will return a string with the answer to that question in natural language."""
+                            It will perform an sql query on data from the 2015-2023 NHL seasons. Note someone may refer to a season using two years. So the 2023-24 season
+                            also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language."""
         ),
         Tool(
             name="Player_BIO_information",
