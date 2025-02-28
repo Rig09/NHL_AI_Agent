@@ -7,11 +7,11 @@ import os
 from data.database_init import init_db, init_cba_db, init_rules_db
 
 load_dotenv()
+if "database" not in st.session_state:
+    db = init_db()
 
-db = init_db()
-
-
-NHLStatsAgent = get_agent(db)
+if "agent_chain" not in st.session_state:
+    NHLStatsAgent = get_agent(db)
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [

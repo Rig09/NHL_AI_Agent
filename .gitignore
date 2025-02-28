@@ -7,10 +7,11 @@
 *.csv
 *.db
 *.png
-*.txt
 *.bin
 *.sqlite3
 tempCodeRunnerFile.py
+NHLPA_NHL_MOU.txt
+2024-25Rules.txt
 
 # Keeping shot data dictionary CSV in repo
 !notes/MoneyPuck_Shot_Data_Dictionary.csv
