@@ -53,23 +53,23 @@ def get_agent(db, rules_db, cba_db, api_key):
 
     llm = ChatOpenAI(model="gpt-4o", api_key=api_key)
 
-    @tool(args_schema=goal_map_scatter_schema)
-    def goal_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
-        """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
-        The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
-        if a situation is not provided, we will assume the situation to be all situations
-        if a season type is not provided, we will assume the season type to be regular season"""
-        goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
-        return "Goal map scatter plot generated successfully"
+    # @tool(args_schema=goal_map_scatter_schema)
+    # def goal_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    #     """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
+    #     The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
+    #     if a situation is not provided, we will assume the situation to be all situations
+    #     if a season type is not provided, we will assume the season type to be regular season"""
+    #     goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
+    #     return "Goal map scatter plot generated successfully"
 
-    @tool(args_schema=goal_map_scatter_schema)
-    def shot_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
-        """Returns a scatterplot of the shots by the player in a given situation, season type and range of seasons. 
-        It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
-        if a situation is not provided, we will assume the situation to be all situations
-        if a season type is not provided, we will assume the season type to be regular season"""
-        shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
-        return "Goal map scatter plot generated successfully"
+    # @tool(args_schema=goal_map_scatter_schema)
+    # def shot_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    #     """Returns a scatterplot of the shots by the player in a given situation, season type and range of seasons. 
+    #     It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
+    #     if a situation is not provided, we will assume the situation to be all situations
+    #     if a season type is not provided, we will assume the season type to be regular season"""
+    #     shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
+    #     return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=rag_args_schema)
     def rule_getter(query: str):
@@ -81,7 +81,7 @@ def get_agent(db, rules_db, cba_db, api_key):
         Please keep those in the response.
         When THIS TOOL IS CALLED KEEP THE SPECIFIC RULE NUMBER IN THE RESPONSE 
         for example at the end of a response it could say (RULE 48.2) keep that rule refrence"""
-        return get_rules_information(rules_db, query)
+        return get_rules_information(rules_db, api_key, query)
 
     @tool(args_schema=rag_args_schema)
     def cba_getter(query: str):
@@ -91,7 +91,7 @@ def get_agent(db, rules_db, cba_db, api_key):
         This includes hypothetical questions like 'what happens if a team goes over the cap with bonus' 'how does revenue sharing between the players work'.
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
         If a specific component of the CBA is refrenced keep that in the response"""
-        return get_cba_information(cba_db, query)
+        return get_cba_information(cba_db, api_key, query)
 
 
     chain = get_chain(db, api_key)
@@ -106,8 +106,6 @@ def get_agent(db, rules_db, cba_db, api_key):
     # cba_getter_wrapped = create_tool_wrapper(cba_getter, cba_db)
 
     tools = [
-        goal_map_scatter,
-        shot_map_scatter,
         rule_getter,
         cba_getter,
         Tool(

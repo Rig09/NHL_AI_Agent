@@ -4,9 +4,6 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from data.database_init import init_cba_db
-load_dotenv()
-
-model = ChatOpenAI(model="gpt-4o")
 
 # print("\n--- Relevant Documents ---")
 # for i, doc in enumerate(relevant_docs, 1):
@@ -14,10 +11,13 @@ model = ChatOpenAI(model="gpt-4o")
 #     if doc.metadata:
 #         print(f"Source: {doc.metadata.get('source', 'Unknown')}\n")
 
-def get_cba_information(vector_db, query: str) -> str:
+def get_cba_information(vector_db, api_key, query: str) -> str:
+    
+    model = ChatOpenAI(model="gpt-4o", api_key = api_key)
+
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
-    search_kwargs={'k': 3, "score_threshold": 0.05}
+    search_kwargs={'k': 3, "score_threshold": 0.01}
     )
     
     relevant_docs = retriever.invoke(query)

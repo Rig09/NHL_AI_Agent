@@ -9,7 +9,7 @@ load_dotenv()
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 file_path = os.path.join(current_dir,'PDFS', '2024-25Rules.txt')
-persistent_dir = os.path.join(current_dir, 'PDFS', 'chroma_db')
+persistent_dir = os.path.join(current_dir, 'PDFS', 'rules_chroma_db')
 
 print('NHL Rulebook embeddings')
 if not os.path.exists(persistent_dir):
@@ -45,7 +45,7 @@ else:
     print("Vector store already exists. No need to initialize.")
 
 file_path = os.path.join(current_dir,'PDFS', 'NHLPA_NHL_MOU.txt')
-persistent_dir = os.path.join(current_dir, 'PDFS', 'chroma_db_CBA')
+persistent_dir = os.path.join(current_dir, 'PDFS', 'cba_chroma_db')
 
 print('Creating embeddings for CBA')
 

@@ -4,15 +4,16 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-load_dotenv()
-model = ChatOpenAI(model="gpt-4o")
 # print("\n--- Relevant Documents ---")
 # for i, doc in enumerate(relevant_docs, 1):
 #     print(f"Document {i}:\n{doc.page_content}\n")
 #     if doc.metadata:
 #         print(f"Source: {doc.metadata.get('source', 'Unknown')}\n")
 
-def get_rules_information(db, query: str) -> str:
+def get_rules_information(db, api_key, query: str) -> str:
+
+    model = ChatOpenAI(model="gpt-4o", api_key = api_key)
+    
     retriever = db.as_retriever(
     search_type="similarity_score_threshold",
     search_kwargs={'k': 3, "score_threshold": 0.2}

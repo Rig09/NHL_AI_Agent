@@ -7,10 +7,8 @@
 *.csv
 *.db
 *.png
-*.txt
 *.bin
 tempCodeRunnerFile.py
 
 # Keeping shot data dictionary CSV in repo
 !notes/MoneyPuck_Shot_Data_Dictionary.csv
-!requirements.txt
