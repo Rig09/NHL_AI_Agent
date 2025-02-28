@@ -14,9 +14,6 @@ model = ChatOpenAI(model="gpt-4o")
 #     if doc.metadata:
 #         print(f"Source: {doc.metadata.get('source', 'Unknown')}\n")
 
-db = init_cba_db()
-
-        
 def get_cba_information(vector_db, query: str) -> str:
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
