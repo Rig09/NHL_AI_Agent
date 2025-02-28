@@ -25,20 +25,6 @@ def init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE):
         ssl_disabled=True
     )
 
-def init_cba_db():
-
-    current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    persistent_dir = os.path.join(current_dir, 'data', 'PDFS', 'chroma_db_CBA')
-
-    return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small"))
-
-def init_rules_db():
-    current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    persistent_dir = os.path.join(current_dir, 'data', 'PDFS', 'chroma_db')
-
-    return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small"))
-    
-
 def get_table_info(db_connection, table_names=None):
     """Retrieve schema information for specific tables or list all tables."""
     cursor = db_connection.cursor(dictionary=True)
