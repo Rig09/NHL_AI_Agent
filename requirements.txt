@@ -19,3 +19,4 @@ protobuf
 torch
 gunicorn
 redis
+pysqlite3
