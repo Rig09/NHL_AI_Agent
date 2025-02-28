@@ -9,3 +9,12 @@ matplotlib
 hockey-rink
 mysql-connector-python
 pydantic
+sqlalchemy
+openai
+scipy
+requests
+numpy
+protobuf
+torch
+gunicorn
+redis
