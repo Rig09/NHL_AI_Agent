@@ -1,4 +1,5 @@
 dotenv
+chromadb
 streamlit
 langchain-core
 langchain-community
