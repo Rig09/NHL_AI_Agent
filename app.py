@@ -4,7 +4,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from Agent.First_agent import get_agent
 import time
 import os
-from data.database_init import init_db, init_cba_db, init_rules_db
+from data.database_init import init_db
 
 #load_dotenv()
 if "database" not in st.session_state:
