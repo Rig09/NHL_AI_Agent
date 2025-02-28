@@ -17,9 +17,6 @@ from RAG_Chains.RAG_NHL_CBA import get_cba_information
 from SQL_Chains.bio_info_query import get_bio_chain
 from data.database_init import init_db, init_cba_db, init_rules_db
 
-load_dotenv()
-# Initialize a ChatOpenAI model
-llm = ChatOpenAI(model="gpt-4o")
 
 class goal_map_scatter_schema(BaseModel):
     player_name: str = Field(title="Player Name", description="The name of the player to generate the goal map scatter plot for")
@@ -52,7 +49,10 @@ def create_tool_wrapper(func, vector_db):
         return func(vector_db, query)
     return wrapper
 
-def get_agent(db, rules_db, cba_db):
+def get_agent(db, rules_db, cba_db, api_key):
+
+    llm = ChatOpenAI(model="gpt-4o", api_key=api_key)
+
     @tool(args_schema=goal_map_scatter_schema)
     def goal_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
@@ -94,9 +94,9 @@ def get_agent(db, rules_db, cba_db):
         return get_cba_information(cba_db, query)
 
 
-    chain = get_chain(db)
+    chain = get_chain(db, api_key)
 
-    bio_chain = get_bio_chain(db)
+    bio_chain = get_bio_chain(db, api_key)
 
     memory = ConversationBufferMemory(
         memory_key="chat_history", return_messages=True)
@@ -114,8 +114,8 @@ def get_agent(db, rules_db, cba_db):
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
             description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. Any statistical question should invoke this tool.
-                            It will perform an sql query on data from the 2015-2023 NHL seasons. If a question about that is asked, 
-                            it will return a string with the answer to that question in natural language."""
+                            It will perform an sql query on data from the 2015-2023 NHL seasons. Note someone may refer to a season using two years. So the 2023-24 season
+                            also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language."""
         ),
         Tool(
             name="Player_BIO_information",

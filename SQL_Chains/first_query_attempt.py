@@ -8,8 +8,6 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.globals import set_verbose
 from data.database_init import get_table_info, run_query_mysql
 
-# Load environment variables
-load_dotenv()
 
 set_verbose(True)
 
@@ -23,7 +21,7 @@ set_verbose(True)
 
 #print(db.run("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
-def get_chain(db):
+def get_chain(db, api_key):
 
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
@@ -36,7 +34,7 @@ def get_chain(db):
     #print(run_query("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
     # Initialize LLM
-    llm = ChatOpenAI(model_name="gpt-4o")
+    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
 
 
     template = """
@@ -68,6 +66,16 @@ def get_chain(db):
 
     Player positions: C = Center, L = Left Wing, R = Right Wing, D = Defenseman.  
     Grouping: Forwards = (C, L, R), Skaters = (C, L, R, D).  
+
+    Someone May request stats from a range of seasons like 'How many goals did Connor Mcdavid score from the 2018-19 season to the 2022-23 season' This means query the db and find the total for Every season in between those two inclusive. 
+    In that example then, you would query for the total goals in the 2018, 2019, 2020, 2021, and 2022 seasons.
+
+    When the user requests a total allways use the 'all' situation for the player do not add these up.
+    For example, if someone were to ask how many games played a player had in a season, use only the result in 'all' DO NOT ADD THEM with others.
+
+    If a user requests a stat per game, devide the stat by the number of games played in that same time period
+
+    If somone asks for a stat per 60 then find the number of that stat per 60 minutes of icetime. Reminder that icetime is stored in seconds.
 
     Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR".
     DO NOT INCLUDE ``` in the response.

@@ -8,14 +8,11 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 load_dotenv()
 
 # Retrieve MySQL credentials from .env
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
+
 
 model = ChatOpenAI(model="gpt-4o")
 
-def init_db():
+def init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD,MYSQL_DATABASE):
     """Initialize and return the database connection"""
     return mysql.connector.connect(
         host=MYSQL_HOST,
@@ -25,18 +22,18 @@ def init_db():
         ssl_disabled=True
     )
 
-def init_cba_db():
+def init_cba_db(api_key):
 
     current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     persistent_dir = os.path.join(current_dir, 'data', 'PDFS', 'chroma_db_CBA')
 
-    return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small"))
+    return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key))
 
-def init_rules_db():
+def init_rules_db(api_key):
     current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     persistent_dir = os.path.join(current_dir, 'data', 'PDFS', 'chroma_db')
 
-    return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small"))
+    return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key))
     
 
 def get_table_info(db_connection, table_names=None):
