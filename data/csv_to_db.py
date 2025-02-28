@@ -28,21 +28,21 @@ cursor.execute(f"USE {MYSQL_DATABASE};")
 # Define seasons to process
 seasons = range(2015, 2024)  # Adjust range as needed
 
-# # Get all table names
-# cursor.execute("SHOW TABLES;")
-# tables = cursor.fetchall()
+# Get all table names
+cursor.execute("SHOW TABLES;")
+tables = cursor.fetchall()
 
-# # Clean the table name (remove unwanted characters like file paths)
-# for table in tables:
-#     table_name = table[0]
+# Clean the table name (remove unwanted characters like file paths)
+for table in tables:
+    table_name = table[0]
     
-#     # Ensure table_name is a valid identifier (e.g., remove potential path components)
-#     table_name = table_name.strip().split("\\")[-1]  # This strips potential path components
+    # Ensure table_name is a valid identifier (e.g., remove potential path components)
+    table_name = table_name.strip().split("\\")[-1]  # This strips potential path components
 
-#     cursor.execute(f"DROP TABLE IF EXISTS `{table_name}`;")  # Ensure table names are quoted to avoid conflicts with reserved words
-#     print(f"✔ Dropped table '{table_name}'")
+    cursor.execute(f"DROP TABLE IF EXISTS `{table_name}`;")  # Ensure table names are quoted to avoid conflicts with reserved words
+    print(f"✔ Dropped table '{table_name}'")
 
-# Use SQLAlchemy for Pandas `.to_sql()` with MySQL
+#Use SQLAlchemy for Pandas `.to_sql()` with MySQL
 engine = create_engine(f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}")
 
 # Function to process CSV files and save to MySQL
@@ -51,8 +51,6 @@ def process_csv(file_path, table_name, season=None, is_playoff=None):
         print(f"Processing {file_path}...")
 
         df = pd.read_csv(file_path, encoding="utf-8", low_memory=False)
-        #df["season"] = season
-        #df["is_playoff"] = is_playoff
 
         # Write to MySQL (replace table each time)
         df.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
@@ -60,44 +58,44 @@ def process_csv(file_path, table_name, season=None, is_playoff=None):
     else:
         print(f"⚠ File not found: {file_path}")
 
-# # Process skaters, goalies, lines, and pairs data
-# for season in seasons:
-#     for is_playoff, game_type in [(0, "regular"), (1, "playoffs")]:
-#         # Skaters
-#         process_csv(f"data/skaters/{season}/skaters_{game_type}_{season}.csv", f"SkaterStats_{game_type}_{season}", season, is_playoff)
+# Process skaters, goalies, lines, and pairs data
+for season in seasons:
+    for is_playoff, game_type in [(0, "regular"), (1, "playoffs")]:
+        # Skaters
+        process_csv(f"data/skaters/{season}/skaters_{game_type}_{season}.csv", f"SkaterStats_{game_type}_{season}", season, is_playoff)
         
-#         # Goalies
-#         process_csv(f"data/goalies/{season}/goalies_{game_type}_{season}.csv", f"GoalieStats_{game_type}_{season}", season, is_playoff)
+        # Goalies
+        process_csv(f"data/goalies/{season}/goalies_{game_type}_{season}.csv", f"GoalieStats_{game_type}_{season}", season, is_playoff)
         
-#         # Lines and Pairs (from the same CSV, separated by 'position')
-#         lines_csv = f"data/pairings/{season}/pairings_{game_type}_{season}.csv"
-#         if os.path.exists(lines_csv):
-#             print(f"Processing {lines_csv}...")
-#             df = pd.read_csv(lines_csv, encoding="utf-8", low_memory=False)
-#             df["season"] = season
-#             df["is_playoff"] = is_playoff
+        # Lines and Pairs (from the same CSV, separated by 'position')
+        lines_csv = f"data/pairings/{season}/pairings_{game_type}_{season}.csv"
+        if os.path.exists(lines_csv):
+            print(f"Processing {lines_csv}...")
+            df = pd.read_csv(lines_csv, encoding="utf-8", low_memory=False)
+            df["season"] = season
+            df["is_playoff"] = is_playoff
             
-#             # Separate into lines and pairs
-#             df_lines = df[df["position"] == "line"]
-#             df_pairs = df[df["position"] == "pairing"]
+            # Separate into lines and pairs
+            df_lines = df[df["position"] == "line"]
+            df_pairs = df[df["position"] == "pairing"]
             
-#             if not df_lines.empty:
-#                 df_lines.to_sql(f"LineStats_{game_type}_{season}", engine, if_exists="replace", index=False, chunksize=5000, method="multi")
-#                 print(f"✔ LineStats_{game_type}_{season} table saved.")
-#             else:
-#                 print(f"⚠ No line data found in {lines_csv}.")
+            if not df_lines.empty:
+                df_lines.to_sql(f"LineStats_{game_type}_{season}", engine, if_exists="replace", index=False, chunksize=5000, method="multi")
+                print(f"✔ LineStats_{game_type}_{season} table saved.")
+            else:
+                print(f"⚠ No line data found in {lines_csv}.")
             
-#             if not df_pairs.empty:
-#                 df_pairs.to_sql(f"PairStats_{game_type}_{season}", engine, if_exists="replace", index=False, chunksize=5000, method="multi")
-#                 print(f"✔ PairStats_{game_type}_{season} table saved.")
-#             else:
-#                 print(f"⚠ No pair data found in {lines_csv}.")
-#         else:
-#             print(f"⚠ File not found: {lines_csv}")
+            if not df_pairs.empty:
+                df_pairs.to_sql(f"PairStats_{game_type}_{season}", engine, if_exists="replace", index=False, chunksize=5000, method="multi")
+                print(f"✔ PairStats_{game_type}_{season} table saved.")
+            else:
+                print(f"⚠ No pair data found in {lines_csv}.")
+        else:
+            print(f"⚠ File not found: {lines_csv}")
 
-# # Process player bio information
-# data_bio = "data/bio_information/allPlayersLookup.csv"
-# process_csv(data_bio, "BIO_Info")
+# Process player bio information
+data_bio = "data/bio_information/allPlayersLookup.csv"
+process_csv(data_bio, "BIO_Info")
 
 shots_data = "data/shots/shots_2015-2023.csv"
 
