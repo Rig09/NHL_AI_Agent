@@ -17,9 +17,7 @@ from RAG_Chains.RAG_NHL_CBA import get_cba_information
 from SQL_Chains.bio_info_query import get_bio_chain
 from data.database_init import init_db, init_cba_db, init_rules_db
 
-load_dotenv()
 # Initialize a ChatOpenAI model
-llm = ChatOpenAI(model="gpt-4o")
 
 class goal_map_scatter_schema(BaseModel):
     player_name: str = Field(title="Player Name", description="The name of the player to generate the goal map scatter plot for")
@@ -46,12 +44,12 @@ class rag_args_schema(BaseModel):
     #vector_db: Any = Field(..., description='A vector database for the RAG chain to interact with. This should be passed to the tool from the rules_db or cba_db depending on the tool used')
     query: str = Field(..., description='The query to be executed by a RAG system. This will be fed into a function which will provide an answer to the query based on text files relevant to the query')
 
-def get_agent(db):
+def get_agent(db, api_key):
 
+    llm = ChatOpenAI(model="gpt-4o", api_key=api_key)
+    chain = get_chain(db, api_key)
 
-    chain = get_chain(db)
-
-    bio_chain = get_bio_chain(db)
+    bio_chain = get_bio_chain(db, api_key)
 
     memory = ConversationBufferMemory(
         memory_key="chat_history", return_messages=True)

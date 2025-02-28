@@ -23,8 +23,9 @@ set_verbose(True)
 
 #print(db.run("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
-def get_chain(db):
+def get_chain(db, api_key):
 
+    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
         relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']

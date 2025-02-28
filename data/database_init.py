@@ -5,17 +5,17 @@ from mysql.connector import errorcode
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
-# Retrieve MySQL credentials from .env
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
+# # Retrieve MySQL credentials from .env
+# MYSQL_HOST = os.getenv("MYSQL_HOST")
+# MYSQL_USER = os.getenv("MYSQL_USER")
+# MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+# MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
 model = ChatOpenAI(model="gpt-4o")
 
-def init_db():
+def init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE):
     """Initialize and return the database connection"""
     return mysql.connector.connect(
         host=MYSQL_HOST,

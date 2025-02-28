@@ -6,12 +6,12 @@ import time
 import os
 from data.database_init import init_db, init_cba_db, init_rules_db
 
-load_dotenv()
+#load_dotenv()
 if "database" not in st.session_state:
-    db = init_db()
+    db = init_db(st.secrets(MYSQL_HOST), st.secrets(MYSQL_USER), st.secrets(MYSQL_PASSWORD), st.secrets(MYSQL_DATABASE))
 
 if "agent_chain" not in st.session_state:
-    NHLStatsAgent = get_agent(db)
+    NHLStatsAgent = get_agent(db, st.secrets(OPENAI_API_KEY))
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
