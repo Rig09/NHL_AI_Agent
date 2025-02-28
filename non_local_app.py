@@ -8,11 +8,11 @@ from data.database_init import init_db, init_cba_db, init_rules_db
 
 if "database" not in st.session_state:
     #upon implementation replace with st.secrets
-    MYSQL_HOST = st.secrets("MYSQL_HOST")
-    MYSQL_USER = st.secrets("MYSQL_USER")
-    MYSQL_PASSWORD = st.secrets("MYSQL_PASSWORD")
-    MYSQL_DATABASE = st.secrets("MYSQL_DATABASE")
-    open_ai_key = st.secrets("OPENAI_API_KEY")
+    MYSQL_HOST = st.secrets["MYSQL_HOST"]
+    MYSQL_USER = st.secrets["MYSQL_USER"]
+    MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
+    MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
+    open_ai_key = st.secrets["OPENAI_API_KEY"]
 
     db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
     rules_db = init_rules_db(open_ai_key)
