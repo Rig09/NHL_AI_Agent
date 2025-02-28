@@ -8,10 +8,15 @@ from data.database_init import init_db
 
 #load_dotenv()
 if "database" not in st.session_state:
-    db = init_db(st.secrets(MYSQL_HOST), st.secrets(MYSQL_USER), st.secrets(MYSQL_PASSWORD), st.secrets(MYSQL_DATABASE))
+    db = init_db(
+        st.secrets["MYSQL_HOST"], 
+        st.secrets["MYSQL_USER"], 
+        st.secrets["MYSQL_PASSWORD"], 
+        st.secrets["MYSQL_DATABASE"]
+    )
 
 if "agent_chain" not in st.session_state:
-    NHLStatsAgent = get_agent(db, st.secrets(OPENAI_API_KEY))
+    NHLStatsAgent = get_agent(db, st.secrets['OPENAI_API_KEY'])
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
