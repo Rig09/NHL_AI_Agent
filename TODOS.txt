@@ -11,6 +11,8 @@ Environment/Setup
 Testing/Performance
 - Time each component of the chain while running.
 - Write mock tests for each function
+- Remove unused imports
+- Tune DB schema to be more efficient?
 
 Cloud
 - Request throttling

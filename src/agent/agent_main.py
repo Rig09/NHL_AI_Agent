@@ -1,20 +1,14 @@
-from dotenv import load_dotenv
 from langchain import hub
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain.memory import ConversationBufferMemory
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from langchain_core.tools import Tool, StructuredTool
+from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from pydantic import BaseModel, Field
 from langchain.tools import tool
-from langchain.schema.output_parser import StrOutputParser
-from SQL_Chains.first_query_attempt import get_chain
+from chains.first_query_attempt import get_chain
 from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get
-from RAG_Chains.RAG_NHL_rules import get_rules_information
-from RAG_Chains.RAG_NHL_CBA import get_cba_information
-from SQL_Chains.bio_info_query import get_bio_chain
-from data.database_init import init_db, init_cba_db, init_rules_db
+from chains.rag_chain import get_cba_information, get_rules_information
+from chains.bio_info_query import get_bio_chain
 
 
 class goal_map_scatter_schema(BaseModel):
@@ -52,23 +46,23 @@ def get_agent(db, rules_db, cba_db, api_key):
 
     llm = ChatOpenAI(model="gpt-4o", api_key=api_key)
 
-    # @tool(args_schema=goal_map_scatter_schema)
-    # def goal_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
-    #     """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
-    #     The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
-    #     if a situation is not provided, we will assume the situation to be all situations
-    #     if a season type is not provided, we will assume the season type to be regular season"""
-    #     goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
-    #     return "Goal map scatter plot generated successfully"
+    @tool(args_schema=goal_map_scatter_schema)
+    def goal_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+        """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
+        The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
+        if a situation is not provided, we will assume the situation to be all situations
+        if a season type is not provided, we will assume the season type to be regular season"""
+        goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
+        return "Goal map scatter plot generated successfully"
 
-    # @tool(args_schema=goal_map_scatter_schema)
-    # def shot_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
-    #     """Returns a scatterplot of the shots by the player in a given situation, season type and range of seasons. 
-    #     It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
-    #     if a situation is not provided, we will assume the situation to be all situations
-    #     if a season type is not provided, we will assume the season type to be regular season"""
-    #     shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
-    #     return "Goal map scatter plot generated successfully"
+    @tool(args_schema=goal_map_scatter_schema)
+    def shot_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+        """Returns a scatterplot of the shots by the player in a given situation, season type and range of seasons. 
+        It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
+        if a situation is not provided, we will assume the situation to be all situations
+        if a season type is not provided, we will assume the season type to be regular season"""
+        shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
+        return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=rag_args_schema)
     def rule_getter(query: str):
@@ -120,6 +114,7 @@ def get_agent(db, rules_db, cba_db, api_key):
             description="""Useful when you want BIO information about a player, including position, handedness, height, weight, Nationality, Birthday, and team."""
         )
     ]
+    # TODO: Add the tools for the goal map scatter and shot map scatter
     
     # Pull the prompt template from the hub
     prompt = hub.pull("hwchase17/openai-tools-agent")
