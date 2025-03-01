@@ -1,3 +1,4 @@
+# TODO: Rewrite with Corrected paths
 #!/bin/bash
 
 # Base directories

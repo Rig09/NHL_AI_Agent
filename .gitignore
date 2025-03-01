@@ -10,4 +10,4 @@
 tempCodeRunnerFile.py
 
 # Keeping shot data dictionary CSV in repo
-!notes/MoneyPuck_Shot_Data_Dictionary.csv
+!data/shots/MoneyPuck_Shot_Data_Dictionary.csv
