@@ -1,7 +1,4 @@
 import pandas as pd
-# import numpy as np
-# from scipy.interpolate import griddata
-# from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 from hockey_rink import NHLRink
 import urllib.request
@@ -9,7 +6,7 @@ import urllib.error
 import hockey_rink.rink_feature
 hockey_rink.rink_feature.urllib = urllib  # Force the module to use correct imports
 import os
-from data.database_init import run_query_mysql, init_db
+from utils.database_init import run_query_mysql, init_db
 
 
 def extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, situation, shot_result, season_type):

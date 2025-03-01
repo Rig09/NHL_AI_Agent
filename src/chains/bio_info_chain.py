@@ -12,7 +12,7 @@ from utils.database_init import get_table_info, run_query_mysql, init_db
 load_dotenv()
 
 set_verbose(True)
-
+# TODO: Can make SQL chains more modular
 def run_query(query, db):
         return run_query_mysql(query, db)
 

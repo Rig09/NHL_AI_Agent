@@ -1,6 +1,8 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
+
+# TODO: Can make this more modular
 def get_rules_information(vector_db, api_key, query: str) -> str:
     model = ChatOpenAI(model="gpt-4o", api_key = api_key)
 

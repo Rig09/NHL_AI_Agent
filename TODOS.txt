@@ -3,7 +3,6 @@ Code Reorganization
 - File + function renaming
 - Retest all src/util files
 
-
 Environment/Setup
 - Complete shell scripts for data install, DB setup + pip env setup
 - Outline plan for tests of the setup to ensure consistency
