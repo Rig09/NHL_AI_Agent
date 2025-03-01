@@ -3,7 +3,6 @@
 .DS_Store
 
 .env
-# TODO: Move CSVs to large file storage
 *.csv
 *.db
 *.png
