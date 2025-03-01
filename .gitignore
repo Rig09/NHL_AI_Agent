@@ -9,5 +9,10 @@
 *.bin
 tempCodeRunnerFile.py
 
+# Chroma DB files
+**/chroma_db/
+*.sqlite3
+*.sqlite
+
 # Keeping shot data dictionary CSV in repo
 !data/shots/MoneyPuck_Shot_Data_Dictionary.csv

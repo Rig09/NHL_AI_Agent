@@ -4,7 +4,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
 from langchain.tools import tool
-from chains.sql_chains import get_chain
+from chains.stats_sql_chain import get_chain
 from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get
 from chains.rag_chains import get_cba_information, get_rules_information
 from chains.bio_info_chain import get_bio_chain
