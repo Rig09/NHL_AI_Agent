@@ -1,21 +1,36 @@
 from dotenv import load_dotenv
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
-from Agent.First_agent import get_agent
-import time
 import os
-from data.database_init import init_db, init_cba_db, init_rules_db
+import argparse
+from agent.agent_main import get_agent
+from utils.database_init import init_db, init_cba_db, init_rules_db
+
+parser = argparse.ArgumentParser()
+# Use local environment variables by default
+parser.add_argument("--local", action="store_false", help="Use local environment variables") 
+
+# TODO: make function cleaner, remove duplicate code, naming
+def get_secrets_or_env(local):
+    if local:
+        load_dotenv()
+        MYSQL_HOST = os.getenv("MYSQL_HOST")
+        MYSQL_USER = os.getenv("MYSQL_USER")
+        MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+        MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
+        open_ai_key = os.getenv("OPENAI_API_KEY")
+    else:
+        MYSQL_HOST = st.secrets["MYSQL_HOST"]
+        MYSQL_USER = st.secrets["MYSQL_USER"]
+        MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
+        MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
+        open_ai_key = st.secrets["OPENAI_API_KEY"]
+    return MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key
 
 if "database" not in st.session_state:
-
-    load_dotenv()
-    #upon implementation replace with st.secrets
-    MYSQL_HOST = os.getenv("MYSQL_HOST")
-    MYSQL_USER = os.getenv("MYSQL_USER")
-    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-    MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-    open_ai_key = os.getenv("OPENAI_API_KEY")
-
+    args = parser.parse_args()
+    MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key = get_secrets_or_env(args.local)
+    
     db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
     rules_db = init_rules_db(open_ai_key)
     cba_db = init_cba_db(open_ai_key)
