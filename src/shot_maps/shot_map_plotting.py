@@ -98,6 +98,7 @@ def goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
     :param situation: str, game situation to extract data for, between the following options (5on5, 5on4, 4on5, all, other)
     :param season: int, season to extract data for (YYYY)
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
+    :returns: matplotlib figure object
     """
     player_shots = extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
     # TODO: Defensive programming if no goals are found for the player in the given season/situation???
@@ -106,7 +107,6 @@ def goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
     
     rink = NHLRink(net={"visible": False})
 
-    # TODO Include plot title? Player photo? Team logo?
     scatter = rink.scatter(
         "xCordAdjusted", "yCordAdjusted", data=player_shots,
         plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89), color="orange",
@@ -118,17 +118,10 @@ def goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
         fig.suptitle(f"{player_name} {season_lower_bound}-{season_lower_bound + 1} Season {situation} Goals", fontsize=16)
     else:
         fig.suptitle(f"{player_name} {season_lower_bound}-{season_lower_bound+1} to {season_upper_bound}- {season_upper_bound+1} Seasons {situation} Goals", fontsize=16)    
-    # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
 
-    #plt.show()
-    output_path = f"generated_images/scatterplot.png"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path, format='png')
-    plt.close(fig)
-    pass
+    return fig
 
 
-# TODO: Add a function for better flow control. There is duplication between the shot map and goal map plotting functions
 def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
@@ -136,6 +129,7 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
     :param situation: str, game situation to extract data for, between the following options (5on5, 5on4, 4on5, all, other)
     :param season: int, season to extract data for (YYYY)
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
+    :returns: matplotlib figure object
     """
     player_shots = extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
 
@@ -147,7 +141,6 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
     # NOTE: Colour mapping is not working.
     player_shots = (player_shots.assign(color=lambda df_: df_.event.map({"SHOT": "grey", "GOAL": "orange"})))
 
-    # TODO Include plot title? Player photo? Team logo?
     scatter = rink.scatter(
         "xCordAdjusted", "yCordAdjusted", color="color", data=player_shots,
         plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89),
@@ -159,13 +152,8 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
         fig.suptitle(f"{player_name} {season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
     else:
         fig.suptitle(f"{player_name} {season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
-    # TODO: better title formatting based on possible input fields. EG other, playoffs, etc. Maybe goal count?
 
-    output_path = f"generated_images/scatterplot.png"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path, format='png')
-    plt.close(fig)
-    pass
+    return fig
 
 # TODO: Include heatmaps in this file
 #db = init_db()

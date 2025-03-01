@@ -5,6 +5,7 @@ import os
 import argparse
 from agent.agent_main import get_agent
 from utils.database_init import init_db, init_cba_db, init_rules_db
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
 # Use local environment variables by default
@@ -82,12 +83,13 @@ if user_query is not None and user_query.strip() != "":
             # Append AI response to chat history
             st.session_state.chat_history.append(AIMessage(content=ai_response))
 
-            # Check if the user query specifically requests a scatterplot
-            if "scatterplot" in user_query.lower():  # Case insensitive check for 'scatterplot'
-                scatterplot_path = "generated_images/scatterplot.png"
-                if os.path.exists(scatterplot_path):
-                    # Display the scatterplot image
-                    st.image(scatterplot_path)
+            # The agent tools will handle plot generation through their own logic
+            # Any plots generated will be available in the matplotlib figure manager
+            if plt.get_fignums():  # Check if any figures were created
+                for fig_num in plt.get_fignums():
+                    fig = plt.figure(fig_num)
+                    st.pyplot(fig)
+                    plt.close(fig)  # Clean up the figure
         else:
             # Handle the case where the response is not as expected
             st.markdown("Sorry, I couldn't understand that request. Please try again.")

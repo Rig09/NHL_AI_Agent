@@ -3,6 +3,7 @@ Code Reorganization
 - File + function renaming
 - Retest all src/util files
 - Config with remote or local dbs
+- Debug deprecation warnings after running streamlit run
 
 Environment/Setup
 - Complete shell scripts for data install, DB setup + pip env setup
