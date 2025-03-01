@@ -4,8 +4,9 @@ import mysql.connector
 from mysql.connector import errorcode
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-# Load environment variables
-load_dotenv()
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # Retrieve MySQL credentials from .env
 
@@ -26,7 +27,6 @@ def init_cba_db(api_key):
 
     current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     persistent_dir = os.path.join(current_dir, 'data', 'PDFS', 'cba_chroma_db')
-
     return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key))
 
 def init_rules_db(api_key):
