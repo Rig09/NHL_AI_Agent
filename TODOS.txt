@@ -41,6 +41,7 @@ Our Own XG Modelling
 
 MISC STRETCH IDEAS
 - Tune LLM related settings. Try multiple models?
+- Sample queries to try in the frontend
 - If you know a player's XG% you can see how that changes over game stages? (OT, 3rd period, etc). 
     Can also see how well they convert on their XG during those times.
 - Input a shot and see the XG from it?
