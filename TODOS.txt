@@ -1,14 +1,29 @@
+Code Reorganization
+- Function comments 
+- File + function renaming
+- Retest all src/util files
+
+
 Environment/Setup
 - Complete shell scripts for data install, DB setup + pip env setup
 - Outline plan for tests of the setup to ensure consistency
 
 Testing/Performance
 - Time each component of the chain while running.
+- Write mock tests for each function
+
+Cloud
+- Request throttling
+- API Key Usage monitoring
+
+Data Visualization
+- Dynamic rendering of scatterplots in Streamlit
 
 Admin
 - Rewrite README
-- Request monitoring + managing volume of requests once hosting
 
+Deployment
+- CI/CD?
 
 STRETCH FEATURES:
 Player Cards
@@ -23,6 +38,7 @@ Our Own XG Modelling
 - Explain train/test overlap
 
 MISC STRETCH IDEAS
+- Tune LLM related settings. Try multiple models?
 - If you know a player's XG% you can see how that changes over game stages? (OT, 3rd period, etc). 
     Can also see how well they convert on their XG during those times.
 - Input a shot and see the XG from it?
@@ -31,7 +47,7 @@ MISC STRETCH IDEAS
     - Shot type or location based
 - Player similarity/comparisons
 - Player progression predictions/forecasting
-- Live updating of stats and XG databases?
+- Live updating of stats and XG databases? (based on updated to MP data)
 
 MISC RESOURCES:
 Evolving Article: https://evolving-hockey.com/blog/a-new-expected-goals-model-for-predicting-goals-in-the-nhl/
@@ -41,3 +57,4 @@ NHL Ice Plotting in Python: https://thecommutesports.com/2022/08/06/creating-nhl
 NHL API GitLab: https://gitlab.com/dword4/nhlapi
 LangSmith Testing Video
 Deeplearning.ai Agent Eval
+Possible Azure Frontend? https://github.com/Azure-Samples/azure-search-openai-demo/
