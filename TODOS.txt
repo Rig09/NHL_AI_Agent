@@ -2,6 +2,7 @@ Code Reorganization
 - Function comments 
 - File + function renaming
 - Retest all src/util files
+- Config with remote or local dbs
 
 Environment/Setup
 - Complete shell scripts for data install, DB setup + pip env setup

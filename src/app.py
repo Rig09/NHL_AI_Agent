@@ -8,28 +8,31 @@ from utils.database_init import init_db, init_cba_db, init_rules_db
 
 parser = argparse.ArgumentParser()
 # Use local environment variables by default
-parser.add_argument("--local", action="store_false", help="Use local environment variables") 
+parser.add_argument("--remote", action="store_true", help="If specified, use remote st secrets config.Otherwise, use local dotenv.") 
+# To run local config, use streamlit run app.py
+# To run remote config, use streamlit run app.py -- --remote
+
 
 # TODO: make function cleaner, remove duplicate code, naming
-def get_secrets_or_env(local):
-    if local:
+def get_secrets_or_env(remote):
+    if remote is True:
+        MYSQL_HOST = st.secrets["MYSQL_HOST"]
+        MYSQL_USER = st.secrets["MYSQL_USER"]
+        MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
+        MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
+        open_ai_key = st.secrets["OPENAI_API_KEY"]
+    else:  # Local config
         load_dotenv()
         MYSQL_HOST = os.getenv("MYSQL_HOST")
         MYSQL_USER = os.getenv("MYSQL_USER")
         MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
         MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
         open_ai_key = os.getenv("OPENAI_API_KEY")
-    else:
-        MYSQL_HOST = st.secrets["MYSQL_HOST"]
-        MYSQL_USER = st.secrets["MYSQL_USER"]
-        MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
-        MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
-        open_ai_key = st.secrets["OPENAI_API_KEY"]
     return MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key
 
 if "database" not in st.session_state:
     args = parser.parse_args()
-    MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key = get_secrets_or_env(args.local)
+    MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key = get_secrets_or_env(args.remote)
     
     db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
     rules_db = init_rules_db(open_ai_key)
