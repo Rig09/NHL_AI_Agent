@@ -23,16 +23,49 @@ def init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD,MYSQL_DATABASE):
         ssl_disabled=True
     )
 
-def init_cba_db(api_key):
+def find_persistent_dir(db_name):
+    """Find the persistent directory for vector database storage.
+    
+    Args:
+        db_name (str): Name of the database ('cba' or 'rules')
+        
+    Returns:
+        str: Path to the persistent directory
+        
+    Raises:
+        FileNotFoundError: If the chroma.sqlite3 file is not found in the directory
+    """
+    assert db_name in ['cba', 'rules']
+    
+    # Get the directory containing the current file
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    
+    # Go up one level to the src directory
+    src_dir = os.path.dirname(base_dir)
+    
+    # Go up one more level to the project root
+    root_dir = os.path.dirname(src_dir)
+    
+    # Create path to the vector db directory
+    persistent_dir = os.path.join(root_dir, 'data', 'rag', db_name, 'chroma_db')
+    
+    # Check if the directory exists
+    if not os.path.exists(persistent_dir):
+        raise FileNotFoundError(f"Vector database directory not found at {persistent_dir}. Please ensure you have initialized the vector database.")
+    
+    # Check for chroma.sqlite3 file
+    sqlite_file = os.path.join(persistent_dir, 'chroma.sqlite3')
+    if not os.path.exists(sqlite_file):
+        raise FileNotFoundError(
+            f"Chroma database file not found at {sqlite_file}. "
+            "Please ensure you have initialized the vector database by running the embedding creation script first."
+        )
+    
+    return persistent_dir
 
-    current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    persistent_dir = os.path.join(current_dir, 'data', 'PDFS', 'cba_chroma_db')
-    return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key))
-
-def init_rules_db(api_key):
-    current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    persistent_dir = os.path.join(current_dir, 'data', 'PDFS', 'rules_chroma_db')
-
+def init_vector_db(db_name, api_key):
+    assert db_name in ['cba', 'rules']
+    persistent_dir = find_persistent_dir(db_name)
     return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key))
     
 
@@ -81,7 +114,6 @@ def get_table_info(db_connection, table_names=None):
 # # Get schema for a list of tables (e.g., 'players' and 'games')
 # tables_schema = get_table_info(db, ['skaterstats_regular_2023', 'goaliestats_regular_2023'])
 # print("Schemas for 'players' and 'goalie' tables:", tables_schema)
-
 def run_query_mysql(query, db_connection):
     """Run a query on the MySQL database and return the result."""
     

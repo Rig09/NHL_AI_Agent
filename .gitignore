@@ -1,7 +1,7 @@
 **/__pycache__/
 
 .DS_Store
-
+.vscode
 .env
 *.csv
 *.db
@@ -11,9 +11,9 @@
 tempCodeRunnerFile.py
 
 # Chroma DB files
-**/chroma_db/
+# **/chroma_db/
 *.sqlite3
-*.sqlite
+# *.sqlite
 
 # Keeping shot data dictionary CSV in repo
 !data/shots/MoneyPuck_Shot_Data_Dictionary.csv
