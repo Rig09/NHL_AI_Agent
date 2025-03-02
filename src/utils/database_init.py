@@ -47,7 +47,7 @@ def find_persistent_dir(db_name):
     root_dir = os.path.dirname(src_dir)
     
     # Create path to the vector db directory
-    persistent_dir = os.path.join(root_dir, 'data', 'rag', db_name, 'chroma_db')
+    persistent_dir = os.path.join(root_dir, 'data', 'rag', db_name)
     
     # Check if the directory exists
     if not os.path.exists(persistent_dir):
