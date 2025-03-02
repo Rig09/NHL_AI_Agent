@@ -12,7 +12,7 @@ tempCodeRunnerFile.py
 
 # Chroma DB files
 # **/chroma_db/
-# *.sqlite3
+*.sqlite3
 # *.sqlite
 
 # Keeping shot data dictionary CSV in repo
