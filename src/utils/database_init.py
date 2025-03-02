@@ -24,17 +24,31 @@ def init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD,MYSQL_DATABASE):
     )
 
 def find_persistent_dir(db_name):
+    """Find the persistent directory for vector database storage.
+    
+    Args:
+        db_name (str): Name of the database ('cba' or 'rules')
+        
+    Returns:
+        str: Path to the persistent directory
+    """
     assert db_name in ['cba', 'rules']
-    # Find the project root by looking for .git directory
-    current_path = os.path.abspath(os.path.dirname(__file__))
-    while current_path != '/' and not os.path.exists(os.path.join(current_path, '.git')):
-        current_path = os.path.dirname(current_path)
     
-    if current_path == '/':
-        raise Exception("Could not find NHL_AI_Agent project root directory")
+    # Get the directory containing the current file
+    base_dir = os.path.abspath(os.path.dirname(__file__))
     
-    # From the root directory, go to the data/rag/db_name/chroma_db directory
-    persistent_dir = os.path.join(current_path, 'data', 'rag', db_name, 'chroma_db')
+    # Go up one level to the src directory
+    src_dir = os.path.dirname(base_dir)
+    
+    # Go up one more level to the project root
+    root_dir = os.path.dirname(src_dir)
+    
+    # Create path to the vector db directory
+    persistent_dir = os.path.join(root_dir, 'data', 'rag', db_name, 'chroma_db')
+    
+    # Ensure the directory exists
+    os.makedirs(persistent_dir, exist_ok=True)
+    
     return persistent_dir
 
 def init_vector_db(db_name, api_key):
