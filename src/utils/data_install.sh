@@ -1,12 +1,11 @@
-# TODO: Rewrite with Corrected paths
 #!/bin/bash
 
 # Base directories
-SKATERS_DIR="./skaters"
-GOALIES_DIR="./goalies"
-PAIRINGS_DIR="./pairings"
-SHOTS_DIR="./shots"
-BIO_INFO_DIR="./bio_information"
+SKATERS_DIR="../../data/skaters"
+GOALIES_DIR="../../data/goalies"
+PAIRINGS_DIR="../../data/pairings"
+SHOTS_DIR="../../data/shots"
+BIO_INFO_DIR="../../data/bio_information"
 
 # URLs for download
 BASE_URL="https://moneypuck.com/moneypuck/playerData/seasonSummary"
