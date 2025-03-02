@@ -15,32 +15,25 @@ import matplotlib.pyplot as plt
 
 
 # # TODO: make function cleaner, remove duplicate code, naming
-# def get_secrets_or_env(remote):
-#     if remote is True:
-#         MYSQL_HOST = st.secrets["MYSQL_HOST"]
-#         MYSQL_USER = st.secrets["MYSQL_USER"]
-#         MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
-#         MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
-#         open_ai_key = st.secrets["OPENAI_API_KEY"]
-#     else:  # Local config
-#         load_dotenv()
-#         MYSQL_HOST = os.getenv("MYSQL_HOST")
-#         MYSQL_USER = os.getenv("MYSQL_USER")
-#         MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-#         MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-#         open_ai_key = os.getenv("OPENAI_API_KEY")
-#     return MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key
-
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-open_ai_key = os.getenv("OPENAI_API_KEY")
-
+def get_secrets_or_env(remote):
+    if remote is True:
+        MYSQL_HOST = st.secrets["MYSQL_HOST"]
+        MYSQL_USER = st.secrets["MYSQL_USER"]
+        MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
+        MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
+        open_ai_key = st.secrets["OPENAI_API_KEY"]
+    else:  # Local config
+        load_dotenv()
+        MYSQL_HOST = os.getenv("MYSQL_HOST")
+        MYSQL_USER = os.getenv("MYSQL_USER")
+        MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+        MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
+        open_ai_key = os.getenv("OPENAI_API_KEY")
+    return MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key
 
 if "database" not in st.session_state:
     # args = parser.parse_args()
-    # MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key = get_secrets_or_env(args.remote)
+    MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key = get_secrets_or_env(remote=True)
     
     db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
     rules_db = init_rules_db(open_ai_key)
