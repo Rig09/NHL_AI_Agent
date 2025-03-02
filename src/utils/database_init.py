@@ -31,6 +31,9 @@ def find_persistent_dir(db_name):
         
     Returns:
         str: Path to the persistent directory
+        
+    Raises:
+        FileNotFoundError: If the chroma.sqlite3 file is not found in the directory
     """
     assert db_name in ['cba', 'rules']
     
@@ -46,8 +49,17 @@ def find_persistent_dir(db_name):
     # Create path to the vector db directory
     persistent_dir = os.path.join(root_dir, 'data', 'rag', db_name, 'chroma_db')
     
-    # Ensure the directory exists
-    os.makedirs(persistent_dir, exist_ok=True)
+    # Check if the directory exists
+    if not os.path.exists(persistent_dir):
+        raise FileNotFoundError(f"Vector database directory not found at {persistent_dir}. Please ensure you have initialized the vector database.")
+    
+    # Check for chroma.sqlite3 file
+    sqlite_file = os.path.join(persistent_dir, 'chroma.sqlite3')
+    if not os.path.exists(sqlite_file):
+        raise FileNotFoundError(
+            f"Chroma database file not found at {sqlite_file}. "
+            "Please ensure you have initialized the vector database by running the embedding creation script first."
+        )
     
     return persistent_dir
 
