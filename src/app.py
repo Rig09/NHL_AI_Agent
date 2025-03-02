@@ -4,7 +4,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 import os
 import argparse
 from agent.agent_main import get_agent
-from utils.database_init import init_db, init_cba_db, init_rules_db
+from utils.database_init import init_db, init_vector_db
 import matplotlib.pyplot as plt
 
 # parser = argparse.ArgumentParser()
@@ -33,11 +33,12 @@ def get_secrets_or_env(remote):
 
 if "database" not in st.session_state:
     # args = parser.parse_args()
+    # TODO: remote to true before pushing on this branch
     MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key = get_secrets_or_env(remote=True)
     
     db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
-    rules_db = init_rules_db(open_ai_key)
-    cba_db = init_cba_db(open_ai_key)
+    rules_db = init_vector_db('rules', open_ai_key)
+    cba_db = init_vector_db('cba', open_ai_key)
 
 if "agent_chain" not in st.session_state:
     NHLStatsAgent = get_agent(db, rules_db, cba_db, open_ai_key)
