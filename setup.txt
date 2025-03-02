@@ -1,0 +1,7 @@
+Making a note to document the order of local setup. Will convert into code later
+
+Local:
+- Pip install requirements
+- Install data
+- OpenAI API
+- DB setup (SQL + vector) + MySQL creds

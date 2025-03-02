@@ -3,14 +3,17 @@
 .DS_Store
 
 .env
-# TODO: Move CSVs to large file storage
 *.csv
 *.db
 *.png
-*.txt
 *.bin
+*.toml
 tempCodeRunnerFile.py
 
+# Chroma DB files
+**/chroma_db/
+*.sqlite3
+*.sqlite
+
 # Keeping shot data dictionary CSV in repo
-!notes/MoneyPuck_Shot_Data_Dictionary.csv
-!requirements.txt
+!data/shots/MoneyPuck_Shot_Data_Dictionary.csv
