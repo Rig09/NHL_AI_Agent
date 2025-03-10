@@ -86,7 +86,7 @@ def extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, s
     shot_data = shot_data[shot_data['shotOnEmptyNet'] == 0]  # Exclude empty net shots
 
     # Drop unnecessary columns if needed (e.g., 'id', 'event' or other non-essential columns)
-    shot_data = shot_data.drop(columns=['id', 'event'])  # example column removal
+    shot_data = shot_data.drop(columns=['id'])  # example column removal
 
     return shot_data
 
