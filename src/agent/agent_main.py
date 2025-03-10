@@ -83,7 +83,7 @@ def get_agent(db, rules_db, cba_db, api_key):
         an aspect of the NHL works that is not a gameplay rule should use this tool. This includes question about revenue, escrow, or any other buissness information about the NHL. 
         This includes hypothetical questions like 'what happens if a team goes over the cap with bonus' 'how does revenue sharing between the players work'.
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
-        If a specific component of the CBA is refrenced keep that in the response"""
+        If a specific component of the CBA is refrenced keep that in the response. For example the return may say per CBA Section 50.12(g)-(m). Keep that in the final response"""
         return get_cba_information(cba_db, api_key, query)
 
 

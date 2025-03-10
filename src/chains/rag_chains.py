@@ -37,7 +37,7 @@ def get_cba_information(vector_db, api_key, query: str) -> str:
 
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
-    search_kwargs={'k': 3, "score_threshold": 0.001}
+    search_kwargs={'k': 3, "score_threshold": 0.004}
     )
 
     relevant_docs = retriever.invoke(query)
@@ -47,7 +47,8 @@ def get_cba_information(vector_db, api_key, query: str) -> str:
     + query
     + "\n\nRelevant Documents:\n"
     + "\n\n".join([doc.page_content for doc in relevant_docs])
-    + "\n\nPlease provide an answer based only on the provided documents. If the answer is not found in the documents, respond with 'I'm not sure'. Please include the part of the CBA being referenced when it is used."
+    + "\n\nPlease provide an answer based only on the provided documents. If the answer is not found in the documents, "
+    "respond with 'I'm not sure'. Please include the part of the CBA being referenced when it is used. For example per CBA Sections 50.12(g)-(m)"
     )
     
     messages = [
