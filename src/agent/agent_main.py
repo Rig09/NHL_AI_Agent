@@ -105,8 +105,9 @@ def get_agent(db, rules_db, cba_db, api_key):
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
-            description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. Any statistical question should invoke this tool.
-                            It will perform an sql query on data from the 2015-2023 NHL seasons. Note someone may refer to a season using two years. So the 2023-24 season
+            description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. Any statistical question should invoke this tool. The tool 
+                            should be invoked with the query as provided to the agent, with any corrections that can be assumed. The tool should not be invoked with an sql query.
+                            It will generate and perform an sql query on data from the 2015-2023 NHL seasons. Note someone may refer to a season using two years. So the 2023-24 season
                             also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language."""
         ),
         Tool(
