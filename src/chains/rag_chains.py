@@ -37,7 +37,7 @@ def get_cba_information(vector_db, api_key, query: str) -> str:
 
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
-    search_kwargs={'k': 3, "score_threshold": 0.01}
+    search_kwargs={'k': 3, "score_threshold": 0.001}
     )
 
     relevant_docs = retriever.invoke(query)
