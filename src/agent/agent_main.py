@@ -79,7 +79,8 @@ def get_agent(db, rules_db, cba_db, api_key):
     def cba_getter(query: str):
         """Returns the relevant CBA information based on the query. This tool should be invoked using the cba_db as the vector_db field which is 
         passed into the getter function. This is the collective bargaining agreement between the NHL and the NHLPA.
-        This tool should be used to answer any queries about the buissness, salary cap, or salary structure in the NHL. 
+        This tool should be used to answer any queries about the buissness, salary cap, or salary structure in the NHL. Any question asking how 
+        an aspect of the NHL works that is not a gameplay rule should use this tool. This includes question about revenue, escrow, or any other buissness information about the NHL. 
         This includes hypothetical questions like 'what happens if a team goes over the cap with bonus' 'how does revenue sharing between the players work'.
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
         If a specific component of the CBA is refrenced keep that in the response"""
@@ -105,15 +106,16 @@ def get_agent(db, rules_db, cba_db, api_key):
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
-            description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. Any statistical question should invoke this tool. The tool 
-                            should be invoked with the query as provided to the agent, with any corrections that can be assumed. The tool should not be invoked with an sql query.
+            description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. The tool should not be invoked with an sql query. 
+                            It should be invoked with a natural language question about what statistics are needed to answer the user query.
                             It will generate and perform an sql query on data from the 2015-2023 NHL seasons. Note someone may refer to a season using two years. So the 2023-24 season
                             also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language."""
         ),
         Tool(
             name="Player_BIO_information",
             func=lambda input, **kwargs: bio_chain.invoke({"question": input}),
-            description="""Useful when you want BIO information about a player, including position, handedness, height, weight, Nationality, Birthday, and team."""
+            description="""Useful when you want BIO information about a player, including position, handedness, height, weight, Nationality, Birthday, and team.
+                            The tool should not be invoked with an sql query. It should be invoked with a natural language question about what statistics are needed to answer the user query."""
         )
     ]
     # TODO: Add the tools for the goal map scatter and shot map scatter
