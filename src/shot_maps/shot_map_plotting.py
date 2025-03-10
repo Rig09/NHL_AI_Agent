@@ -139,13 +139,14 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
 
     # Plotting shots and goals in different colors
     # NOTE: Colour mapping is not working.
-    player_shots = (player_shots.assign(color=lambda df_: df_.event.map({"SHOT": "grey", "GOAL": "orange"})))
+    player_shots = player_shots.assign(color=lambda df_: df_.event.apply(lambda x: "orange" if x == "GOAL" else "grey"))
+
 
 
     scatter = rink.scatter(
-        "xCordAdjusted", "yCordAdjusted", color="color", data=player_shots,
+        "xCordAdjusted", "yCordAdjusted", color=player_shots['color'], data=player_shots,
         plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89),
-        ax=ax, draw_kw={"display_range": "offense"},
+        ax=ax, draw_kw={"display_range": "offense"}
     )
 
     # Title for the figure
