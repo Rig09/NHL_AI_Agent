@@ -6,6 +6,9 @@ import argparse
 from agent.agent_main import get_agent
 from utils.database_init import init_db, init_vector_db
 import matplotlib.pyplot as plt
+from langchain.globals import set_debug
+
+set_debug(True)
 
 # parser = argparse.ArgumentParser()
 # # Use local environment variables by default
