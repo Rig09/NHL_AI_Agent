@@ -131,7 +131,7 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
@@ -139,7 +139,7 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
 
     # Plotting shots and goals in different colors
     # NOTE: Colour mapping is not working.
-    player_shots = (player_shots.assign(color=lambda df_: df_.shot_result.map({"SHOT": "grey", "GOAL": "orange"})))
+    player_shots = (player_shots.assign(color=lambda df_: df_.event.map({"SHOT": "grey", "GOAL": "orange"})))
 
 
     scatter = rink.scatter(
