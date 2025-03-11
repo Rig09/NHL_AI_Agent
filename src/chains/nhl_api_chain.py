@@ -3,14 +3,88 @@ This module implements a Langchain chain for interacting with the NHL API.
 It provides functionality to query various NHL endpoints and parse responses.
 """
 
-from typing import Dict, Any, Optional
-from datetime import datetime
-from langchain_core.runnables import RunnableConfig
+from typing import Dict, Any, Optional, List, Tuple
+from datetime import datetime, timedelta
+from langchain_core.runnables import RunnableConfig, RunnableSequence
+from langchain_core.prompts import PromptTemplate
+from langchain_core.messages import AIMessage
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 from langchain.chains.base import Chain
 from langchain.chains import TransformChain, SequentialChain
 import requests
 import json
+import os
+
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+QUERY_PROMPT = """You are an NHL API expert. Convert the following natural language query into an API request specification.
+Available endpoints and their required parameters:
+
+1. Current Data Endpoints (NO path parameters required):
+- /player-spotlight (GET) - Get player spotlight information
+- /schedule/now (GET) - Get current schedule
+- /score/now (GET) - Get current scores
+- /skater-stats-leaders/current (GET) - Get current skater stats leaders
+  Optional Parameters:
+  - categories: Stats categories to retrieve
+  - limit: Number of players to return
+
+2. Date-Specific Endpoints (require date parameter):
+- /schedule/{{date}} (GET) - Get schedule for specific date
+  Required path_params: {{"date": "YYYY-MM-DD"}}
+- /score/{{date}} (GET) - Get scores for specific date
+  Required path_params: {{"date": "YYYY-MM-DD"}}
+
+3. Historical Data Endpoints:
+- /standings-season (GET) - Get standings seasons (no parameters required)
+- /skater-stats-leaders/{{season}}/{{game-type}} (GET) - Get historical skater stats leaders
+  Required path_params: 
+  - season: 8-digit format (e.g., "20232024")
+  - game-type: integer
+  Optional params:
+  - categories: Stats categories to retrieve
+  - limit: Number of players to return
+
+For current data, use the /now endpoints instead of providing a date.
+For example:
+- "Get current scores" → use /score/now
+- "Show today's schedule" → use /schedule/now
+- "Get live scores" → use /score/now
+
+Query: {query}
+
+Respond with a JSON object containing:
+- endpoint: The API endpoint to use
+- params: Query parameters (if any)
+- path_params: Path parameters (if any)
+
+Example Responses:
+
+1. Current scores:
+{{
+    "endpoint": "/score/now",
+    "params": {{}},
+    "path_params": {{}}
+}}
+
+2. Specific date schedule:
+{{
+    "endpoint": "/schedule/{{date}}",
+    "params": {{}},
+    "path_params": {{"date": "2024-03-11"}}
+}}
+
+3. Top scorers:
+{{
+    "endpoint": "/skater-stats-leaders/current",
+    "params": {{"categories": "points", "limit": 10}},
+    "path_params": {{}}
+}}
+
+Response:"""
 
 class NHLAPIChain(Chain):
     """Chain for interacting with the NHL API."""
@@ -44,13 +118,13 @@ class NHLAPIChain(Chain):
         params = inputs.get("params", {})
         path_params = inputs.get("path_params", {})
         
-        # Format the endpoint with path parameters if any
-        formatted_endpoint = endpoint.format(**path_params) if path_params else endpoint
-        
-        # Construct the full URL
-        url = f"{self.base_url}{formatted_endpoint}"
-        
         try:
+            # Format the endpoint with path parameters if any
+            formatted_endpoint = endpoint.format(**path_params) if path_params else endpoint
+            
+            # Construct the full URL
+            url = f"{self.base_url}{formatted_endpoint}"
+            
             # Make the API request
             response = requests.get(url, params=params)
             response.raise_for_status()
@@ -60,8 +134,14 @@ class NHLAPIChain(Chain):
             
             return {"response": data}
             
+        except KeyError as e:
+            # Handle missing path parameters
+            missing_param = str(e).strip("'")
+            return {"response": {"error": f"Missing path parameter: {missing_param}"}}
         except requests.exceptions.RequestException as e:
-            return {"response": {"error": str(e)}}
+            return {"response": {"error": f"API request failed: {str(e)}"}}
+        except Exception as e:
+            return {"response": {"error": f"Unexpected error: {str(e)}"}}
 
     @property
     def _chain_type(self) -> str:
@@ -118,87 +198,154 @@ class NHLResponseParser(BaseModel):
         }
 
 def create_nhl_chain() -> Chain:
-    """Create a chain for querying the NHL API and parsing responses.
+    """Create a chain for querying the NHL API and parsing responses."""
+    return NHLAPIChain()
+
+def get_formatted_date(date_str: str) -> str:
+    """Convert various date strings to YYYY-MM-DD format."""
+    today = datetime.now()
     
+    if date_str.lower() == "today":
+        return today.strftime("%Y-%m-%d")
+    elif date_str.lower() == "yesterday":
+        return (today - timedelta(days=1)).strftime("%Y-%m-%d")
+    elif date_str.lower() == "tomorrow":
+        return (today + timedelta(days=1)).strftime("%Y-%m-%d")
+    
+    # If it's already in YYYY-MM-DD format, return as is
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+        return date_str
+    except ValueError:
+        # If we can't parse the date, default to today
+        return today.strftime("%Y-%m-%d")
+
+def get_current_season() -> str:
+    """Get the current NHL season in the format YYYYYYYY."""
+    today = datetime.now()
+    if today.month < 9:  # NHL season ends in June
+        return f"{today.year-1}{today.year}"
+    return f"{today.year}{today.year+1}"
+
+def extract_message_content(message: AIMessage) -> str:
+    """Extract content from an AIMessage."""
+    return message.content
+
+def parse_llm_output(llm_output: str) -> Dict[str, Any]:
+    """Parse LLM output into API specification."""
+    try:
+        return json.loads(llm_output)
+    except json.JSONDecodeError:
+        raise ValueError("Failed to parse LLM output as JSON")
+
+def prepare_api_params(api_spec: Dict[str, Any]) -> Dict[str, Any]:
+    """Prepare API parameters with proper date and season handling."""
+    # Ensure params and path_params exist
+    if "params" not in api_spec:
+        api_spec["params"] = {}
+    if "path_params" not in api_spec:
+        api_spec["path_params"] = {}
+        
+    # Handle date parameters
+    if "path_params" in api_spec and "date" in api_spec["path_params"]:
+        api_spec["path_params"]["date"] = get_formatted_date(api_spec["path_params"]["date"])
+    
+    # Handle season parameter
+    if "path_params" in api_spec and "season" in api_spec["path_params"]:
+        if api_spec["path_params"]["season"] == "current":
+            api_spec["path_params"]["season"] = get_current_season()
+            
+    return api_spec
+
+def query_nhl(query: str, debug: bool = False) -> Dict[str, Any]:
+    """Query the NHL API using natural language.
+    
+    Args:
+        query: Natural language query about NHL data
+        debug: Whether to print debug information
+        
     Returns:
-        A sequential chain that handles API requests and response parsing
+        Parsed response from the NHL API
     """
-    # Create the API chain
-    api_chain = NHLAPIChain()
-    
-    # Create a transform chain for parsing responses
-    def transform_func(inputs: dict) -> dict:
-        parser = NHLResponseParser(response=inputs["response"])
+    try:
+        # Create the query chain
+        llm = ChatOpenAI(temperature=0)
+        prompt = PromptTemplate(template=QUERY_PROMPT, input_variables=["query"])
         
-        # Determine which parser to use based on the endpoint
-        endpoint = inputs["endpoint"]
+        # Create the runnable sequence
+        query_chain = (
+            prompt 
+            | llm 
+            | extract_message_content 
+            | parse_llm_output 
+            | prepare_api_params
+        )
         
-        if "player-spotlight" in endpoint:
-            return parser.parse_player_spotlight()
-        elif "schedule" in endpoint:
-            return parser.parse_schedule()
-        elif "standings" in endpoint:
-            return parser.parse_standings()
-        elif "score" in endpoint:
-            return parser.parse_scores()
-        elif "stats-leaders" in endpoint:
-            return parser.parse_stats_leaders()
+        # Execute the chain
+        api_spec = query_chain.invoke({"query": query})
         
-        # Default to returning raw response if no specific parser
-        return {
-            "parsed_data": {
-                "type": "raw",
-                "data": inputs["response"]
-            }
-        }
-    
-    parser_chain = TransformChain(
-        input_variables=["response", "endpoint"],
-        output_variables=["parsed_data"],
-        transform=transform_func
-    )
-    
-    # Combine the chains
-    return SequentialChain(
-        chains=[api_chain, parser_chain],
-        input_variables=["endpoint", "params", "path_params"],
-        output_variables=["parsed_data"]
-    )
+        if debug:
+            print("\nAPI Specification:")
+            print(json.dumps(api_spec, indent=2))
+        
+        # Create and invoke the NHL API chain
+        nhl_chain = create_nhl_chain()
+        response = nhl_chain.invoke(api_spec)
+        
+        if debug:
+            print("\nRaw API Response:")
+            print(json.dumps(response, indent=2))
+        
+        # Parse the response if successful
+        if "error" not in response["response"]:
+            parser = NHLResponseParser(response=response["response"])
+            endpoint = api_spec["endpoint"]
+            
+            if "player-spotlight" in endpoint:
+                return parser.parse_player_spotlight()
+            elif "schedule" in endpoint:
+                return parser.parse_schedule()
+            elif "standings" in endpoint:
+                return parser.parse_standings()
+            elif "score" in endpoint:
+                return parser.parse_scores()
+            elif "stats-leaders" in endpoint:
+                return parser.parse_stats_leaders()
+            else:
+                return {
+                    "parsed_data": {
+                        "type": "raw",
+                        "data": response["response"]
+                    }
+                }
+        
+        return response
+        
+    except ValueError as e:
+        return {"error": str(e)}
+    except Exception as e:
+        return {"error": f"Error processing query: {str(e)}"}
 
 # Example usage:
 if __name__ == "__main__":
-    chain = create_nhl_chain()
+    # Test queries one at a time with debug output
+    queries = [
+        "What are the current NHL scores?",
+        "Show me today's schedule",
+        "Who are the top 5 point leaders this season?"
+    ]
     
-    # Example 1: Get current scores
-    scores_result = chain.invoke({
-        "endpoint": "/score/now",
-        "params": {},
-        "path_params": {}
-    })
-    
-    # Example 2: Get schedule for a specific date
-    schedule_result = chain.invoke({
-        "endpoint": "/schedule/{date}",
-        "params": {},
-        "path_params": {"date": datetime.now().strftime("%Y-%m-%d")}
-    })
-    
-    # Example 3: Get skater stats leaders
-    leaders_result = chain.invoke({
-        "endpoint": "/skater-stats-leaders/current",
-        "params": {
-            "categories": "points",
-            "limit": 10
-        },
-        "path_params": {}
-    })
-    
-    # Print results
-    print("\nCurrent Scores:")
-    print(json.dumps(scores_result, indent=2))
-    
-    print("\nToday's Schedule:")
-    print(json.dumps(schedule_result, indent=2))
-    
-    print("\nStats Leaders:")
-    print(json.dumps(leaders_result, indent=2)) 
+    for query in queries:
+        print(f"\n{'='*50}")
+        print(f"Testing query: {query}")
+        print('='*50)
+        
+        result = query_nhl(query, debug=True)
+        
+        print("\nFinal Result:")
+        if "error" in result:
+            print(f"Error: {result['error']}")
+        else:
+            print(json.dumps(result, indent=2))
+        
+        input("\nPress Enter to continue to next query...") 
