@@ -165,11 +165,19 @@ def shot_map_scatter_get(db, api_key, conditions, season_lower_bound, season_upp
         ax=ax, draw_kw={"display_range": "offense"}
     )
 
-    # Title for the figure
-    if season_lower_bound == season_upper_bound:
-        fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
-    else:
-        fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
+    # # Title for the figure
+    # if season_lower_bound == season_upper_bound:
+    #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
+    # else:
+    #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
+    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
+
+    caption = llm.invoke(
+    f"""Return a figure caption for a scatterplot of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
+    in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
+    ).content
+
+    fig.suptitle(caption, fontsize=16)
 
     return fig
 
