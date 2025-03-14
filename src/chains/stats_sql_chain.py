@@ -21,15 +21,12 @@ set_verbose(True)
 
 #print(db.run("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
-def get_chain(db, api_key):
+def get_sql_chain(db, api_key):
 
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
         relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
-
-    def run_query(query, db):
-        return run_query_mysql(query, db)
 
     #print(run_query("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
@@ -78,7 +75,12 @@ def get_chain(db, api_key):
     If somone asks for a stat per 60 then find the number of that stat per 60 minutes of icetime. Reminder that icetime is stored in seconds.
 
     Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR".
-    DO NOT INCLUDE ``` in the response.
+
+    When using the shots_data table, the 'isHomeTeam' attribute can be used to determine the team, the shot is either taken by the home team or not. 
+    
+    Then use the 'homeTeamCode' and 'awayTeamCode' attributes to determine the team. If the home team took the shot, the shot is from the homeTeamCode.
+
+    DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
     """
@@ -110,6 +112,19 @@ def get_chain(db, api_key):
         | StrOutputParser()
         #|(lambda output: extract_sql_query(output)) 
     )
+    return sql_chain
+
+def get_chain(db, api_key):
+    def run_query(query, db):
+        return run_query_mysql(query, db)
+    
+    def get_table_schema(db):
+        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
+        return get_table_info(db, relevent_tables) #return the schema of the first table in the list
+
+
+    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
+    sql_chain = get_sql_chain(db, api_key)
 
     #print(sql_chain.invoke({"question": "How many goals did William Nylander score in the 2018 playoffs"}))
     #print(sql_chain.invoke({"question": "How many goals did Sidney Crosby score in the 2023 regular season?"})) #Test the first chain generating sql query
@@ -124,7 +139,7 @@ def get_chain(db, api_key):
     SQL Response: {response}
 
     """
-
+    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
     prompt = ChatPromptTemplate.from_template(template)
 
     full_chain = (
@@ -146,3 +161,4 @@ def get_chain(db, api_key):
     #print(full_chain.invoke({"question": "What pairing had the highest expected goals percentage with at least 100 minutes in 2023?"}))
 
     return full_chain
+    

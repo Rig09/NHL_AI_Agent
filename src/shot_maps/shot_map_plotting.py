@@ -7,13 +7,16 @@ import hockey_rink.rink_feature
 hockey_rink.rink_feature.urllib = urllib  # Force the module to use correct imports
 import os
 from utils.database_init import run_query_mysql, init_db
+from chains.stats_sql_chain import get_sql_chain
+from langchain_openai import ChatOpenAI
+from openai import OpenAI 
 
 
-def extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, situation, shot_result, season_type):
+def extract_shot_data(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, shot_result, season_type):
     """
     Extracts shot data for a given player, season, situation, and shot result type
     """
-
+    sql_chain = get_sql_chain(db, api_key)
     # Validate input parameters
     valid_situations = ['5on5', '5on4', '4on5', 'all', 'other']
     valid_shot_results = ['GOAL', 'SOG_OR_GOAL', 'ANY']
@@ -27,20 +30,28 @@ def extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, s
         raise ValueError(f"Season type {season_type} not found in data")
 
     # Define the query with filtering based on input, using season_lower_bound and season_upper_bound
-    query = f"""
-    SELECT * 
-    FROM shots_data
-    WHERE shooterName = '{player_name}' 
-    AND season >= {season_lower_bound}
-    AND season <= {season_upper_bound}
-    """
+    # query = f"""
+    # SELECT * 
+    # FROM shots_data
+    # WHERE shooterName = '{player_name}' 
+    # AND season >= {season_lower_bound}
+    # AND season <= {season_upper_bound}
+    # """
+
+    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table  intact, Given the conditions: {conditions}, In the seasons between {season_lower_bound} to {season_upper_bound},
+                                Return the list of shots so they can be put into a dataframe. An example query for the player Morgan Rielly between 2020 and 2023 seasons would be: SELECT * FROM SHOTS_DATA WHERE SEASON <=2023 AND SEASON >= 2020 AND  shooterName='Morgan Rielly'. 
+                                Also note to find the team of a shot, compare home team with is_home the attribute."""
+                
+    query = sql_chain.invoke({"question" : template_for_sql_query})
+    print('query:')
+    print(query)
     shot_data = pd.DataFrame(run_query_mysql(query, db))
-
+    print(shot_data.head(5))
     # Filter for the player name
-    shot_data = shot_data[shot_data['shooterName'] == player_name]
+    # shot_data = shot_data[shot_data['shooterName'] == player_name]
 
-    # Filter for season range
-    shot_data = shot_data[(shot_data['season'] >= season_lower_bound) & (shot_data['season'] <= season_upper_bound)]
+    # # Filter for season range
+    # shot_data = shot_data[(shot_data['season'] >= season_lower_bound) & (shot_data['season'] <= season_upper_bound)]
 
     # NOTE: Excluding shots from behind half
     shot_data = shot_data[shot_data['xCordAdjusted'] <= 89]
@@ -59,27 +70,27 @@ def extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, s
         shot_data = shot_data[shot_data['event'].isin(["GOAL", "SHOT"])]
     # No filtering needed if shot_result is 'ANY'
 
-    # Situation filtering
-    if situation == '5on5':
-        shot_data = shot_data[(shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 5)]
-    elif situation == '5on4':
-        shot_data = shot_data.loc[
-            ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5)) |
-            ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4))
-        ]
-    elif situation == '4on5':
-        shot_data = shot_data.loc[
-            ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
-            ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5))
-        ]
-    elif situation == 'other':  # Inverse of 5on5, 5on4, 4on5
-        shot_data = shot_data.loc[~(
-            ((shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 5)) |
-            ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5)) |
-            ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
-            ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
-            ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5))
-        )]
+    # # Situation filtering
+    # if situation == '5on5':
+    #     shot_data = shot_data[(shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 5)]
+    # elif situation == '5on4':
+    #     shot_data = shot_data.loc[
+    #         ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5)) |
+    #         ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4))
+    #     ]
+    # elif situation == '4on5':
+    #     shot_data = shot_data.loc[
+    #         ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
+    #         ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5))
+    #     ]
+    # elif situation == 'other':  # Inverse of 5on5, 5on4, 4on5
+    #     shot_data = shot_data.loc[~(
+    #         ((shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 5)) |
+    #         ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5)) |
+    #         ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
+    #         ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
+    #         ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5))
+    #     )]
     # No filtering needed if situation is 'all'
 
     # Exclude empty net shots
@@ -91,7 +102,7 @@ def extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, s
     return shot_data
 
 
-def goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type):
+def goal_map_scatter_get(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a scatter plot of a player's goals on a hockey rink, excluding empty net goals and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -100,7 +111,7 @@ def goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
     # TODO: Defensive programming if no goals are found for the player in the given season/situation???
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
@@ -112,17 +123,24 @@ def goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
         plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89), color="orange",
         ax=ax, draw_kw={"display_range": "offense"},
     )
+    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
+
+    caption = llm.invoke(
+    f"""Return a figure caption for a scatterplot of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
+    in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
+    ).content
+
 
     # Title for the figure
-    if season_lower_bound == season_upper_bound:
-        fig.suptitle(f"{player_name} {season_lower_bound}-{season_lower_bound + 1} Season {situation} Goals", fontsize=16)
-    else:
-        fig.suptitle(f"{player_name} {season_lower_bound}-{season_lower_bound+1} to {season_upper_bound}- {season_upper_bound+1} Seasons {situation} Goals", fontsize=16)    
-
+    # if season_lower_bound == season_upper_bound:
+    #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Goals", fontsize=16)
+    # else:
+    #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound+1} to {season_upper_bound}- {season_upper_bound+1} Seasons {situation} Goals", fontsize=16)    
+    fig.suptitle(caption, fontsize=16)
     return fig
+    
 
-
-def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type):
+def shot_map_scatter_get(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -131,7 +149,7 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, player_name, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
@@ -149,9 +167,9 @@ def shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound
 
     # Title for the figure
     if season_lower_bound == season_upper_bound:
-        fig.suptitle(f"{player_name} {season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
+        fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
     else:
-        fig.suptitle(f"{player_name} {season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
+        fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
 
     return fig
 

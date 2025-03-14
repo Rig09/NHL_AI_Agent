@@ -51,7 +51,7 @@ def get_agent(db, rules_db, cba_db, api_key):
         The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        goal_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_map_scatter_get(db, api_key, player_name, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
@@ -60,7 +60,7 @@ def get_agent(db, rules_db, cba_db, api_key):
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        shot_map_scatter_get(db, player_name, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_map_scatter_get(db, api_key, player_name, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=rag_args_schema)
