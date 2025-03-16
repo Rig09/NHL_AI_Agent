@@ -21,7 +21,7 @@ set_verbose(True)
 
 #print(db.run("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
-def get_sql_chain(db, api_key):
+def get_sql_chain(db, api_key, llm):
 
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
@@ -29,10 +29,6 @@ def get_sql_chain(db, api_key):
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
 
     #print(run_query("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
-
-    # Initialize LLM
-    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
-
 
     template = """
     Based on the table schema below, generate a valid SQL query that answers the user's question. There are four different types of tables.
@@ -114,7 +110,7 @@ def get_sql_chain(db, api_key):
     )
     return sql_chain
 
-def get_chain(db, api_key):
+def get_chain(db, api_key, llm):
     def run_query(query, db):
         return run_query_mysql(query, db)
     
@@ -122,9 +118,7 @@ def get_chain(db, api_key):
         relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
 
-
-    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
-    sql_chain = get_sql_chain(db, api_key)
+    sql_chain = get_sql_chain(db, api_key, llm)
 
     #print(sql_chain.invoke({"question": "How many goals did William Nylander score in the 2018 playoffs"}))
     #print(sql_chain.invoke({"question": "How many goals did Sidney Crosby score in the 2023 regular season?"})) #Test the first chain generating sql query

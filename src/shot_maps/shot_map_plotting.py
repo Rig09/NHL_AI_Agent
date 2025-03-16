@@ -102,7 +102,7 @@ def extract_shot_data(db, api_key, conditions, season_lower_bound, season_upper_
     return shot_data
 
 
-def goal_map_scatter_get(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, season_type):
+def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a scatter plot of a player's goals on a hockey rink, excluding empty net goals and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -123,7 +123,6 @@ def goal_map_scatter_get(db, api_key, conditions, season_lower_bound, season_upp
         plot_range="offense", s=100, alpha=0.7, plot_xlim=(0, 89), color="orange",
         ax=ax, draw_kw={"display_range": "offense"},
     )
-    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
 
     caption = llm.invoke(
     f"""Return a figure caption for a scatterplot of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
@@ -149,7 +148,7 @@ def shot_map_scatter_get(db, api_key, conditions, season_lower_bound, season_upp
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
@@ -170,7 +169,6 @@ def shot_map_scatter_get(db, api_key, conditions, season_lower_bound, season_upp
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
     # else:
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
-    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
 
     caption = llm.invoke(
     f"""Return a figure caption for a scatterplot of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 

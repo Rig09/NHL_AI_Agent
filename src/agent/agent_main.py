@@ -11,7 +11,7 @@ from chains.bio_info_chain import get_bio_chain
 from pydantic import BaseModel, Field
 
 class goal_map_scatter_schema(BaseModel):
-    player_name: str = Field(title="Player Name", description="The name of the player to generate the goal map scatter plot for")
+    conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.""")
     season_lower_bound: int = Field(title="Season_lower_bound", description="""The first season in the range of seasons to generate the goal map scatter plot for. 
                                     Often a season can be refered to using two different years since it takes place on either side of new years,  like 'in the 2020-2021 season', 
                                     pass the first year as the argument. Another way this could be done is by only using the last two numbers of the second year. For example 2020-21 means pass '2020'
@@ -41,26 +41,26 @@ def create_tool_wrapper(func, vector_db):
         return func(vector_db, query)
     return wrapper
 
-def get_agent(db, rules_db, cba_db, api_key):
+def get_agent(db, rules_db, cba_db, api_key, llm):
 
     llm = ChatOpenAI(model="gpt-4o", api_key=api_key)
 
     @tool(args_schema=goal_map_scatter_schema)
-    def goal_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
         The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        goal_map_scatter_get(db, api_key, player_name, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
-    def shot_map_scatter(player_name, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    def shot_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a scatterplot of the shots by the player in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        shot_map_scatter_get(db, api_key, player_name, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=rag_args_schema)
@@ -86,9 +86,9 @@ def get_agent(db, rules_db, cba_db, api_key):
         return get_cba_information(cba_db, api_key, query)
 
 
-    chain = get_chain(db, api_key)
+    chain = get_chain(db, api_key, llm)
 
-    bio_chain = get_bio_chain(db, api_key)
+    bio_chain = get_bio_chain(db, api_key, llm)
 
     memory = ConversationBufferMemory(
         memory_key="chat_history", return_messages=True)

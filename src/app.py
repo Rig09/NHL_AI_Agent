@@ -6,6 +6,7 @@ import argparse
 from agent.agent_main import get_agent
 from utils.database_init import init_db, init_vector_db
 import matplotlib.pyplot as plt
+from langchain_openai import ChatOpenAI
 
 # parser = argparse.ArgumentParser()
 # # Use local environment variables by default
@@ -41,7 +42,7 @@ if "database" not in st.session_state:
     cba_db = init_vector_db('cba', open_ai_key)
 
 if "agent_chain" not in st.session_state:
-    NHLStatsAgent = get_agent(db, rules_db, cba_db, open_ai_key)
+    NHLStatsAgent = get_agent(db, rules_db, cba_db, open_ai_key, llm=ChatOpenAI(model="gpt-4o", api_key=open_ai_key))
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [

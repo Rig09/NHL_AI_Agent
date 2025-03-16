@@ -7,8 +7,7 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # TODO: Can make this more modular
-def get_rules_information(vector_db, api_key, query: str) -> str:
-    model = ChatOpenAI(model="gpt-4o", api_key = api_key)
+def get_rules_information(vector_db, api_key, llm, query: str) -> str:
 
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
@@ -29,11 +28,10 @@ def get_rules_information(vector_db, api_key, query: str) -> str:
     SystemMessage(content="You are a helpful assistant."),
     HumanMessage(content=combined_input),
     ]
-    return model.invoke(messages).content
+    return llm.invoke(messages).content
 
 
-def get_cba_information(vector_db, api_key, query: str) -> str:
-    model = ChatOpenAI(model="gpt-4o", api_key = api_key)
+def get_cba_information(vector_db, api_key, llm, query: str) -> str:
 
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
@@ -55,4 +53,4 @@ def get_cba_information(vector_db, api_key, query: str) -> str:
     SystemMessage(content="You are a helpful assistant."),
     HumanMessage(content=combined_input),
     ]
-    return model.invoke(messages).content
+    return llm.invoke(messages).content
