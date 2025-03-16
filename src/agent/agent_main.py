@@ -88,7 +88,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
 
     chain = get_chain(db, api_key, llm)
 
-    bio_chain = get_bio_chain(db, api_key, llm)
+    bio_chain = get_bio_chain(db, llm)
 
     memory = ConversationBufferMemory(
         memory_key="chat_history", return_messages=True)

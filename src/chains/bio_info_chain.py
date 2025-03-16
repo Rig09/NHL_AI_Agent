@@ -20,7 +20,7 @@ def get_table_schema(db):
         relevent_tables = ['BIO_Info']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
 
-def get_bio_chain(db, api_key, llm):
+def get_bio_chain(db, llm):
 
     template = """
     Based on the table schema below, generate a valid SQL query that answers the user's question. Generate only the query do not say sql ``` before the query.
