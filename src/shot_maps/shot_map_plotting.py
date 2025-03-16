@@ -12,11 +12,11 @@ from langchain_openai import ChatOpenAI
 from openai import OpenAI 
 
 
-def extract_shot_data(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, shot_result, season_type):
+def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result, season_type):
     """
     Extracts shot data for a given player, season, situation, and shot result type
     """
-    sql_chain = get_sql_chain(db, api_key)
+    sql_chain = get_sql_chain(db, api_key, llm)
     # Validate input parameters
     valid_situations = ['5on5', '5on4', '4on5', 'all', 'other']
     valid_shot_results = ['GOAL', 'SOG_OR_GOAL', 'ANY']
@@ -111,7 +111,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, api_key, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
     # TODO: Defensive programming if no goals are found for the player in the given season/situation???
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
