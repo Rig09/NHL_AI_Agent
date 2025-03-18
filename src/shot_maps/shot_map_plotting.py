@@ -73,27 +73,27 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
         shot_data = shot_data[shot_data['event'].isin(["GOAL", "SHOT"])]
     # No filtering needed if shot_result is 'ANY'
 
-    # # Situation filtering
-    # if situation == '5on5':
-    #     shot_data = shot_data[(shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 5)]
-    # elif situation == '5on4':
-    #     shot_data = shot_data.loc[
-    #         ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5)) |
-    #         ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4))
-    #     ]
-    # elif situation == '4on5':
-    #     shot_data = shot_data.loc[
-    #         ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
-    #         ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5))
-    #     ]
-    # elif situation == 'other':  # Inverse of 5on5, 5on4, 4on5
-    #     shot_data = shot_data.loc[~(
-    #         ((shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 5)) |
-    #         ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5)) |
-    #         ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
-    #         ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
-    #         ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5))
-    #     )]
+    # Situation filtering
+    if situation == '5on5':
+        shot_data = shot_data[(shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 5)]
+    elif situation == '5on4':
+        shot_data = shot_data.loc[
+            ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5)) |
+            ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4))
+        ]
+    elif situation == '4on5':
+        shot_data = shot_data.loc[
+            ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
+            ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5))
+        ]
+    elif situation == 'other':  # Inverse of 5on5, 5on4, 4on5
+        shot_data = shot_data.loc[~(
+            ((shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 5)) |
+            ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5)) |
+            ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
+            ((shot_data['isHomeTeam'] == 1) & (shot_data['awaySkatersOnIce'] == 5) & (shot_data['homeSkatersOnIce'] == 4)) |
+            ((shot_data['isHomeTeam'] == 0) & (shot_data['awaySkatersOnIce'] == 4) & (shot_data['homeSkatersOnIce'] == 5))
+        )]
     # No filtering needed if situation is 'all'
 
     # Exclude empty net shots
