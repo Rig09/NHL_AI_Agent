@@ -79,6 +79,9 @@ def get_sql_chain(db, api_key, llm):
     Then use the 'homeTeamCode' and 'awayTeamCode' attributes to determine the team. If the home team took the shot, the shot is from the homeTeamCode.
     
     If asked to return a table for use in a dataframe, allways have Select * given the conditions of the questions. Include all the coloumns in the table.
+    When asking for a table, there may be no playername or team included. It may only rely on situation or seasons.
+
+    The query may also ask for stats between seasons when using the shots_data tabe. This means to query so that all the seasons between the two should be in the table returned.
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
