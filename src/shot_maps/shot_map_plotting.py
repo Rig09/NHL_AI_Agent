@@ -197,14 +197,10 @@ def heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_
     :returns: matplotlib figure object
     """
     player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
     rink = NHLRink(net={"visible": False})
-
-    caption = llm.invoke(
-    f"""Return a figure caption for a heatmap of all shots that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
-    in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
-    ).content
 
     # Plotting shots and goals in different colors
     # NOTE: Colour mapping is not working.
@@ -217,6 +213,11 @@ def heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_
         cmap="bwr", alpha=0.8, plot_xlim=(0, 89),
         plot_range="offense", ax=ax, draw_kw={"display_range": "offense"}
     )
+
+    caption = llm.invoke(
+    f"""Return a figure caption for a heatmap of all shots that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
+    in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
+    ).content
 
     fig.suptitle(caption, fontsize=16)
 
