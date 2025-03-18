@@ -103,7 +103,7 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     return shot_data
 
 
-def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
+def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type = "regular", situation = "all"):
     """
     Generates a scatter plot of a player's goals on a hockey rink, excluding empty net goals and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -141,7 +141,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     return fig
     
 
-def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type):
+def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type = "regular", situation = "all"):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
     :param all_shots: bool, if True, plot all shots, if False, plot only goals
@@ -188,7 +188,7 @@ def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_b
 
 
 # TODO: Include heatmaps in this file
-def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type):
+def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type = "regular", situation = "all"):
     """
     Generates a heatmap of a player's stat type on a hockey rink, excluding empty net shots and shots from behind half
     :param conditions: str, Natural language conditions to filter the data
