@@ -50,7 +50,8 @@ def get_sql_chain(db, api_key, llm):
     If someone asks what 'line' they mean forward line from the lineStats_regular_<year> or lineStats_playoffs_<year> tables.
 
     Use correct stat terms:
-    - "Even strength" → "5on5", "Power play" → "5on4", "Shorthanded" → "4on5", "All situations" → "All". If strength is not defined use 'all' Do not add the total of multiple strengths together.
+    - "Even strength" → "5on5", "Powerplay, pp, power play" → "5on4", "Shorthanded" → "4on5", "All situations" → "All". If strength is not defined use 'all' Do not add the total of multiple strengths together.
+    Also note someone may say, on the powerplay or on the penalty kill. This means the same as '5on4' and '4on5' respectively.
     If no strength is defined search in 'all' not all strengths combined. So if someone asks how many goals did a player score. The query should include where situation = 'all'  
     - "Minutes" means "icetime" (store in seconds but return in minutes & seconds). Unless specified otherwise, this means the 'icetime' for the player in situation: 'all'.  
     - "Points" = Goals + Assists.
