@@ -10,7 +10,7 @@ from utils.database_init import run_query_mysql, init_db
 from chains.stats_sql_chain import get_sql_chain
 from langchain_openai import ChatOpenAI
 from openai import OpenAI 
-
+import numpy as np
 
 def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result, season_type):
     """
@@ -38,7 +38,7 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     # AND season <= {season_upper_bound}
     # """
 
-    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table  intact, Given the conditions: {conditions}, In the seasons between {season_lower_bound} to {season_upper_bound},
+    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table intact, Given the conditions: {conditions}, In the seasons between {season_lower_bound} to {season_upper_bound},
                                 Return the list of shots so they can be put into a dataframe. An example query for the player Morgan Rielly between 2020 and 2023 seasons would be: SELECT * FROM SHOTS_DATA WHERE SEASON <=2023 AND SEASON >= 2020 AND  shooterName='Morgan Rielly'. 
                                 Also note to find the team of a shot, compare home team with is_home the attribute."""
                 
@@ -68,6 +68,7 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
         shot_data = shot_data[shot_data['event'] == "GOAL"]
     elif shot_result == 'SOG_OR_GOAL':
         shot_data = shot_data[shot_data['event'].isin(["GOAL", "SHOT"])]
+
     # No filtering needed if shot_result is 'ANY'
 
     # # Situation filtering
@@ -111,6 +112,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
+
     player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
     # TODO: Defensive programming if no goals are found for the player in the given season/situation???
 
@@ -139,16 +141,20 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     return fig
     
 
-def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
+def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
+    :param all_shots: bool, if True, plot all shots, if False, plot only goals
     :param player_name: str, name of the NHL player to extract data for
     :param situation: str, game situation to extract data for, between the following options (5on5, 5on4, 4on5, all, other)
     :param season: int, season to extract data for (YYYY)
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+    if all_shots == True:
+        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+    else:
+        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
@@ -171,7 +177,7 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
 
     caption = llm.invoke(
-    f"""Return a figure caption for a scatterplot of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
+    f"""Return a figure caption for a scatterplot of shots that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
     in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
     ).content
 
@@ -179,23 +185,52 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
 
     return fig
 
+
+
 # TODO: Include heatmaps in this file
-#db = init_db()
-# Sample function calls
-# if __name__ == "__main__":
-    # goal_map_scatter("Auston Matthews", 2021, "5on5", "regular")
-    # shot_map_scatter("Auston Matthews", 2021, "5on5", "regular")
-    # goal_map_scatter("Auston Matthews", 2022, "5on4", "playoffs")
-    # goal_map_scatter("Travis Konecny", 2023, "4on5", "all")
-    # goal_map_scatter("Connor McDavid", 2022, "all", "all")
-    # goal_map_scatter("Auston Matthews", 2022, "other", "all")
+def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type):
+    """
+    Generates a heatmap of a player's stat type on a hockey rink, excluding empty net shots and shots from behind half
+    :param conditions: str, Natural language conditions to filter the data
+    :param all_shots: bool, if True, plot all shots, if False, plot only goals
+    :param season_lower_bound: int, the lower bound to filter the season data 
+    :param season_upper_bound: int, the upper bound to filter the season data
+    :param situation: str, game situation to extract data for, between the following options (5on5, 5on4, 4on5, all, other)
+    :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
+    :returns: matplotlib figure object
+    """
 
 
-#goal_map_scatter_get(db, "Auston Matthews", 2021, 2023, "5on5", "regular")
+    fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
+    
+    rink = NHLRink(net={"visible": False})
+    if all_shots == True:
+        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
-# query = f"""
-#     SELECT * FROM shots_data WHERE shooterName = 'Darren Raddysh' and WHERE seasonLIMIT 5"""
+        caption = llm.invoke(
+        f"""Return a figure caption for a heatmap of that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
+        in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
+        ).content
+    else:
+        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
 
-# print(query)
+        caption = llm.invoke(
+        f"""Return a figure caption for a heatmap of that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
+        in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
+        ).content
 
-# print(run_query_mysql(query, db))
+    # Plotting shots and goals in different colors
+    # NOTE: Colour mapping is not working.
+    hist, xedges, yedges = np.histogram2d(
+    player_shots["xCordAdjusted"], player_shots["yCordAdjusted"], bins=50
+    )
+
+    contour = rink.contourf(
+        "xCordAdjusted", "yCordAdjusted", hist.T, data=player_shots, 
+        cmap="bwr", alpha=0.8, plot_xlim=(0, 89),
+        plot_range="offense", ax=ax, draw_kw={"display_range": "offense"}
+    )
+
+    fig.suptitle(caption, fontsize=16)
+
+    return fig

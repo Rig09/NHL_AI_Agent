@@ -5,7 +5,7 @@ from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
 from langchain.tools import tool
 from chains.stats_sql_chain import get_chain
-from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get
+from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get, heat_map_get
 from chains.rag_chains import get_cba_information, get_rules_information
 from chains.bio_info_chain import get_bio_chain
 from pydantic import BaseModel, Field
@@ -31,6 +31,30 @@ class goal_map_scatter_schema(BaseModel):
     situation: str = Field(title="Situation", description="The situation which can be on the powerplay, even strength," 
                            "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations")
 
+class heatmap_schema(BaseModel):
+    conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.""")
+    all_shots : bool = Field(title="All Shots", description="A boolean value to determine if the heatmap should be generated for all shots or just goals. If true, the heatmap will be generated for all shots, if false, the heatmap will be generated for goals only.")
+    season_lower_bound: int = Field(title="Season_lower_bound", description="""The first season in the range of seasons to generate the goal map scatter plot for. 
+                                    Often a season can be refered to using two different years since it takes place on either side of new years,  like 'in the 2020-2021 season', 
+                                    pass the first year as the argument. Another way this could be done is by only using the last two numbers of the second year. For example 2020-21 means pass '2020'
+                                    Pass this as ONLY the integer value. So if the user asks for the 2022 season. Pass the argument '2022'. 
+                                    DO NOT PASS 'Season 2022' Pass '2022'. When a range of seasons is provided like, 'from the 2015 to 2023 season generate a scatterplot' 
+                                    This is the lower bound of the range. ie. the older year should be this value.'""")
+    season_upper_bound: int = Field(title="Season_upper_bound", description="""The second season in the range of seasons to generate the goal map scatter plot for. 
+                                    If only a single season is provided like 'generate a scatterplot for the 2022-23 season' then this value should be the same as season_lower_bound. 
+                                    If there is a range of seasons in the request, then this should be the newest year. For example if someone asks 'generate a scatterplot for goals from the 2017-2023 seasons' 
+                                    then this would take the value 2023. Someone may also say, 'generate a scatterplot from 2017-18 to 2022-23. Then the value of this would be 2022. Allways pass the fist year 
+                                    if the season is given as multiple years. Interperate whether a range of seasons or single season is being requested. If it is a range, the upper bound should be this value.
+                                    If it is a single, this value should be the same as lower_bound_season. 
+                                    DO NOT PASS 'Season 2022' Pass '2022'""")
+    season_type: str = Field(title="Season Type", description="""The type of season this should be past as: 'regular', 'playoffs', or 
+                             'all'. Default to passing the word 'regular' if it is not specified. The playoffs can also be called the
+                              postseason, this should be passed as playoffs""")
+    situation: str = Field(title="Situation", description="The situation which can be on the powerplay, even strength," 
+                           "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations")
+
+
+
 class rag_args_schema(BaseModel):
     #vector_db: Any = Field(..., description='A vector database for the RAG chain to interact with. This should be passed to the tool from the rules_db or cba_db depending on the tool used')
     query: str = Field(..., description='The query to be executed by a RAG system. This will be fed into a function which will provide an answer to the query based on text files relevant to the query')
@@ -42,8 +66,6 @@ def create_tool_wrapper(func, vector_db):
     return wrapper
 
 def get_agent(db, rules_db, cba_db, api_key, llm):
-
-    llm = ChatOpenAI(model="gpt-4o", api_key=api_key)
 
     @tool(args_schema=goal_map_scatter_schema)
     def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
@@ -62,6 +84,16 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         if a season type is not provided, we will assume the season type to be regular season"""
         shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
+    
+    @tool(args_schema=goal_map_scatter_schema)
+    def heatmap_getter(conditions, all_shots, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+        """Returns a heatmap of the shots or goals by the player in a given situation, season type and range of seasons. 
+        It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
+        if a situation is not provided, we will assume the situation to be all situations
+        if a season type is not provided, we will assume the season type to be regular season"""
+        heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type)
+        return "Heatmap generated successfully"
+
 
     @tool(args_schema=rag_args_schema)
     def rule_getter(query: str):
@@ -85,7 +117,6 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         If a specific component of the CBA is refrenced keep that in the response. For example the return may say per CBA Section 50.12(g)-(m). Keep that in the final response"""
         return get_cba_information(cba_db, api_key, query)
 
-
     chain = get_chain(db, api_key, llm)
 
     bio_chain = get_bio_chain(db, llm)
@@ -102,6 +133,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         shot_map_scatter,
         rule_getter,
         cba_getter,
+        heatmap_getter,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
