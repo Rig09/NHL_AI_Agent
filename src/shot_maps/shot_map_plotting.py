@@ -187,7 +187,7 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
 
 
 # TODO: Include heatmaps in this file
-def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type):
+def heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a heatmap of a player's stat type on a hockey rink, excluding empty net shots and shots from behind half
     :param conditions: str, Natural language conditions to filter the data
@@ -201,20 +201,14 @@ def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, se
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
     rink = NHLRink(net={"visible": False})
-    if all_shots == True:
-        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
-        caption = llm.invoke(
-        f"""Return a figure caption for a heatmap of all shots that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
-        in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
-        ).content
-    else:
-        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
 
-        caption = llm.invoke(
-        f"""Return a figure caption for a heatmap of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
-        in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
-        ).content
+    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+
+    caption = llm.invoke(
+    f"""Return a figure caption for a heatmap of all shots that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
+    in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
+    ).content
 
     # Plotting shots and goals in different colors
     # NOTE: Colour mapping is not working.

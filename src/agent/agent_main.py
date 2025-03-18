@@ -35,7 +35,7 @@ class goal_map_scatter_schema(BaseModel):
 class heatmap_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the heatmap. This should include information like the team, player, home or away, ect. Do not include the all_shots field. This is not a field in the table.
                                     So for example, if the user asks 'Generate a heatmap for player_name in the 2022-23 season in the playoffs at 5on5' the conditions field should be something like 'generate a table for player_name in the 2022-23 season in the playoffs at 5on5'""")
-    all_shots : bool = Field(title="All Shots", description="A boolean value to determine if the heatmap should be generated for all shots or just goals. If true, the heatmap will be generated for all shots, if false, the heatmap will be generated for goals only.")
+    #all_shots : bool = Field(title="All Shots", description="A boolean value to determine if the heatmap should be generated for all shots or just goals. If true, the heatmap will be generated for all shots, if false, the heatmap will be generated for goals only.")
     season_lower_bound: int = Field(title="Season_lower_bound", description="""The first season in the range of seasons to generate the goal map scatter plot for. 
                                     Often a season can be refered to using two different years since it takes place on either side of new years,  like 'in the 2020-2021 season', 
                                     pass the first year as the argument. Another way this could be done is by only using the last two numbers of the second year. For example 2020-21 means pass '2020'
@@ -90,12 +90,12 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=heatmap_schema)
-    def heatmap_getter(conditions, all_shots, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    def heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a heatmap of the shots or goals by the player in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a season type is not provided, we will assume the season type to be regular season. season_type can take the values 'regular', 'playoffs', or 'all'.
         if a situation is not provided, we will assume the situation to be all situations, situation can take the values, '5on5', '5on4', '4on5', or 'all'"""
-        heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type)
+        heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Heatmap generated successfully"
 
 
