@@ -38,7 +38,9 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     # AND season <= {season_upper_bound}
     # """
 
-    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table intact. The return should be a table that can be used as a dataframe. Here is a natural language description of the requirements for the query: {conditions}."""
+    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table intact. The return should be a table that can be used as a dataframe. Here is a natural language description of the requirements for the query: {conditions}.
+    An example of a return would be if the natural language description was 'all shots from the 2023 season', the query would be 'SELECT * FROM shots_data WHERE season = 2023'. Or another example, 'create a table for Auston Matthews Powerplay goals in the playoffs between the 2020 and 2023 seasons.
+    The query should also include: 'AND season >= {season_lower_bound} AND season <= {season_upper_bound}'"""
                 
     query = sql_chain.invoke({"question" : template_for_sql_query})
     shot_data = pd.DataFrame(run_query_mysql(query, db))
