@@ -11,7 +11,7 @@ from chains.stats_sql_chain import get_sql_chain
 from langchain_openai import ChatOpenAI
 from openai import OpenAI 
 import numpy as np
-
+    extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
 def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result, season_type):
     """
     Extracts shot data for a given player, season, situation, and shot result type
@@ -113,7 +113,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     :returns: matplotlib figure object
     """
 
-    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation = situation, shot_result="GOAL", season_type=season_type)
     # TODO: Defensive programming if no goals are found for the player in the given season/situation???
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
@@ -151,7 +151,7 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, sitsituation = situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
@@ -198,19 +198,18 @@ def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, se
     :returns: matplotlib figure object
     """
     print(f"situation: {situation}")
-
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
     rink = NHLRink(net={"visible": False})
     if all_shots == True:
-        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation = situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
         caption = llm.invoke(
         f"""Return a figure caption for a heatmap of all shots that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
         in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
         ).content
     else:
-        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation = situation, shot_result="GOAL", season_type=season_type)
 
         caption = llm.invoke(
         f"""Return a figure caption for a heatmap of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
