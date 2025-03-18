@@ -13,7 +13,8 @@ from pydantic import BaseModel, Field
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the plot. This should include information like the team, player, home or away, ect. It could include none of those as well. 
                              This is a natural language description of the data used in the plot. It is used to return a table that will be become a data frame for the plot. This will use a chain that will create a sql query to get the data for the plot.
-                             So for example, if the user asks 'Generate a scatterplot for player_name in the 2022-23 season in the playoffs at 5on5' the conditions field should be something like 'generate a table for player_name in the 2022-23 season in the playoffs at 5on5.'""")
+                             So for example, if the user asks 'Generate a scatterplot for player_name in the 2022-23 season in the playoffs at 5on5' the conditions field should be something like 'generate a table for player_name in the 2022-23 season in the playoffs at 5on5.'
+                             Another example would be the user input: 'create a heatmap of leafs powerpay goals in the 2022-23 playoffs' The conditions field should be 'create a table of leafs powerplay goals in the 2022-23 NHL playoffs'""")
     season_lower_bound: int = Field(title="Season_lower_bound", description="""The first season in the range of seasons to generate the goal map scatter plot for. 
                                     Often a season can be refered to using two different years since it takes place on either side of new years,  like 'in the 2020-2021 season', 
                                     pass the first year as the argument. Another way this could be done is by only using the last two numbers of the second year. For example 2020-21 means pass '2020'
