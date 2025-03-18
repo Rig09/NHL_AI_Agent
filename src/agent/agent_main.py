@@ -33,7 +33,7 @@ class goal_map_scatter_schema(BaseModel):
 
 
 class heatmap_schema(BaseModel):
-    conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the heatmap. This should include information like the team, player, home or away, ect. 
+    conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the heatmap. This should include information like the team, player, home or away, ect. Do not include the all_shots field. This is not a field in the table.
                                     So for example, if the user asks 'Generate a heatmap for player_name in the 2022-23 season in the playoffs at 5on5' the conditions field should be something like 'generate a table for player_name in the 2022-23 season in the playoffs at 5on5'""")
     all_shots : bool = Field(title="All Shots", description="A boolean value to determine if the heatmap should be generated for all shots or just goals. If true, the heatmap will be generated for all shots, if false, the heatmap will be generated for goals only.")
     season_lower_bound: int = Field(title="Season_lower_bound", description="""The first season in the range of seasons to generate the goal map scatter plot for. 

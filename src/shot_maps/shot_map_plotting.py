@@ -43,10 +43,7 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
                                 Also note to find the team of a shot, compare home team with is_home the attribute."""
                 
     query = sql_chain.invoke({"question" : template_for_sql_query})
-    print('query:')
-    print(query)
     shot_data = pd.DataFrame(run_query_mysql(query, db))
-    print(shot_data.head(5))
     # Filter for the player name
     # shot_data = shot_data[shot_data['shooterName'] == player_name]
 
@@ -190,7 +187,6 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
 
 
 # TODO: Include heatmaps in this file
-
 def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a heatmap of a player's stat type on a hockey rink, excluding empty net shots and shots from behind half
@@ -202,7 +198,6 @@ def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, se
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    print(f"situation: {situation}")
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
     rink = NHLRink(net={"visible": False})
