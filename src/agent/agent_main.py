@@ -71,11 +71,11 @@ def create_tool_wrapper(func, vector_db):
 def get_agent(db, rules_db, cba_db, api_key, llm):
 
     @tool(args_schema=goal_map_scatter_schema)
-    def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023,season_type = "regular", situation = "all"):
+    def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
         The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
-        if a situation is not provided, we will assume the situation to be all situations
-        if a season type is not provided, we will assume the season type to be regular season"""
+        if a season type is not provided, we will assume the season type to be regular season. season_type can take the values 'regular', 'playoffs', or 'all'.
+        if a situation is not provided, we will assume the situation to be all situations, situation can take the values, '5on5', '5on4', '4on5', or 'all'"""
         goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type, situation)
         return "Goal map scatter plot generated successfully"
 
@@ -83,8 +83,8 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
     def shot_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a scatterplot of the shots by the player in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
-        if a situation is not provided, we will assume the situation to be all situations
-        if a season type is not provided, we will assume the season type to be regular season"""
+        if a season type is not provided, we will assume the season type to be regular season. season_type can take the values 'regular', 'playoffs', or 'all'.
+        if a situation is not provided, we will assume the situation to be all situations, situation can take the values, '5on5', '5on4', '4on5', or 'all'"""
         shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type, situation)
         return "Goal map scatter plot generated successfully"
     
@@ -92,8 +92,8 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
     def heatmap_getter(conditions, all_shots, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a heatmap of the shots or goals by the player in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
-        if a situation is not provided, we will assume the situation to be all situations
-        if a season type is not provided, we will assume the season type to be regular season"""
+        if a season type is not provided, we will assume the season type to be regular season. season_type can take the values 'regular', 'playoffs', or 'all'.
+        if a situation is not provided, we will assume the situation to be all situations, situation can take the values, '5on5', '5on4', '4on5', or 'all'"""
         heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type, situation)
         return "Heatmap generated successfully"
 

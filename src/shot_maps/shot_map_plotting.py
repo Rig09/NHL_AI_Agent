@@ -141,7 +141,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     return fig
     
 
-def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type = "regular", situation='all'):
+def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type = "regular", situation='all'):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
     :param all_shots: bool, if True, plot all shots, if False, plot only goals
@@ -151,10 +151,7 @@ def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_b
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    if all_shots == True:
-        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
-    else:
-        player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
