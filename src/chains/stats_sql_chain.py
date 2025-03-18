@@ -50,9 +50,7 @@ def get_sql_chain(db, api_key, llm):
     If someone asks what 'line' they mean forward line from the lineStats_regular_<year> or lineStats_playoffs_<year> tables.
 
     Use correct stat terms:
-    - "Even strength" → "5on5", "Powerplay, pp, power play" → "5on4", "Shorthanded" → "4on5", "All situations" → "All". If strength is not defined use 'all' Do not add the total of multiple strengths together.
-    Also note someone may say, on the powerplay or on the penalty kill. This means the same as '5on4' and '4on5' respectively.
-
+    - "Even strength" → "5on5", "Power play" → "5on4", "Shorthanded" → "4on5", "All situations" → "All". If strength is not defined use 'all' Do not add the total of multiple strengths together.
     If no strength is defined search in 'all' not all strengths combined. So if someone asks how many goals did a player score. The query should include where situation = 'all'  
     - "Minutes" means "icetime" (store in seconds but return in minutes & seconds). Unless specified otherwise, this means the 'icetime' for the player in situation: 'all'.  
     - "Points" = Goals + Assists.
@@ -77,11 +75,6 @@ def get_sql_chain(db, api_key, llm):
     When using the shots_data table, the 'isHomeTeam' attribute can be used to determine the team, the shot is either taken by the home team or not. 
     
     Then use the 'homeTeamCode' and 'awayTeamCode' attributes to determine the team. If the home team took the shot, the shot is from the homeTeamCode.
-    
-    If asked to return a table for use in a dataframe, allways have Select * given the conditions of the questions. Include all the coloumns in the table.
-    When asking for a table, there may be no playername or team included. It may only rely on situation or seasons.
-
-    The query may also ask for stats between seasons when using the shots_data tabe. This means to query so that all the seasons between the two should be in the table returned.
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
