@@ -153,7 +153,6 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     """
 
     player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation = situation, shot_result="SOG_OR_GOAL", season_type=season_type)
-    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation = situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     

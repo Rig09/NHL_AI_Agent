@@ -86,7 +86,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         if a season type is not provided, we will assume the season type to be regular season. season_type can take the values 'regular', 'playoffs', or 'all'.
         if a situation is not provided, we will assume the situation to be all situations, situation can take the values, '5on5', '5on4', '4on5', or 'all'"""
         shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type, situation)
-        return "Goal map scatter plot generated successfully"
+        return "shot map scatter plot generated successfully"
     
     @tool(args_schema=heatmap_schema)
     def heatmap_getter(conditions, all_shots, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
