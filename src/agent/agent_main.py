@@ -11,7 +11,8 @@ from chains.bio_info_chain import get_bio_chain
 from pydantic import BaseModel, Field
 
 class goal_map_scatter_schema(BaseModel):
-    conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.""")
+    conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
+                              This description should not include the strength or the season_type. Do not include that information in this field.""")
     season_lower_bound: int = Field(title="Season_lower_bound", description="""The first season in the range of seasons to generate the goal map scatter plot for. 
                                     Often a season can be refered to using two different years since it takes place on either side of new years,  like 'in the 2020-2021 season', 
                                     pass the first year as the argument. Another way this could be done is by only using the last two numbers of the second year. For example 2020-21 means pass '2020'

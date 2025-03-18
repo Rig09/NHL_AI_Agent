@@ -35,7 +35,7 @@ def get_sql_chain(db, api_key, llm):
     Tables for skaters, goalies, pairings, and lines. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
     DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
     {schema}
-
+    If a request is to return an entire table, allways use the shots_data table.
 
     For both skaters and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
     - Regular season → <playerType>Stats_regular_<year> 
@@ -76,6 +76,11 @@ def get_sql_chain(db, api_key, llm):
     
     Then use the 'homeTeamCode' and 'awayTeamCode' attributes to determine the team. If the home team took the shot, the shot is from the homeTeamCode.
 
+    When querying the shots_data table, the 'isPlayoffGame' attribute can be used to determine if the game is a playoff game or not. This takes the value 1 if it is a playoff game and 0 if it is a regular season game. 
+    To determine the strength when querying the shots_data table, use the 'awaySkatersOnIce', 'homeSkatersOnIce' attributes. Use the is_home_team to determine whether the shots are taken by the home or away team. 
+    If it is taken by the home team than the homeSkatersOnIce attribute comes first in the strenth. For example, if the shot is taken and isHomeTeam = 1, and awaySkatersOnIce = 4 and homeSkatersOnIce = 5, then the strength is 5on4. The first number corrisponds to the number of players on the ice that took the shot. 
+    Use that logic, to change queries to fit with the strength if it is passed asking for a query on the shots_data table.
+    
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
