@@ -38,15 +38,13 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     # AND season <= {season_upper_bound}
     # """
 
-    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table intact, Given the conditions: {conditions}, In the seasons between {season_lower_bound} to {season_upper_bound},
+    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table intact, Given the conditions: {conditions}, These conditions can inclue the player or team for which the table should be about, or any other conditions regarding information in the table. 
+                                The query should be for shots in the seasons between {season_lower_bound} to {season_upper_bound}, In the {situation} situation, and in the {season_type} season type.
                                 Return the list of shots so they can be put into a dataframe. An example query for the player Morgan Rielly between 2020 and 2023 seasons would be: SELECT * FROM SHOTS_DATA WHERE SEASON <=2023 AND SEASON >= 2020 AND  shooterName='Morgan Rielly'. 
                                 Also note to find the team of a shot, compare home team with is_home the attribute."""
                 
     query = sql_chain.invoke({"question" : template_for_sql_query})
-    print('query:')
-    print(query)
     shot_data = pd.DataFrame(run_query_mysql(query, db))
-    print(shot_data.head(5))
     # Filter for the player name
     # shot_data = shot_data[shot_data['shooterName'] == player_name]
 
