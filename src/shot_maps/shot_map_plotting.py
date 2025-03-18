@@ -38,8 +38,8 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     # AND season <= {season_upper_bound}
     # """
 
-    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table  intact, Given the conditions: {conditions}, In the seasons between {season_lower_bound} to {season_upper_bound},
-                                Return the list of shots so they can be put into a dataframe. An example query for the player Morgan Rielly between 2020 and 2023 seasons would be: SELECT * FROM SHOTS_DATA WHERE SEASON <=2023 AND SEASON >= 2020 AND  shooterName='Morgan Rielly'. 
+    template_for_sql_query = f"""return from the shots_data table with all of the columns in the table intact. The return should be a table that can be used as a dataframe. Here is a natural language description of the requirements for the query: {conditions}. This should be In the seasons between {season_lower_bound} to {season_upper_bound},
+                                Return the list of shots so they can be put into a dataframe. An example query if the conditions were asking for shots for the player Morgan Rielly between 2020 and 2023 seasons would be: SELECT * FROM SHOTS_DATA WHERE SEASON <=2023 AND SEASON >= 2020 AND  shooterName='Morgan Rielly'. 
                                 Also note to find the team of a shot, compare home team with is_home the attribute."""
                 
     query = sql_chain.invoke({"question" : template_for_sql_query})
