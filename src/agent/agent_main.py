@@ -85,7 +85,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
     
-    @tool(args_schema=goal_map_scatter_schema)
+    @tool(args_schema=heatmap_schema)
     def heatmap_getter(conditions, all_shots, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a heatmap of the shots or goals by the player in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
