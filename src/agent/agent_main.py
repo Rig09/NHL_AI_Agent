@@ -33,18 +33,19 @@ class goal_map_scatter_schema(BaseModel):
                                     as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations""")
 
 class heatmap_schema(BaseModel):
-    conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.""")
+    conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the heatmap. This should include information like the team, player, home or away, ect. 
+                                    So for example, if the user asks 'Generate a heatmap for player_name in the 2022-23 season in the playoffs at 5on5' the conditions field should be something like 'generate a table for player_name in the 2022-23 season in the playoffs at 5on5'""")
     all_shots : bool = Field(title="All Shots", description="A boolean value to determine if the heatmap should be generated for all shots or just goals. If true, the heatmap will be generated for all shots, if false, the heatmap will be generated for goals only.")
     season_lower_bound: int = Field(title="Season_lower_bound", description="""The first season in the range of seasons to generate the goal map scatter plot for. 
                                     Often a season can be refered to using two different years since it takes place on either side of new years,  like 'in the 2020-2021 season', 
                                     pass the first year as the argument. Another way this could be done is by only using the last two numbers of the second year. For example 2020-21 means pass '2020'
                                     Pass this as ONLY the integer value. So if the user asks for the 2022 season. Pass the argument '2022'. 
-                                    DO NOT PASS 'Season 2022' Pass '2022'. When a range of seasons is provided like, 'from the 2015 to 2023 season generate a scatterplot' 
+                                    DO NOT PASS 'Season 2022' Pass '2022'. When a range of seasons is provided like, 'from the 2015 to 2023 season generate a heat map' 
                                     This is the lower bound of the range. ie. the older year should be this value.'""")
-    season_upper_bound: int = Field(title="Season_upper_bound", description="""The second season in the range of seasons to generate the goal map scatter plot for. 
-                                    If only a single season is provided like 'generate a scatterplot for the 2022-23 season' then this value should be the same as season_lower_bound. 
-                                    If there is a range of seasons in the request, then this should be the newest year. For example if someone asks 'generate a scatterplot for goals from the 2017-2023 seasons' 
-                                    then this would take the value 2023. Someone may also say, 'generate a scatterplot from 2017-18 to 2022-23. Then the value of this would be 2022. Allways pass the fist year 
+    season_upper_bound: int = Field(title="Season_upper_bound", description="""The second season in the range of seasons to generate the heat map for. 
+                                    If only a single season is provided like 'generate a heatmap for the 2022-23 season' then this value should be the same as season_lower_bound. 
+                                    If there is a range of seasons in the request, then this should be the newest year. For example if someone asks 'generate a heatmap for goals from the 2017-2023 seasons' 
+                                    then this would take the value 2023. Someone may also say, 'generate a heatmap from 2017-18 to 2022-23. Then the value of this would be 2022. Allways pass the fist year 
                                     if the season is given as multiple years. Interperate whether a range of seasons or single season is being requested. If it is a range, the upper bound should be this value.
                                     If it is a single, this value should be the same as lower_bound_season. 
                                     DO NOT PASS 'Season 2022' Pass '2022'""")
