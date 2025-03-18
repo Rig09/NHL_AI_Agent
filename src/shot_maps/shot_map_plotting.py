@@ -18,12 +18,12 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     """
     sql_chain = get_sql_chain(db, api_key, llm)
     # Validate input parameters
-    valid_situations = ['5on5', '5on4', '4on5', 'all', 'other']
+    #valid_situations = ['5on5', '5on4', '4on5', 'all', 'other']
     valid_shot_results = ['GOAL', 'SOG_OR_GOAL', 'ANY']
     valid_season_types = ['all', 'regular', 'playoffs']
 
-    if situation not in valid_situations:
-        raise ValueError(f"Situation '{situation}' not found in data")
+    # if situation not in valid_situations:
+    #     raise ValueError(f"Situation '{situation}' not found in data")
     if shot_result not in valid_shot_results:
         raise ValueError(f"Event type '{shot_result}' not found in data")
     if season_type not in valid_season_types:
