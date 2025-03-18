@@ -189,21 +189,17 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
 # TODO: Include heatmaps in this file
 def heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
-    Generates a heatmap of a player's stat type on a hockey rink, excluding empty net shots and shots from behind half
-    :param conditions: str, Natural language conditions to filter the data
-    :param all_shots: bool, if True, plot all shots, if False, plot only goals
-    :param season_lower_bound: int, the lower bound to filter the season data 
-    :param season_upper_bound: int, the upper bound to filter the season data
+    Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
+    :param player_name: str, name of the NHL player to extract data for
     :param situation: str, game situation to extract data for, between the following options (5on5, 5on4, 4on5, all, other)
+    :param season: int, season to extract data for (YYYY)
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
+    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
     
     rink = NHLRink(net={"visible": False})
-
-
-    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     caption = llm.invoke(
     f"""Return a figure caption for a heatmap of all shots that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
