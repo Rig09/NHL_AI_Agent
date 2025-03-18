@@ -25,12 +25,13 @@ class goal_map_scatter_schema(BaseModel):
                                     if the season is given as multiple years. Interperate whether a range of seasons or single season is being requested. If it is a range, the upper bound should be this value.
                                     If it is a single, this value should be the same as lower_bound_season. 
                                     DO NOT PASS 'Season 2022' Pass '2022'""")
+    season_type: str = Field(title="Season Type", description="""The type of season this should be past as: 'regular', 'playoffs', or 
+                                    'all'. Default to passing the word 'regular' if it is not specified. The playoffs can also be called the
+                                    postseason, this should be passed as playoffs""")
     situation: str = Field(title="Situation", description="""The situation which can be on the powerplay, even strength,
                                     shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations 
                                     as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations""")
-    season_type: str = Field(title="Season Type", description="""The type of season this should be past as: 'regular', 'playoffs', or 
-                             'all'. Default to passing the word 'regular' if it is not specified. The playoffs can also be called the
-                              postseason, this should be passed as playoffs""")
+
 class heatmap_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.""")
     all_shots : bool = Field(title="All Shots", description="A boolean value to determine if the heatmap should be generated for all shots or just goals. If true, the heatmap will be generated for all shots, if false, the heatmap will be generated for goals only.")
@@ -47,12 +48,13 @@ class heatmap_schema(BaseModel):
                                     if the season is given as multiple years. Interperate whether a range of seasons or single season is being requested. If it is a range, the upper bound should be this value.
                                     If it is a single, this value should be the same as lower_bound_season. 
                                     DO NOT PASS 'Season 2022' Pass '2022'""")
-    situation: str = Field(title="Situation", description="""The situation which can be on the powerplay, even strength,
-                        "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations
-                           as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations""")
     season_type: str = Field(title="Season Type", description="""The type of season this should be past as: 'regular', 'playoffs', or 
-                             'all'. Default to passing the word 'regular' if it is not specified. The playoffs can also be called the
-                              postseason, this should be passed as playoffs""")
+                                    'all'. Default to passing the word 'regular' if it is not specified. The playoffs can also be called the
+                                    postseason, this should be passed as playoffs""")
+    situation: str = Field(title="Situation", description="""The situation which can be on the powerplay, even strength,
+                                    "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations
+                                    as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations""")
+
 
 
 
@@ -69,30 +71,30 @@ def create_tool_wrapper(func, vector_db):
 def get_agent(db, rules_db, cba_db, api_key, llm):
 
     @tool(args_schema=goal_map_scatter_schema)
-    def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, situation = "all", season_type = "regular"):
+    def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023,season_type = "regular", situation = "all"):
         """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
         The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type, situation)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
-    def shot_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, situation = "all", season_type = "regular"):
+    def shot_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a scatterplot of the shots by the player in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type, situation)
         return "Goal map scatter plot generated successfully"
     
     @tool(args_schema=heatmap_schema)
-    def heatmap_getter(conditions, all_shots, season_lower_bound =2023, season_upper_bound=2023, situation = "all", season_type = "regular"):
+    def heatmap_getter(conditions, all_shots, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a heatmap of the shots or goals by the player in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, situation, season_type)
+        heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type, situation)
         return "Heatmap generated successfully"
 
 

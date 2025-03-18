@@ -18,12 +18,12 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     """
     sql_chain = get_sql_chain(db, api_key, llm)
     # Validate input parameters
-    #valid_situations = ['5on5', '5on4', '4on5', 'all', 'other']
+    valid_situations = ['5on5', '5on4', '4on5', 'all', 'other']
     valid_shot_results = ['GOAL', 'SOG_OR_GOAL', 'ANY']
     valid_season_types = ['all', 'regular', 'playoffs']
 
-    # if situation not in valid_situations:
-    #     raise ValueError(f"Situation '{situation}' not found in data")
+    if situation not in valid_situations:
+        raise ValueError(f"Situation '{situation}' not found in data")
     if shot_result not in valid_shot_results:
         raise ValueError(f"Event type '{shot_result}' not found in data")
     if season_type not in valid_season_types:
@@ -103,7 +103,7 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     return shot_data
 
 
-def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type, situation):
+def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type = "regular", situation='all'):
     """
     Generates a scatter plot of a player's goals on a hockey rink, excluding empty net goals and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -113,7 +113,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     :returns: matplotlib figure object
     """
 
-    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation=situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
     # TODO: Defensive programming if no goals are found for the player in the given season/situation???
 
     fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
@@ -141,7 +141,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     return fig
     
 
-def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type, situation):
+def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type = "regular", situation='all'):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
     :param all_shots: bool, if True, plot all shots, if False, plot only goals
