@@ -11,7 +11,7 @@ from chains.stats_sql_chain import get_sql_chain
 from langchain_openai import ChatOpenAI
 from openai import OpenAI 
 import numpy as np
-    extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+
 def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result, season_type):
     """
     Extracts shot data for a given player, season, situation, and shot result type
