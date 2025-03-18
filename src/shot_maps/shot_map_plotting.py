@@ -23,11 +23,11 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     valid_season_types = ['all', 'regular', 'playoffs']
 
     if situation not in valid_situations:
-        raise ValueError(f"Situation {situation} not found in data")
+        raise ValueError(f"Situation '{situation}' not found in data")
     if shot_result not in valid_shot_results:
-        raise ValueError(f"Event type {shot_result} not found in data")
+        raise ValueError(f"Event type '{shot_result}' not found in data")
     if season_type not in valid_season_types:
-        raise ValueError(f"Season type {season_type} not found in data")
+        raise ValueError(f"Season type '{season_type}' not found in data")
 
     # Define the query with filtering based on input, using season_lower_bound and season_upper_bound
     # query = f"""
@@ -103,7 +103,7 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     return shot_data
 
 
-def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type = "regular", situation = "all"):
+def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, season_type, situation):
     """
     Generates a scatter plot of a player's goals on a hockey rink, excluding empty net goals and shots from behind half
     :param player_name: str, name of the NHL player to extract data for
@@ -141,7 +141,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     return fig
     
 
-def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type = "regular", situation = "all"):
+def shot_map_scatter_get(db, api_key, llm, conditions, all_shots, season_lower_bound, season_upper_bound, season_type, situation):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
     :param all_shots: bool, if True, plot all shots, if False, plot only goals
