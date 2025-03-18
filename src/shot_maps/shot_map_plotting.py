@@ -222,7 +222,7 @@ def heat_map_get(db, api_key, llm, conditions, all_shots, season_lower_bound, se
     # Plotting shots and goals in different colors
     # NOTE: Colour mapping is not working.
     hist, xedges, yedges = np.histogram2d(
-    player_shots["xCordAdjusted"], player_shots["yCordAdjusted"], bins=50
+    player_shots["xCordAdjusted"], player_shots["yCordAdjusted"], bins=10
     )
 
     contour = rink.contourf(
