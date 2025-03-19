@@ -84,12 +84,17 @@ def get_sql_chain(db, api_key, llm):
     More information on goalies: If a user asks for goals saved above expected, this is the difference between the expected goals against and the actual goals against. or the Xgoals and goals columns. 
     If someone asks for goals saved above expected per 60 minutes, divide the goals saved above expected by the icetime in minutes and multiply by 60.
     if someone asks for goals saved above expected per expected goal faced, devide by the number of expected goals faced.
-    If someone asks for save percentage, this is the number of saves divided by the number of shots faced. The number of shots faced is the coloumn 'ongoal' in the goalies tables. The saves is this number minues the goals column.
-    Save percentage should be presented as a decimal value, for example 0.916. There should be no percentage sign. It should have three decimal places. So 91.6% would be 0.916.
+    If someone asks for save percentage, this is the number of saves divided by the number of shots faced. The number of shots faced is the coloumn 'ongoal' in the goalies tables. The saves is this number minues the goals column. 
+    DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
+    For example: (ongoal - goals) / ongoal
+    Save percentage should be presented as a decimal value, for example 0.916. There should be no percentage sign. It should have three decimal places. So 91.6% would be 0.916. Never return with a decimal sign for a goalie. allways use a decimal value.
     Goals against average, is the goals against divided by the icetime in minutes and multiplied by 60.
     If someone asks for the save percentage on the penalty kill, this is the saves on the penalty kill divided by the shots faced on the penalty kill. The penalty kill is the situation '4on5'.
     If someone asks for the save percentage against high danger shots, this would use the coloumn highDangerShots instead of the ongoal coloumn. This is similiar for the other danger levels.
+    If not specified assume the save percentage is for the situation 'all'.
 
+    If the user asks for the goalie that lead in a stat that is a ratio (ie save percentage or goals saved above expected) return the best ratio, and the goalie with the best ratio that faced over 100 shots.
+    If the user asks for the skater that lead in a stat that is a ratio (i.e. expected goals percentage) provide the skater with the best ratio, and also the skater with the best ratio with over 100 minutes played.
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
