@@ -131,7 +131,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     )
 
     goal_count = (player_shots['event'] == 'GOAL').sum()
-    ax.text(-0.3, 1.0, f"Total Goals: {goal_count}", 
+    ax.text(-0.35, 1.0, f"Total Goals: {goal_count}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
@@ -161,7 +161,7 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     """
     player_shots = extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
-    fig, ax = plt.subplots(1,1, figsize=(10,12), facecolor='w', edgecolor='k')
+    fig, ax = plt.subplots(1,1, figsize=(10,9), facecolor='w', edgecolor='k')
     
     rink = NHLRink(net={"visible": False})
 
@@ -185,7 +185,7 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     # Calculate and display totals (moved up and to the left)
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    ax.text(-0.3, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}\nShooting Percentage: {goal_count/shot_count:.2%}", 
+    ax.text(-0.35, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}\nShooting Percentage: {goal_count/shot_count:.2%}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
     # # Title for the figure
@@ -237,7 +237,7 @@ def shot_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_u
     
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    ax.text(-0.3, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}\nShooting Percentage: {goal_count/shot_count:.2%}", 
+    ax.text(-0.35, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}\nShooting Percentage: {goal_count/shot_count:.2%}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
