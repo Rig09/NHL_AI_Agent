@@ -131,7 +131,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     )
 
     goal_count = (player_shots['event'] == 'GOAL').sum()
-    ax.text(-0.15, 1.05, f"Total Goals: {goal_count}", 
+    ax.text(-0.3, 1.0, f"Total Goals: {goal_count}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
@@ -180,12 +180,12 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     plt.Line2D([0], [0], marker='o', color='grey', markersize=10, label='Shot', linestyle='None'),
     plt.Line2D([0], [0], marker='o', color='orange', markersize=10, label='Goal', linestyle='None')
     ]
-    ax.legend(handles=handles, loc="upper right", fontsize=12)
+    ax.legend(handles=handles, loc="upper right", fontsize=12, bbox_to_anchor=(1.2, 1))
 
     # Calculate and display totals (moved up and to the left)
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    ax.text(-0.15, 1.05, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}", 
+    ax.text(-0.3, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
     # # Title for the figure
