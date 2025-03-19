@@ -80,22 +80,21 @@ def get_sql_chain(db, api_key, llm):
     To determine the strength when querying the shots_data table, use the 'awaySkatersOnIce', 'homeSkatersOnIce' attributes. Use the is_home_team to determine whether the shots are taken by the home or away team. 
     If it is taken by the home team than the homeSkatersOnIce attribute comes first in the strenth. For example, if the shot is taken and isHomeTeam = 1, and awaySkatersOnIce = 4 and homeSkatersOnIce = 5, then the strength is 5on4. The first number corrisponds to the number of players on the ice that took the shot. 
     Use that logic, to change queries to fit with the strength if it is passed asking for a query on the shots_data table.
-     
+    
+
+    ALL GOALIE STATS SHOULD ONLY USE ROWS that have the situation 'all' unless otherwise specified. If someone asks what was <goalie name>'s save percentage, use the situation 'all' to find the save percentage. 
+    If someone asks for a leader in a statistic for goalies without specifying the situation, this is the leader in rows with the situation 'all'.
+
     More information on goalies: If a user asks for goals saved above expected, this is the difference between the expected goals against and the actual goals against. or the Xgoals and goals columns. 
     If someone asks for goals saved above expected per 60 minutes, divide the goals saved above expected by the icetime in minutes and multiply by 60.
     if someone asks for goals saved above expected per expected goal faced, devide by the number of expected goals faced.
     If someone asks for save percentage, this is the number of saves divided by the number of shots faced. The number of shots faced is the coloumn 'ongoal' in the goalies tables. The saves is this number minues the goals column. 
     DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
     For example: (ongoal - goals) / ongoal
-    Save percentage should be presented as a decimal value, for example 0.916. There should be no percentage sign. It should have three decimal places. So 91.6% would be 0.916. Never return with a percent sign for a goalie. Allways use a decimal value. NEVER use the form 91.6%. ONLY USE 0.916.
+
     DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
-    SAVE PERCENTAGE IS A SIMPLE FORMULA. DO NOT OVERCOMPLICATE IT.
-    DO NOT PRESENT SAVE PERCENTAGE AS A NORMAL PERCENTAGE. IT SHOULD BE A DECIMAL VALUE.
-    DO NOT MESS THIS UP. THIS IS A SIMPLE CALCULATION USE ONLY THE GOALS AGAINST AND SHOTS FACED TO FIND SAVE PERCENTAGE. THIS IS VERY IMPORTANT.
 
     Goals against average, is the goals against divided by the icetime in minutes and multiplied by 60.
-    If someone asks for the save percentage on the penalty kill, this is the saves on the penalty kill divided by the shots faced on the penalty kill. The penalty kill is the situation '4on5'.
-    If someone asks for the save percentage against high danger shots, this would use the coloumn highDangerShots instead of the ongoal coloumn. This is similiar for the other danger levels.
     If not specified assume the save percentage is for the situation 'all'.
 
     If the user asks for the goalie that lead in a stat that is a ratio (ie save percentage or goals saved above expected) return the best ratio, and the goalie with the best ratio that faced over 100 shots.
@@ -156,7 +155,8 @@ def get_chain(db, api_key, llm):
     Quesiton: {question}
     SQL Query: {query}
     SQL Response: {response}
-
+    Please note that  Save percentage should be presented as a decimal value NOT AS A PERCENTAGE, for example 0.916. There should NEVER be percentage sign. It should have three decimal places.
+    So 91.6% would be 0.916. Never return with a percent sign for a goalie. Allways use a decimal value. NEVER use the form 91.6%. ONLY USE 0.916. This is counter intuitive but it is important convention. 
     """
     llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
     prompt = ChatPromptTemplate.from_template(template)
