@@ -80,7 +80,17 @@ def get_sql_chain(db, api_key, llm):
     To determine the strength when querying the shots_data table, use the 'awaySkatersOnIce', 'homeSkatersOnIce' attributes. Use the is_home_team to determine whether the shots are taken by the home or away team. 
     If it is taken by the home team than the homeSkatersOnIce attribute comes first in the strenth. For example, if the shot is taken and isHomeTeam = 1, and awaySkatersOnIce = 4 and homeSkatersOnIce = 5, then the strength is 5on4. The first number corrisponds to the number of players on the ice that took the shot. 
     Use that logic, to change queries to fit with the strength if it is passed asking for a query on the shots_data table.
-    
+     
+    More information on goalies: If a user asks for goals saved above expected, this is the difference between the expected goals against and the actual goals against. or the Xgoals and goals columns. 
+    If someone asks for goals saved above expected per 60 minutes, divide the goals saved above expected by the icetime in minutes and multiply by 60.
+    if someone asks for goals saved above expected per expected goal faced, devide by the number of expected goals faced.
+    If someone asks for save percentage, this is the number of saves divided by the number of shots faced. The number of shots faced is the coloumn 'ongoal' in the goalies tables. The saves is this number minues the goals column.
+    Save percentage should be presented as a decimal value, for example 0.916. There should be no percentage sign. It should have three decimal places. So 91.6% would be 0.916.
+    Goals against average, is the goals against divided by the icetime in minutes and multiplied by 60.
+    If someone asks for the save percentage on the penalty kill, this is the saves on the penalty kill divided by the shots faced on the penalty kill. The penalty kill is the situation '4on5'.
+    If someone asks for the save percentage against high danger shots, this would use the coloumn highDangerShots instead of the ongoal coloumn. This is similiar for the other danger levels.
+
+
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
