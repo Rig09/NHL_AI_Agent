@@ -1,4 +1,4 @@
-from dotenv import load_dotenv
+import load_dotenv
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 import os
@@ -49,10 +49,6 @@ if "chat_history" not in st.session_state:
         AIMessage(content="Welcome to the NHL Stats Chatbot! Ask me anything about NHL statistics and I will do my best to answer your questions!")
     ]
 
-# Store generated figures in session state
-if "generated_figures" not in st.session_state:
-    st.session_state.generated_figures = []
-
 st.set_page_config(page_title="NHL Stats Chatbot", page_icon="🏒", layout="wide")
 
 st.title("NHL Stats Chatbot")
@@ -90,19 +86,13 @@ if user_query is not None and user_query.strip() != "":
                 # Append AI response to chat history
                 st.session_state.chat_history.append(AIMessage(content=ai_response))
 
+                # The agent tools will handle plot generation through their own logic
+                # Any plots generated will be available in the matplotlib figure manager
                 if plt.get_fignums():  # Check if any figures were created
                     for fig_num in plt.get_fignums():
                         fig = plt.figure(fig_num)
-                        # Store the figure along with the current user query that generated it
-                        st.session_state.generated_figures.append((user_query, fig))
-
-                # Display all figures, associating each figure with its corresponding question
-                for query, fig in st.session_state.generated_figures:
-                    # Display the question that generated this figure separately
-                    st.markdown(f"**Question:** {query}")
-                    # Display the figure
-                    st.pyplot(fig)
-                    plt.close(fig)  # Clean up the figure after displaying
+                        st.pyplot(fig)
+                        plt.close(fig)  # Clean up the figure
             else:
                 # Handle the case where the response is not as expected
                 st.markdown("Sorry, I couldn't understand that request. Please try again.")
