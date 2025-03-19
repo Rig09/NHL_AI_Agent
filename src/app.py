@@ -1,4 +1,4 @@
-import load_dotenv
+from dotenv import load_dotenv
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 import os
