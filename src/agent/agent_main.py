@@ -102,7 +102,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         Please keep those in the response.
         When THIS TOOL IS CALLED KEEP THE SPECIFIC RULE NUMBER IN THE RESPONSE 
         for example at the end of a response it could say (RULE 48.2) keep that rule refrence"""
-        return get_rules_information(rules_db, api_key, query)
+        return get_rules_information(rules_db, api_key, llm, query)
 
     @tool(args_schema=rag_args_schema)
     def cba_getter(query: str):
@@ -112,7 +112,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         This includes hypothetical questions like 'what happens if a team goes over the cap with bonus'.
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
         If a specific component of the CBA is refrenced keep that in the response. For example the return may say per CBA Section 50.12(g)-(m). Keep that in the final response"""
-        return get_cba_information(cba_db, api_key, query)
+        return get_cba_information(cba_db, api_key, llm, query)
 
     chain = get_chain(db, api_key, llm)
 
