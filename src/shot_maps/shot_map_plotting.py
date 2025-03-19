@@ -43,6 +43,8 @@ def extract_shot_data(db, api_key, llm, conditions, season_lower_bound, season_u
     
     query = sql_chain.invoke({"question" : template_for_sql_query})
     shot_data = pd.DataFrame(run_query_mysql(query, db))
+    if shot_data.empty:
+        raise ValueError("There was an error with the query. Please try again with a different query.")
     # Filter for the player name
     # shot_data = shot_data[shot_data['shooterName'] == player_name]
 
@@ -129,8 +131,9 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     )
 
     goal_count = (player_shots['event'] == 'GOAL').sum()
-    ax.text(0.05, 0.95, f"Total Goals: {goal_count}", 
-            transform=ax.transAxes, fontsize=12, verticalalignment='top', bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+    ax.text(-0.05, 1.05, f"Total Goals: {goal_count}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', 
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
     caption = llm.invoke(
     f"""Return a figure caption for a scatterplot of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
@@ -172,16 +175,17 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
         ax=ax, draw_kw={"display_range": "offense"}
     )
 
-    # Add legend
+    # Add legend (moved up and to the right)
     ax.scatter([], [], color='grey', s=100, label='Shot')
     ax.scatter([], [], color='orange', s=100, label='Goal')
-    ax.legend(loc="upper right", fontsize=12)
+    ax.legend(loc="upper right", bbox_to_anchor=(1.2, 1.05), fontsize=12)
 
-    # Calculate and display totals
+    # Calculate and display totals (moved up and to the left)
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    ax.text(0.05, 0.95, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}", 
-            transform=ax.transAxes, fontsize=12, verticalalignment='top', bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+    ax.text(-0.05, 1.05, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', 
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
     # # Title for the figure
     # if season_lower_bound == season_upper_bound:
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
