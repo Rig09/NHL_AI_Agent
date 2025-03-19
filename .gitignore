@@ -9,7 +9,7 @@
 *.bin
 *.toml
 tempCodeRunnerFile.py
-
+load_new_shots.py
 # Chroma DB files
 # **/chroma_db/
 *.sqlite3

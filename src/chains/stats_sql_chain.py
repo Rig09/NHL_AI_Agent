@@ -25,22 +25,22 @@ def get_sql_chain(db, api_key, llm):
 
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
-        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
+        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023', 'teamstats_regular_2023']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
 
     #print(run_query("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
     template = """
     Based on the table schema below, generate a valid SQL query that answers the user's question. There are four different types of tables.
-    Tables for skaters, goalies, pairings, and lines. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
+    Tables for skaters, goalies, pairings, teams, and lines. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
     DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
     {schema}
     If a request is to return an entire table, allways use the shots_data table.
 
-    For both skaters and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
+    For skaters, lines, pairs, teams, and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
     - Regular season → <playerType>Stats_regular_<year> 
     - Playoffs → <PlayerType>Stats_playoffs_<year>
-    where player type refers to whether the player is a skater, goalie, pairing, or line. 
+    where player type refers to whether the player is a skater, goalie, pairing, line, or team. 
 
     For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
@@ -97,6 +97,9 @@ def get_sql_chain(db, api_key, llm):
     Goals against average, is the goals against divided by the icetime in minutes and multiplied by 60.
     If not specified assume the save percentage is for the situation 'all'.
     When A user says with at least _ shots faced, they mean that the column 'ongoal' has a value greater than or equal to that number
+
+    The team table should only be used when a stat is being asked for an entire team. ie. "what team had the highest shooting percentage in the 2023-24 season." 
+    If someone asks who lead a team in a stat, still use the individual tables. Only use this table for team wide stats. Other than that, it is the same as the pairs, skaters, and goalie tables. Follow the same rules as you would for those.
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
