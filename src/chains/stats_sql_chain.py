@@ -96,9 +96,7 @@ def get_sql_chain(db, api_key, llm):
 
     Goals against average, is the goals against divided by the icetime in minutes and multiplied by 60.
     If not specified assume the save percentage is for the situation 'all'.
-
-    If the user asks for the goalie that lead in a stat that is a ratio (ie save percentage or goals saved above expected) return the best ratio, and the goalie with the best ratio that faced over 100 shots.
-    If the user asks for the skater that lead in a stat that is a ratio (i.e. expected goals percentage) provide the skater with the best ratio, and also the skater with the best ratio with over 100 minutes played.
+    When A user says with at least _ shots faced, they mean that the column 'ongoal' has a value greater than or equal to that number
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}

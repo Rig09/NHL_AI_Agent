@@ -142,7 +142,11 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
                             also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language.
                             somtimes for a ratio statistic the tool will return too names if a minumum minutes or shots against is not given. Return both, unless they are the same person. 
                             If the tool returns a decimal value do not turn it into a percentage. The decimal is convention even if the user asks for a percentage. The tool knows when to return a decimal and when to return a percentage.]
-                            the stat save percentage is presented as a decimal. DO not correct this."""
+                            the stat save percentage is presented as a decimal. DO not correct this.
+                            If the user asks for the goalie that lead in a stat that is a ratio (ie save percentage or goals saved above expected) Invoke this tool twice. Once to satisfy the query as is 
+                            and then a second time with the extra condition that the goalie faced at least 100 shots against. Return both of these answers.
+                            If the user asks for the skater that lead in a stat that is a ratio (i.e. expected goals percentage)Invoke this tool twice. Once to satisfy the query as is 
+                            and then a second time with the extra condition that the player played at least 100 minutes. Return both of these answers."""
         ),
         Tool(
             name="Player_BIO_information",
