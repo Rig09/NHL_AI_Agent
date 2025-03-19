@@ -87,10 +87,11 @@ def get_sql_chain(db, api_key, llm):
     If someone asks for save percentage, this is the number of saves divided by the number of shots faced. The number of shots faced is the coloumn 'ongoal' in the goalies tables. The saves is this number minues the goals column. 
     DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
     For example: (ongoal - goals) / ongoal
-    Save percentage should be presented as a decimal value, for example 0.916. There should be no percentage sign. It should have three decimal places. So 91.6% would be 0.916. Never return with a decimal sign for a goalie. allways use a decimal value.
+    Save percentage should be presented as a decimal value, for example 0.916. There should be no percentage sign. It should have three decimal places. So 91.6% would be 0.916. Never return with a percent sign for a goalie. Allways use a decimal value. NEVER use the form 91.6%. ONLY USE 0.916.
     DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
     SAVE PERCENTAGE IS A SIMPLE FORMULA. DO NOT OVERCOMPLICATE IT.
-    DO NOT PRESENT SAVE PERCENTAGE AS A NORMAL PERCENTAGE. IT SHOULD BE A DECIMAL VALUE. DESPITE ITS NAME THIS IS HOW IT IS.
+    DO NOT PRESENT SAVE PERCENTAGE AS A NORMAL PERCENTAGE. IT SHOULD BE A DECIMAL VALUE.
+    DO NOT MESS THIS UP. THIS IS A SIMPLE CALCULATION USE ONLY THE GOALS AGAINST AND SHOTS FACED TO FIND SAVE PERCENTAGE. THIS IS VERY IMPORTANT.
 
     Goals against average, is the goals against divided by the icetime in minutes and multiplied by 60.
     If someone asks for the save percentage on the penalty kill, this is the saves on the penalty kill divided by the shots faced on the penalty kill. The penalty kill is the situation '4on5'.
