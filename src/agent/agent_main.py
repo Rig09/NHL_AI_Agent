@@ -46,7 +46,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
 
     @tool(args_schema=goal_map_scatter_schema)
     def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
-        """Returns a scatterplot of the goals scored by the player in a given situation, season type and range of seasons. 
+        """Returns a scatterplot of the goals scored by a player or team or any other conditins specifiedin a given situation, season type and range of seasons. 
         The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
@@ -55,7 +55,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
 
     @tool(args_schema=goal_map_scatter_schema)
     def shot_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
-        """Returns a scatterplot of the shots by the player in a given situation, season type and range of seasons. 
+        """Returns a scatterplot of the shots by a  player or team or any other conditins specified in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
@@ -64,21 +64,23 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
 
     @tool(args_schema=goal_map_scatter_schema)
     def shot_heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
-        """Returns a heatmap of the shots by the player in a given situation, season type and range of seasons. 
+        """Returns a heatmap of the shots by the player or team or any other conditins specified in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
-        if a season type is not provided, we will assume the season type to be regular season"""
+        if a season type is not provided, we will assume the season type to be regular season
+        if the user requests a heatmap of shots, or a shot heatmap, it should invoke this tool"""
         shot_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
-        return "Heatmap generated successfully"
+        return "Shot heatmap generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
     def goal_heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
-        """Returns a heatmap of the goals by the player in a given situation, season type and range of seasons. 
+        """Returns a heatmap of the goals scored by the player or team or any other conditins specified, in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
-        if a season type is not provided, we will assume the season type to be regular season"""
+        if a season type is not provided, we will assume the season type to be regular season
+        if the user requests a heatmap of goals, or a goal heatmap, it should invoke this tool"""
         goal_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
-        return "Heatmap generated successfully"
+        return "Goal heatmap generated successfully"
 
     @tool(args_schema=rag_args_schema)
     def rule_getter(query: str):
