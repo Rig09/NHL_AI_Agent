@@ -88,6 +88,10 @@ def get_sql_chain(db, api_key, llm):
     DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
     For example: (ongoal - goals) / ongoal
     Save percentage should be presented as a decimal value, for example 0.916. There should be no percentage sign. It should have three decimal places. So 91.6% would be 0.916. Never return with a decimal sign for a goalie. allways use a decimal value.
+    DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
+    SAVE PERCENTAGE IS A SIMPLE FORMULA. DO NOT OVERCOMPLICATE IT.
+    DO NOT PRESENT SAVE PERCENTAGE AS A NORMAL PERCENTAGE. IT SHOULD BE A DECIMAL VALUE. DESPITE ITS NAME THIS IS HOW IT IS.
+
     Goals against average, is the goals against divided by the icetime in minutes and multiplied by 60.
     If someone asks for the save percentage on the penalty kill, this is the saves on the penalty kill divided by the shots faced on the penalty kill. The penalty kill is the situation '4on5'.
     If someone asks for the save percentage against high danger shots, this would use the coloumn highDangerShots instead of the ongoal coloumn. This is similiar for the other danger levels.

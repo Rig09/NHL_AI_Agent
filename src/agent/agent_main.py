@@ -140,7 +140,9 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
                             It should be invoked with a natural language question about what statistics are needed to answer the user query.
                             It will generate and perform an sql query on data from the 2015-2023 NHL seasons. Note someone may refer to a season using two years. So the 2023-24 season
                             also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language.
-                            somtimes for a ratio statistic the tool will return too names if a minumum minutes or shots against is not given. Return both, unless they are the same person."""
+                            somtimes for a ratio statistic the tool will return too names if a minumum minutes or shots against is not given. Return both, unless they are the same person. 
+                            If the tool returns a decimal value do not turn it into a percentage. The decimal is convention even if the user asks for a percentage. The tool knows when to return a decimal and when to return a percentage.]
+                            the stat save percentage is presented as a decimal. DO not correct this."""
         ),
         Tool(
             name="Player_BIO_information",
