@@ -128,11 +128,14 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
         ax=ax, draw_kw={"display_range": "offense"},
     )
 
+    goal_count = (player_shots['event'] == 'GOAL').sum()
+    ax.text(0.05, 0.95, f"Total Goals: {goal_count}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+
     caption = llm.invoke(
     f"""Return a figure caption for a scatterplot of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
     in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
     ).content
-
 
     # Title for the figure
     # if season_lower_bound == season_upper_bound:
@@ -169,6 +172,16 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
         ax=ax, draw_kw={"display_range": "offense"}
     )
 
+    # Add legend
+    ax.scatter([], [], color='grey', s=100, label='Shot')
+    ax.scatter([], [], color='orange', s=100, label='Goal')
+    ax.legend(loc="upper right", fontsize=12)
+
+    # Calculate and display totals
+    goal_count = (player_shots['event'] == 'GOAL').sum()
+    shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
+    ax.text(0.05, 0.95, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
     # # Title for the figure
     # if season_lower_bound == season_upper_bound:
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
