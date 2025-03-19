@@ -237,7 +237,7 @@ def shot_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_u
     
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    ax.text(-0.35, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}\nShooting Percentage: {goal_count/shot_count:.2%}", 
+    ax.text(-0.35, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
