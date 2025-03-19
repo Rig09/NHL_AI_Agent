@@ -98,9 +98,8 @@ if user_query is not None and user_query.strip() != "":
 
                 # Display all figures, associating each figure with its corresponding question
                 for query, fig in st.session_state.generated_figures:
-                    # Display the question that generated this figure
-                    with st.chat_message("Human"):
-                        st.markdown(query)
+                    # Display the question that generated this figure separately
+                    st.markdown(f"**Question:** {query}")
                     # Display the figure
                     st.pyplot(fig)
                     plt.close(fig)  # Clean up the figure after displaying
