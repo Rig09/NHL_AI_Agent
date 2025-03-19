@@ -5,7 +5,7 @@ from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
 from langchain.tools import tool
 from chains.stats_sql_chain import get_chain
-from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get, shot_heat_map_get, goal_heat_map_get
+from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get, shot_heat_map_get, goal_heat_map_get, xg_heat_map_get
 from chains.rag_chains import get_cba_information, get_rules_information
 from chains.bio_info_chain import get_bio_chain
 from pydantic import BaseModel, Field
@@ -65,7 +65,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
     @tool(args_schema=goal_map_scatter_schema)
     def shot_heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a heatmap of the shots by the player or team or any other conditins specified in a given situation, season type and range of seasons. 
-        It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
+        Like goal_map_scatter it uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of shots, or a shot heatmap, it should invoke this tool"""
@@ -75,12 +75,22 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
     @tool(args_schema=goal_map_scatter_schema)
     def goal_heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
         """Returns a heatmap of the goals scored by the player or team or any other conditins specified, in a given situation, season type and range of seasons. 
-        It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
+        Like goal_map_scatter it uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of goals, or a goal heatmap, it should invoke this tool"""
         goal_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal heatmap generated successfully"
+    
+    @tool(args_schema=goal_map_scatter_schema)
+    def xg_heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+        """Returns a heatmap of the average expected goals in different locations by the player or team or any other conditins specified, in a given situation, season type and range of seasons. 
+        Like goal_map_scatter it uses the same schema and arguments.
+        if a situation is not provided, we will assume the situation to be all situations
+        if a season type is not provided, we will assume the season type to be regular season
+        if the user requests a heatmap of expected goals, or an xg heatmap or a expected goal heatmap, or something similar it should invoke this tool"""
+        xg_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        return "Expected Goal heatmap generated successfully"
 
     @tool(args_schema=rag_args_schema)
     def rule_getter(query: str):
@@ -122,6 +132,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         cba_getter,
         shot_heatmap_getter,
         goal_heatmap_getter,
+        xg_heatmap_getter,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
