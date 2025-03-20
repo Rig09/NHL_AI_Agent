@@ -69,7 +69,8 @@ sample_queries = [
     "Show me a heatmap of shots for the leafs on the powerplay in 2023-24",
     "Based on statistical evidence, Who is the best player in the NHL?",
     "generate a shot scatterplot of Auston Matthews shots in the 2023-24 season",
-    "Explain escrow in the NHL CBA"
+    "Explain escrow in the NHL CBA", 
+    "What were the top 10 pairs in terms of expected goals percentage with at least 50 minutes played together in the 2022-2023 season?",
 ]
 
 # Display sample queries as pills
