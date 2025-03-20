@@ -51,7 +51,7 @@ if "chat_history" not in st.session_state:
 
 st.set_page_config(page_title="NHL Stats Chatbot", page_icon="🏒", layout="wide")
 
-st.title("NHL Chatbot")
+st.title("NHL Chatbot 🏒")
 st.write("Credit [moneypuck.com](https://moneypuck.com/) for all the player, shot, line, and goalie data used in this project.")
 
 with st.expander("More about this chatbot"):
@@ -67,10 +67,10 @@ sample_queries = [
     "Generate an expected goal heatmap of all shots in the 2023-24 season",
     "Explain what determines whether a body check that makes head contact is legal or illegal",
     "Show me a heatmap of shots for the leafs on the powerplay in 2023-24",
-    "Based on statistical that you can access, Who is the best player in the NHL?",
-    "generate a shot scatterplot of Auston Matthews shots in the 2023-24 season",
+    "Based on statistical that you can access, who is the best player in the NHL?",
+    "Generate a shot scatterplot of Auston Matthews shots in the 2023-24 season",
     "Explain escrow in the NHL CBA", 
-    "top 10 pairs in terms of expected goals percentage with at least 50 minutes played together in 2022-2023",
+    "Top 10 pairs in terms of expected goals percentage with at least 50 minutes played together in 2022-2023",
     "How tall is Matt Rempe?"
 ]
 
