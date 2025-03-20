@@ -21,33 +21,26 @@ set_verbose(True)
 
 #print(db.run("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
-def get_chain(db, api_key):
+def get_sql_chain(db, api_key, llm):
 
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
-        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
+        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023', 'teamstats_regular_2023']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
-
-    def run_query(query, db):
-        return run_query_mysql(query, db)
 
     #print(run_query("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
-    # Initialize LLM
-    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
-
-
     template = """
     Based on the table schema below, generate a valid SQL query that answers the user's question. There are four different types of tables.
-    Tables for skaters, goalies, pairings, and lines. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
+    Tables for skaters, goalies, pairings, teams, and lines. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
     DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
     {schema}
+    If a request is to return an entire table, allways use the shots_data table.
 
-
-    For both skaters and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
+    For skaters, lines, pairs, teams, and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
     - Regular season → <playerType>Stats_regular_<year> 
     - Playoffs → <PlayerType>Stats_playoffs_<year>
-    where player type refers to whether the player is a skater, goalie, pairing, or line. 
+    where player type refers to whether the player is a skater, goalie, pairing, line, or team. 
 
     For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
@@ -78,7 +71,37 @@ def get_chain(db, api_key):
     If somone asks for a stat per 60 then find the number of that stat per 60 minutes of icetime. Reminder that icetime is stored in seconds.
 
     Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR".
-    DO NOT INCLUDE ``` in the response.
+
+    When using the shots_data table, the 'isHomeTeam' attribute can be used to determine the team, the shot is either taken by the home team or not. 
+    
+    Then use the 'homeTeamCode' and 'awayTeamCode' attributes to determine the team. If the home team took the shot, the shot is from the homeTeamCode.
+
+    When querying the shots_data table, the 'isPlayoffGame' attribute can be used to determine if the game is a playoff game or not. This takes the value 1 if it is a playoff game and 0 if it is a regular season game. 
+    To determine the strength when querying the shots_data table, use the 'awaySkatersOnIce', 'homeSkatersOnIce' attributes. Use the is_home_team to determine whether the shots are taken by the home or away team. 
+    If it is taken by the home team than the homeSkatersOnIce attribute comes first in the strenth. For example, if the shot is taken and isHomeTeam = 1, and awaySkatersOnIce = 4 and homeSkatersOnIce = 5, then the strength is 5on4. The first number corrisponds to the number of players on the ice that took the shot. 
+    Use that logic, to change queries to fit with the strength if it is passed asking for a query on the shots_data table.
+    
+
+    ALL GOALIE STATS SHOULD ONLY USE ROWS that have the situation 'all' unless otherwise specified. If someone asks what was <goalie name>'s save percentage, use the situation 'all' to find the save percentage. 
+    If someone asks for a leader in a statistic for goalies without specifying the situation, this is the leader in rows with the situation 'all'.
+
+    More information on goalies: If a user asks for goals saved above expected, this is the difference between the expected goals against and the actual goals against. or the Xgoals and goals columns. 
+    If someone asks for goals saved above expected per 60 minutes, divide the goals saved above expected by the icetime in minutes and multiply by 60.
+    if someone asks for goals saved above expected per expected goal faced, devide by the number of expected goals faced.
+    If someone asks for save percentage, this is the number of saves divided by the number of shots faced. The number of shots faced is the coloumn 'ongoal' in the goalies tables. The saves is this number minues the goals column. 
+    DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
+    For example: (ongoal - goals) / ongoal
+
+    DO NOT USE the danger level columns to make save percentage unless specifically asked for. The abseloute total of shots faced comes from 'ongoal'. To find save percentage, divide this number minus the goals column by itself.
+
+    Goals against average, is the goals against divided by the icetime in minutes and multiplied by 60.
+    If not specified assume the save percentage is for the situation 'all'.
+    When A user says with at least _ shots faced, they mean that the column 'ongoal' has a value greater than or equal to that number
+
+    The team table should only be used when a stat is being asked for an entire team. ie. "what team had the highest shooting percentage in the 2023-24 season." 
+    If someone asks who lead a team in a stat, still use the individual tables. Only use this table for team wide stats. Other than that, it is the same as the pairs, skaters, and goalie tables. Follow the same rules as you would for those.
+
+    DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
     """
@@ -110,6 +133,17 @@ def get_chain(db, api_key):
         | StrOutputParser()
         #|(lambda output: extract_sql_query(output)) 
     )
+    return sql_chain
+
+def get_chain(db, api_key, llm):
+    def run_query(query, db):
+        return run_query_mysql(query, db)
+    
+    def get_table_schema(db):
+        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
+        return get_table_info(db, relevent_tables) #return the schema of the first table in the list
+
+    sql_chain = get_sql_chain(db, api_key, llm)
 
     #print(sql_chain.invoke({"question": "How many goals did William Nylander score in the 2018 playoffs"}))
     #print(sql_chain.invoke({"question": "How many goals did Sidney Crosby score in the 2023 regular season?"})) #Test the first chain generating sql query
@@ -122,9 +156,10 @@ def get_chain(db, api_key):
     Quesiton: {question}
     SQL Query: {query}
     SQL Response: {response}
-
+    Please note that  Save percentage should be presented as a decimal value NOT AS A PERCENTAGE, for example 0.916. There should NEVER be percentage sign. It should have three decimal places.
+    So 91.6% would be 0.916. Never return with a percent sign for a goalie. Allways use a decimal value. NEVER use the form 91.6%. ONLY USE 0.916. This is counter intuitive but it is important convention. 
     """
-
+    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
     prompt = ChatPromptTemplate.from_template(template)
 
     full_chain = (
@@ -146,3 +181,4 @@ def get_chain(db, api_key):
     #print(full_chain.invoke({"question": "What pairing had the highest expected goals percentage with at least 100 minutes in 2023?"}))
 
     return full_chain
+    

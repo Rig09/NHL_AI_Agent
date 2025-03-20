@@ -99,14 +99,17 @@ def process_csv(file_path, table_name, season=None, is_playoff=None):
 # data_bio = "data/bio_information/allPlayersLookup.csv"
 # process_csv(data_bio, "BIO_Info")
 
-shots_data = "data/shots/shots_2015-2023.csv"
+shots_data = r'C:\Users\agjri\Desktop\NHL_agent\NHL_AI_Agent\data\shots\shots_2015-2023.csv'
 
 col_list = [
     'shotID', 'homeTeamCode', 'awayTeamCode', 'season', 'isPlayoffGame', 'game_id', 
     'homeTeamWon', 'id', 'time', 'period', 'team', 'xCord', 'yCord', 'location', 
-    'event', 'goal', 'shotDistance', 'shotType', 'shotOnEmptyNet', 'goalieIdForShot',
+    'event', 'goal', 'shotDistance', 'shotType', 'shotOnEmptyNet', 
     'goalieNameForShot', 'shooterPlayerId', 'shooterName', 'shooterLeftRight', 
-    'xCordAdjusted', 'yCordAdjusted', 'isHomeTeam', 'awaySkatersOnIce', 'homeSkatersOnIce', 'shotOnEmptyNet'
+    'xCordAdjusted', 'yCordAdjusted', 'isHomeTeam', 'awaySkatersOnIce', 'homeSkatersOnIce', 
+    'xGoal', 'homeTeamGoals', 'awayTeamGoals', 'shotAngle', 
+    'playerPositionThatDidEvent', 'shootingTeamForwardsOnIce', 'shootingTeamDefencemenOnIce', 
+    'defendingTeamForwardsOnIce', 'defendingTeamDefencemenOnIce'
 ]
 
 
