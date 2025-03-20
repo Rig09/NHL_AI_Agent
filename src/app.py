@@ -67,11 +67,11 @@ sample_queries = [
     "Generate an expected goal heatmap of all shots in the 2023-24 season",
     "Explain what determines whether a body check that makes head contact is legal or illegal",
     "Show me a heatmap of shots for the leafs on the powerplay in 2023-24",
-    "Based on statistical evidence, Who is the best player in the NHL?",
+    "Based on statistical that you can access, Who is the best player in the NHL?",
     "generate a shot scatterplot of Auston Matthews shots in the 2023-24 season",
     "Explain escrow in the NHL CBA", 
     "top 10 pairs in terms of expected goals percentage with at least 50 minutes played together in 2022-2023",
-    "How tall is Matt Rempe"
+    "How tall is Matt Rempe?"
 ]
 
 # Display sample queries as pills
