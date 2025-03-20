@@ -62,6 +62,18 @@ with st.expander("More about this chatbot"):
             \t 1. Scatterplots of shots or goals given custom conditions given by a user \n
             \t 2. A heatmap of shots, goals, or expected goals given custom conditions given by a user""")
 
+sample_queries = [
+    "Who lead the NHL in goals in the 2023-24 season?",
+    "Generate an expected goal heatmap of all shots in the 2023-24 season",
+    "Explain what determines whether a body check that makes head contact is legal or illegal",
+    "Show me a heatmap of shots for the leafs on the powerplay in 2023-24",
+    "Based on statistical evidence, Who is the best player in the NHL?",
+    "generate a shot scatterplot of Auston Matthews shots in the 2023-24 season"
+]
+
+# Display sample queries as pills
+selected_query = st.pills("Here are some examples of questions you can try:", sample_queries)
+
 # Display the chat history
 # Display the chat history
 for message in st.session_state.chat_history:
@@ -73,17 +85,6 @@ for message in st.session_state.chat_history:
             st.markdown(message.content)
 
 
-sample_queries = [
-    "Who lead the NHL in goals in the 2023-24 season?",
-    "Generate an expected goal heatmap of all shots in the 2023-24 season",
-    "Explain what determines whether a body check that makes head contact is legal or illegal",
-    "Show me a heatmap of shots for the leafs on the powerplay in 2023-24",
-    "Based on statistical evidence, Who is the best player in the NHL?",
-    "generate a shot scatterplot of Auston Matthews shots in the 2023-24 season"
-]
-
-# Display sample queries as pills
-selected_query = st.pills("Try a sample query:", sample_queries)
 
 # Handle user input and update the chat history
 user_query = st.chat_input("Type a message...")
