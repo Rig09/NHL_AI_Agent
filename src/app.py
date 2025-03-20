@@ -74,7 +74,12 @@ for message in st.session_state.chat_history:
 
 
 sample_queries = [
-    "Who Lead the NHL in goals in the 2023-24 season?"
+    "Who lead the NHL in goals in the 2023-24 season?",
+    "Generate an expected goal heatmap of all shots in the 2023-24 season",
+    "Explain what determines whether a body check that makes head contact is legal or illegal",
+    "Show me a heatmap of shots for the leafs on the powerplay in 2023-24",
+    "Based on statistical evidence, Who is the best player in the NHL?",
+    "generate a shot scatterplot of Auston Matthews shots in the 2023-24 season"
 ]
 
 # Display sample queries as pills
