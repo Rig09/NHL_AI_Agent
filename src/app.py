@@ -133,3 +133,5 @@ if user_query is not None and user_query.strip() != "":
             else:
                 st.error("An unexpected error occurred. Please try again later.")
                 st.write(f"Error details: {e}")
+    finally:
+        status.empty()  # Clears the status to hide the spinner
