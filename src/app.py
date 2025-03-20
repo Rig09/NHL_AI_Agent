@@ -70,7 +70,8 @@ sample_queries = [
     "Based on statistical evidence, Who is the best player in the NHL?",
     "generate a shot scatterplot of Auston Matthews shots in the 2023-24 season",
     "Explain escrow in the NHL CBA", 
-    "top 10 pairs in terms of expected goals percentage with at least 50 minutes played together in 2022-2023?",
+    "top 10 pairs in terms of expected goals percentage with at least 50 minutes played together in 2022-2023",
+    "How tall is Matt Rempe"
 ]
 
 # Display sample queries as pills
