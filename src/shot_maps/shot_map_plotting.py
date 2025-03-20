@@ -131,7 +131,7 @@ def goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     )
 
     goal_count = (player_shots['event'] == 'GOAL').sum()
-    ax.text(-0.35, 1.0, f"Total Goals: {goal_count}", 
+    ax.text(-0.35, 1.0, f"Non empty net goals: {goal_count}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
@@ -185,7 +185,7 @@ def shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, seaso
     # Calculate and display totals (moved up and to the left)
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    ax.text(-0.35, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}\nShooting Percentage: {goal_count/shot_count:.2%}", 
+    ax.text(-0.35, 1.0, f"Shots: {shot_count}\nNon empty net goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
     # # Title for the figure
@@ -237,7 +237,7 @@ def shot_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_u
     
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    ax.text(-0.35, 1.0, f"Total Shots: {shot_count}\nTotal Goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
+    ax.text(-0.35, 1.0, f"Shots: {shot_count}\nNon empty net goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
@@ -281,6 +281,11 @@ def goal_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_u
         cmap="bwr", alpha=0.8, plot_xlim=(0, 89),
         plot_range="offense", ax=ax, draw_kw={"display_range": "offense"}
     )
+
+    goal_count = (player_shots['event'] == 'GOAL').sum()
+    ax.text(-0.35, 1.0, f"Non empty net goals: {goal_count}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', 
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
     cbar = fig.colorbar(contour, ax=ax, orientation="horizontal")
     cbar.set_label("Number of Goals")
