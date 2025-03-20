@@ -52,7 +52,17 @@ if "chat_history" not in st.session_state:
 st.set_page_config(page_title="NHL Stats Chatbot", page_icon="🏒", layout="wide")
 
 st.title("NHL Stats Chatbot")
+st.write("Credit [moneypuck.com](https://moneypuck.com/) for all the player, shot, line, and goalie data used in this project.")
 
+if st.button("More about this chatbot"):
+    st.info("""This chatbot leverages Lang-chain and OpenAI's GPT-4 model to interact with user queries for information about the NHL.
+    The chatbot can answer questions about NHL statistics regarding teams, lines, players, and goalies. All of this data is sourced from moneypuck.com. As they allow non commercial use of their data.
+    The chatbot can aslo answer questions about game rules, and the collective bargaining agreement (CBA). Using the PDF files that can be found on the NHL website
+    In addition to answeing those questions, this chatbot can generate two types of plots: 
+            1. Scatterplots of shots or goals given custom conditions given by a user
+            2. A heatmap of shots, goals, or expected goals given custom conditions given by a user""")
+
+# Display the chat history
 # Display the chat history
 for message in st.session_state.chat_history:
     if isinstance(message, AIMessage):
