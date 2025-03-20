@@ -102,16 +102,14 @@ if user_query is not None and user_query.strip() != "":
     # Get response from the agent, passing the chat history
     try:
         with st.chat_message("AI"):
-            status = st.status("Processing your request... Please wait.")
-            # Pass the entire chat history to the agent
-            agent_input = "\n".join([message.content for message in st.session_state.chat_history])  # Join all messages
-            response = NHLStatsAgent.invoke({"input": agent_input})
-
-            # Check that the response contains the expected 'output' key
+            with st.spinner("processing..."):
+                # Pass the entire chat history to the agent
+                agent_input = "\n".join([message.content for message in st.session_state.chat_history])  # Join all messages
+                response = NHLStatsAgent.invoke({"input": agent_input})
+                # Check that the response contains the expected 'output' key
             if isinstance(response, dict) and "output" in response:
                 ai_response = response["output"]
-                
-                status.empty()
+
                 st.markdown(ai_response)
                 
                 # Append AI response to chat history
