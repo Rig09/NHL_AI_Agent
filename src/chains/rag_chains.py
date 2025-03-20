@@ -7,7 +7,7 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # TODO: Can make this more modular
-def get_rules_information(vector_db, api_key, llm, query: str) -> str:
+def get_rules_information(vector_db, llm, query: str) -> str:
 
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
@@ -31,7 +31,7 @@ def get_rules_information(vector_db, api_key, llm, query: str) -> str:
     return llm.invoke(messages).content
 
 
-def get_cba_information(vector_db, api_key, llm, query: str) -> str:
+def get_cba_information(vector_db, llm, query: str) -> str:
 
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",

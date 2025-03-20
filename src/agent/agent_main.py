@@ -112,7 +112,7 @@ def get_agent(db, rules_db, cba_db, llm):
         This includes hypothetical questions like 'what happens if a team goes over the cap with bonus'.
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
         If a specific component of the CBA is refrenced keep that in the response. For example the return may say per CBA Section 50.12(g)-(m). Keep that in the final response"""
-        return get_cba_information(cba_db, llm, query)
+        return get_cba_information(cba_db, llm, api_key, query)
 
     chain = get_chain(db, llm)
 
