@@ -112,7 +112,7 @@ def get_agent(db, rules_db, cba_db, llm):
         This includes hypothetical questions like 'what happens if a team goes over the cap with bonus'.
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
         If a specific component of the CBA is refrenced keep that in the response. For example the return may say per CBA Section 50.12(g)-(m). Keep that in the final response"""
-        return get_cba_information(cba_db, llm, api_key, query)
+        return get_cba_information(cba_db, llm, query)
 
     chain = get_chain(db, llm)
 
@@ -141,12 +141,9 @@ def get_agent(db, rules_db, cba_db, llm):
                             It will generate and perform an sql query on data from the 2015-2023 NHL seasons. Note someone may refer to a season using two years. So the 2023-24 season
                             also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language.
                             somtimes for a ratio statistic the tool will return too names if a minumum minutes or shots against is not given. Return both, unless they are the same person. 
-                            If the tool returns a decimal value do not turn it into a percentage. The decimal is convention even if the user asks for a percentage. The tool knows when to return a decimal and when to return a percentage.]
-                            the stat save percentage is presented as a decimal. DO not correct this.
-                            If the user asks for the goalie that lead in a stat that is a ratio (ie save percentage or goals saved above expected) Invoke this tool twice. Once to satisfy the query as is 
-                            and then a second time with the extra condition that the goalie faced at least 100 shots against. Return both of these answers.
-                            If the user asks for the skater that lead in a stat that is a ratio (i.e. expected goals percentage)Invoke this tool twice. Once to satisfy the query as is 
-                            and then a second time with the extra condition that the player played at least 100 minutes. Return both of these answers."""
+                            In the special case that the user asks for save percentage, despite the name, the tool will return a decimal. Keep that value as is. 
+                            If the tool returns a percentage or decimal, never change it. The tool knows correct conventions.
+                            If a user asks you to evaluate a player you can use this tool to get common statistics to measure performance. These include: goals, points, assists, expected goals percentage, ect."""
         ),
         Tool(
             name="Player_BIO_information",

@@ -157,7 +157,8 @@ def get_chain(db, llm):
     SQL Query: {query}
     SQL Response: {response}
     Please note that  Save percentage should be presented as a decimal value NOT AS A PERCENTAGE, for example 0.916. There should NEVER be percentage sign. It should have three decimal places.
-    So 91.6% would be 0.916. Never return with a percent sign for a goalie. Allways use a decimal value. NEVER use the form 91.6%. ONLY USE 0.916. This is counter intuitive but it is important convention. 
+    So 91.6% would be 0.916. Never return with a percent sign for a goalie. Allways use a decimal value. NEVER use the form 91.6%. ONLY USE 0.916. This is counter intuitive but it is important convention.
+    Do this only for save percentage. All other stats that are percentages are fine to return as a percentage. Use decimal only for save percentage. 
     """
     prompt = ChatPromptTemplate.from_template(template)
 
