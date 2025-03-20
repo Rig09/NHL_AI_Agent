@@ -21,7 +21,7 @@ set_verbose(True)
 
 #print(db.run("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
 
-def get_sql_chain(db, api_key, llm):
+def get_sql_chain(db, llm):
 
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
@@ -135,7 +135,7 @@ def get_sql_chain(db, api_key, llm):
     )
     return sql_chain
 
-def get_chain(db, api_key, llm):
+def get_chain(db, llm):
     def run_query(query, db):
         return run_query_mysql(query, db)
     
@@ -143,7 +143,7 @@ def get_chain(db, api_key, llm):
         relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
 
-    sql_chain = get_sql_chain(db, api_key, llm)
+    sql_chain = get_sql_chain(db, llm)
 
     #print(sql_chain.invoke({"question": "How many goals did William Nylander score in the 2018 playoffs"}))
     #print(sql_chain.invoke({"question": "How many goals did Sidney Crosby score in the 2023 regular season?"})) #Test the first chain generating sql query
@@ -159,7 +159,6 @@ def get_chain(db, api_key, llm):
     Please note that  Save percentage should be presented as a decimal value NOT AS A PERCENTAGE, for example 0.916. There should NEVER be percentage sign. It should have three decimal places.
     So 91.6% would be 0.916. Never return with a percent sign for a goalie. Allways use a decimal value. NEVER use the form 91.6%. ONLY USE 0.916. This is counter intuitive but it is important convention. 
     """
-    llm = ChatOpenAI(model_name="gpt-4o", api_key=api_key)
     prompt = ChatPromptTemplate.from_template(template)
 
     full_chain = (

@@ -42,7 +42,7 @@ def create_tool_wrapper(func, vector_db):
         return func(vector_db, query)
     return wrapper
 
-def get_agent(db, rules_db, cba_db, api_key, llm):
+def get_agent(db, rules_db, cba_db, llm):
 
     @tool(args_schema=goal_map_scatter_schema)
     def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
@@ -50,7 +50,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
@@ -59,7 +59,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
@@ -69,7 +69,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of shots, or a shot heatmap, it should invoke this tool"""
-        shot_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Shot heatmap generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
@@ -79,7 +79,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of goals, or a goal heatmap, it should invoke this tool"""
-        goal_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal heatmap generated successfully"
     
     @tool(args_schema=goal_map_scatter_schema)
@@ -89,7 +89,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of expected goals, or an xg heatmap or a expected goal heatmap, or something similar it should invoke this tool"""
-        xg_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        xg_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Expected Goal heatmap generated successfully"
 
     @tool(args_schema=rag_args_schema)
@@ -102,7 +102,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         Please keep those in the response.
         When THIS TOOL IS CALLED KEEP THE SPECIFIC RULE NUMBER IN THE RESPONSE 
         for example at the end of a response it could say (RULE 48.2) keep that rule refrence"""
-        return get_rules_information(rules_db, api_key, llm, query)
+        return get_rules_information(rules_db, llm, query)
 
     @tool(args_schema=rag_args_schema)
     def cba_getter(query: str):
@@ -112,9 +112,9 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         This includes hypothetical questions like 'what happens if a team goes over the cap with bonus'.
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
         If a specific component of the CBA is refrenced keep that in the response. For example the return may say per CBA Section 50.12(g)-(m). Keep that in the final response"""
-        return get_cba_information(cba_db, api_key, llm, query)
+        return get_cba_information(cba_db, llm, query)
 
-    chain = get_chain(db, api_key, llm)
+    chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
 
