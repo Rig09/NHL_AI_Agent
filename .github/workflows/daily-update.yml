@@ -3,7 +3,7 @@ name: Daily Update Script
 on:
   schedule:
     # This cron expression schedules the workflow to run every day at 7 AM UTC
-    - cron: '45 13 * * *'  # 1:45 PM UTC # 7 AM UTC, adjust if necessary to your timezone
+    - cron: '0 12 * * *'  # 12:00 PM UTC, which corresponds to 7:00 AM EST
   workflow_dispatch:  # Allows you to manually trigger the workflow if needed
 
 jobs:
