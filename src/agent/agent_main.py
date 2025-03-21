@@ -139,7 +139,7 @@ def get_agent(db, rules_db, cba_db, llm):
             description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. The tool should not be invoked with an sql query. 
                             It should be invoked with a natural language question about what statistics are needed to answer the user query.
                             It will generate and perform an sql query on data from the 2015-2024 NHL seasons. Note someone may refer to a season using two years. So the 2024-25 season
-                            also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language.
+                            also counts and should be invoke this tool. Questions about current statstics should use the 2024 season. If a question about that is asked, it will return a string with the answer to that question in natural language.
                             somtimes for a ratio statistic the tool will return too names if a minumum minutes or shots against is not given. Return both, unless they are the same person. 
                             In the special case that the user asks for save percentage, despite the name, the tool will return a decimal. Keep that value as is. 
                             If the tool returns a percentage or decimal, never change it. The tool knows correct conventions.

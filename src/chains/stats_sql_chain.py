@@ -25,7 +25,7 @@ def get_sql_chain(db, llm):
 
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
-        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2024', 'LineStats_playoffs_2023', 'PairStats_regular_2024', 'teamstats_regular_2023']
+        relevent_tables = ['SkaterStats_regular_2024', 'GoalieStats_regular_2024', 'LineStats_playoffs_2024', 'PairStats_regular_2024', 'teamstats_regular_2024']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
 
     #print(run_query("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
@@ -36,12 +36,14 @@ def get_sql_chain(db, llm):
     DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
     {schema}
     If a request is to return an entire table, allways use the shots_data table.
+   
 
     For skaters, lines, pairs, teams, and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
     - Regular season → <playerType>Stats_regular_<year> 
     - Playoffs → <PlayerType>Stats_playoffs_<year>
     where player type refers to whether the player is a skater, goalie, pairing, line, or team. 
 
+    
     For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
     If a question is given in present tense, assume the user is asking about 2024-25. If no season is given, assume the user is asking about the 2024-25 season.
@@ -51,6 +53,9 @@ def get_sql_chain(db, llm):
     If someone asks what 'pair', 'defensive pairing', 'd pair', or 'pairing' they mean defensive pairing from the PairStats_regular_<year> or PairStats_playoffs_<year> tables.
     If someone asks what 'line' they mean forward line from the lineStats_regular_<year> or lineStats_playoffs_<year> tables.
 
+    The current season is the 2024-25 season. Use this season for current stats. When no season is provided or it is unclear what season is being refered to, Use 2024. 
+    If someone asks, 'what pair leads the NHL in expected goals percentage with at least 50 minutes played" Then this means to query the PairStats_regular_2024 and find the highest expected goals percentage with at least 50 minutes played.
+    
     Use correct stat terms:
     - "Even strength" → "5on5", "Power play" → "5on4", "Shorthanded" → "4on5", "All situations" → "All". If strength is not defined use 'all' Do not add the total of multiple strengths together.
     If no strength is defined search in 'all' not all strengths combined. So if someone asks how many goals did a player score. The query should include where situation = 'all'  
@@ -103,6 +108,9 @@ def get_sql_chain(db, llm):
     The team table should only be used when a stat is being asked for an entire team. ie. "what team had the highest shooting percentage in the 2023-24 season." 
     If someone asks who lead a team in a stat, still use the individual tables. Only use this table for team wide stats. Other than that, it is the same as the pairs, skaters, and goalie tables. Follow the same rules as you would for those.
 
+    It is very common that someone may ask for a statistic with at least a number of minutes played. This measn that the player, line, or pair must have played at least that number of minutes. This can be determined with the icetime column. 
+    Reminder that this column is stored in seconds. Convert a minumum number of minutes to seconds by multiplying by 60. Use this for the SQL query.
+
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
@@ -141,9 +149,11 @@ def get_chain(db, llm):
     def run_query(query, db):
         return run_query_mysql(query, db)
     
+    #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
-        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023']
+        relevent_tables = ['SkaterStats_regular_2024', 'GoalieStats_regular_2024', 'LineStats_playoffs_2024', 'PairStats_regular_2024', 'teamstats_regular_2024']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
+
 
     sql_chain = get_sql_chain(db, llm)
 
