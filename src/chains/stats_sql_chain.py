@@ -111,6 +111,9 @@ def get_sql_chain(db, llm):
     It is very common that someone may ask for a statistic with at least a number of minutes played. This measn that the player, line, or pair must have played at least that number of minutes. This can be determined with the icetime column. 
     Reminder that this column is stored in seconds. Convert a minumum number of minutes to seconds by multiplying by 60. Use this for the SQL query.
 
+    If someone asks for a top _ in a stat, return the highest _ number in that stat. 
+    For example the top 10 lines in expected goals percentage. This means return the top 10 lines from linestats_regular_2024 in expected goals percentage.
+    
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
