@@ -17,12 +17,12 @@ class goal_map_scatter_schema(BaseModel):
                                     Often a season can be refered to using two different years since it takes place on either side of new years,  like 'in the 2020-2021 season', 
                                     pass the first year as the argument. Another way this could be done is by only using the last two numbers of the second year. For example 2020-21 means pass '2020'
                                     Pass this as ONLY the integer value. So if the user asks for the 2022 season. Pass the argument '2022'. That said, if someone asks for a stat in the 2023 playoffs, they are refering to the 2022-23 season. So use 2022 as the season.
-                                    DO NOT PASS 'Season 2022' Pass '2022'. When a range of seasons is provided like, 'from the 2015 to 2023 season generate a scatterplot' 
+                                    DO NOT PASS 'Season 2022' Pass '2022'. When a range of seasons is provided like, 'from the 2015 to 2024 season generate a scatterplot' 
                                     This is the lower bound of the range. ie. the older year should be this value.'""")
     season_upper_bound: int = Field(title="Season_upper_bound", description="""The second season in the range of seasons to generate the goal map scatter plot for. 
                                     If only a single season is provided like 'generate a scatterplot for the 2022-23 season' then this value should be the same as season_lower_bound. 
                                     If there is a range of seasons in the request, then this should be the newest year. For example if someone asks 'generate a scatterplot for goals from the 2017-2023 seasons' 
-                                    then this would take the value 2023. Someone may also say, 'generate a scatterplot from 2017-18 to 2022-23. Then the value of this would be 2022. Allways pass the fist year 
+                                    then this would take the value 2024. Someone may also say, 'generate a scatterplot from 2017-18 to 2022-23. Then the value of this would be 2022. Allways pass the fist year 
                                     if the season is given as multiple years. Interperate whether a range of seasons or single season is being requested. If it is a range, the upper bound should be this value.
                                     If it is a single, this value should be the same as lower_bound_season. Also note that if someone asks for a stat that is in the 2024 playoffs. This is actually from the season 2023-24.
                                     DO NOT PASS 'Season 2022' Pass '2022'""")
@@ -42,54 +42,54 @@ def create_tool_wrapper(func, vector_db):
         return func(vector_db, query)
     return wrapper
 
-def get_agent(db, rules_db, cba_db, api_key, llm):
+def get_agent(db, rules_db, cba_db, llm):
 
     @tool(args_schema=goal_map_scatter_schema)
-    def goal_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    def goal_map_scatter(conditions, season_lower_bound =2024, season_upper_bound=2024, season_type = "regular", situation = "all"):
         """Returns a scatterplot of the goals scored by a player or team or any other conditins specifiedin a given situation, season type and range of seasons. 
         The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        goal_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
-    def shot_map_scatter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    def shot_map_scatter(conditions, season_lower_bound =2024, season_upper_bound=2024, season_type = "regular", situation = "all"):
         """Returns a scatterplot of the shots by a  player or team or any other conditins specified in a given situation, season type and range of seasons. 
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        shot_map_scatter_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
-    def shot_heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    def shot_heatmap_getter(conditions, season_lower_bound =2024, season_upper_bound=2024, season_type = "regular", situation = "all"):
         """Returns a heatmap of the shots by the player or team or any other conditins specified in a given situation, season type and range of seasons. 
         Like goal_map_scatter it uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of shots, or a shot heatmap, it should invoke this tool"""
-        shot_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Shot heatmap generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
-    def goal_heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    def goal_heatmap_getter(conditions, season_lower_bound =2024, season_upper_bound=2024, season_type = "regular", situation = "all"):
         """Returns a heatmap of the goals scored by the player or team or any other conditins specified, in a given situation, season type and range of seasons. 
         Like goal_map_scatter it uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of goals, or a goal heatmap, it should invoke this tool"""
-        goal_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal heatmap generated successfully"
     
     @tool(args_schema=goal_map_scatter_schema)
-    def xg_heatmap_getter(conditions, season_lower_bound =2023, season_upper_bound=2023, season_type = "regular", situation = "all"):
+    def xg_heatmap_getter(conditions, season_lower_bound =2024, season_upper_bound=2024, season_type = "regular", situation = "all"):
         """Returns a heatmap of the average expected goals in different locations by the player or team or any other conditins specified, in a given situation, season type and range of seasons. 
         Like goal_map_scatter it uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of expected goals, or an xg heatmap or a expected goal heatmap, or something similar it should invoke this tool"""
-        xg_heat_map_get(db, api_key, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        xg_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Expected Goal heatmap generated successfully"
 
     @tool(args_schema=rag_args_schema)
@@ -102,7 +102,7 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         Please keep those in the response.
         When THIS TOOL IS CALLED KEEP THE SPECIFIC RULE NUMBER IN THE RESPONSE 
         for example at the end of a response it could say (RULE 48.2) keep that rule refrence"""
-        return get_rules_information(rules_db, api_key, llm, query)
+        return get_rules_information(rules_db, llm, query)
 
     @tool(args_schema=rag_args_schema)
     def cba_getter(query: str):
@@ -112,9 +112,9 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
         This includes hypothetical questions like 'what happens if a team goes over the cap with bonus'.
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
         If a specific component of the CBA is refrenced keep that in the response. For example the return may say per CBA Section 50.12(g)-(m). Keep that in the final response"""
-        return get_cba_information(cba_db, api_key, llm, query)
+        return get_cba_information(cba_db, llm, query)
 
-    chain = get_chain(db, api_key, llm)
+    chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
 
@@ -138,15 +138,12 @@ def get_agent(db, rules_db, cba_db, api_key, llm):
             func=lambda input, **kwargs: chain.invoke({"question": input}),
             description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. The tool should not be invoked with an sql query. 
                             It should be invoked with a natural language question about what statistics are needed to answer the user query.
-                            It will generate and perform an sql query on data from the 2015-2023 NHL seasons. Note someone may refer to a season using two years. So the 2023-24 season
+                            It will generate and perform an sql query on data from the 2015-2024 NHL seasons. Note someone may refer to a season using two years. So the 2024-25 season
                             also counts and should be invoke this tool. If a question about that is asked, it will return a string with the answer to that question in natural language.
                             somtimes for a ratio statistic the tool will return too names if a minumum minutes or shots against is not given. Return both, unless they are the same person. 
-                            If the tool returns a decimal value do not turn it into a percentage. The decimal is convention even if the user asks for a percentage. The tool knows when to return a decimal and when to return a percentage.]
-                            the stat save percentage is presented as a decimal. DO not correct this.
-                            If the user asks for the goalie that lead in a stat that is a ratio (ie save percentage or goals saved above expected) Invoke this tool twice. Once to satisfy the query as is 
-                            and then a second time with the extra condition that the goalie faced at least 100 shots against. Return both of these answers.
-                            If the user asks for the skater that lead in a stat that is a ratio (i.e. expected goals percentage)Invoke this tool twice. Once to satisfy the query as is 
-                            and then a second time with the extra condition that the player played at least 100 minutes. Return both of these answers."""
+                            In the special case that the user asks for save percentage, despite the name, the tool will return a decimal. Keep that value as is. 
+                            If the tool returns a percentage or decimal, never change it. The tool knows correct conventions.
+                            If a user asks you to evaluate a player you can use this tool to get common statistics to measure performance. These include: goals, points, assists, expected goals percentage, ect."""
         ),
         Tool(
             name="Player_BIO_information",

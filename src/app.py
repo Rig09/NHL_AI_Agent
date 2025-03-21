@@ -42,11 +42,11 @@ if "database" not in st.session_state:
     cba_db = init_vector_db('cba', open_ai_key)
 
 if "agent_chain" not in st.session_state:
-    NHLStatsAgent = get_agent(db, rules_db, cba_db, open_ai_key, llm=ChatOpenAI(model="gpt-4o", api_key=open_ai_key))
+    NHLStatsAgent = get_agent(db, rules_db, cba_db, llm=ChatOpenAI(model="gpt-4o", api_key=open_ai_key))
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
-        AIMessage(content="Welcome to the NHL Stats Chatbot! Ask me anything about NHL statistics and I will do my best to answer your questions!")
+        AIMessage(content="Welcome to the NHL Chatbot! Ask me anything about the NHL I will do my best to answer your questions!")
     ]
 
 st.set_page_config(page_title="NHL Stats Chatbot", page_icon="🏒", layout="wide")
@@ -102,13 +102,14 @@ if user_query is not None and user_query.strip() != "":
     # Get response from the agent, passing the chat history
     try:
         with st.chat_message("AI"):
-            # Pass the entire chat history to the agent
-            agent_input = "\n".join([message.content for message in st.session_state.chat_history])  # Join all messages
-            response = NHLStatsAgent.invoke({"input": agent_input})
-
-            # Check that the response contains the expected 'output' key
+            with st.spinner("processing..."):
+                # Pass the entire chat history to the agent
+                agent_input = "\n".join([message.content for message in st.session_state.chat_history])  # Join all messages
+                response = NHLStatsAgent.invoke({"input": agent_input})
+                # Check that the response contains the expected 'output' key
             if isinstance(response, dict) and "output" in response:
                 ai_response = response["output"]
+
                 st.markdown(ai_response)
                 
                 # Append AI response to chat history
