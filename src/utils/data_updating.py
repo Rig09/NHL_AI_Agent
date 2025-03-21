@@ -138,15 +138,31 @@ def process_shots_data(zip_url, table_name):
     else:
         print(f"⚠ File not found: {csv_file_path}")
 
-# Process each CSV and upload to MySQL
+def process_lines_csv(url, table_name):
+    # Download the CSV file into memory
+    df = download_csv(url)
+    
+    if df is not None:
+        # Separate into lines and pairs
+        df_lines = df[df["position"] == "line"]  # Filter rows for lines
+        df_pairs = df[df["position"] == "pairing"]  # Filter rows for pairings
+        
+        # Now, handle lines (just like the other DataFrames)
+        update_table(df_lines, f"{table_name}")  # Update the 'lines' table
+        
+        # Handle pairs (just like the other DataFrames)
+        update_table(df_pairs, f"pairstats_regular_2024")  # Update the 'pairs' table
+        
+        print(f"✔ Lines and pairs data from {table_name} processed and added to database.")
+
+
+# Modify the main processing loop to handle the linestats_regular_2024 URL differently
 for table_name, url in urls.items():
-    if "shots_data" in table_name:  # Process the ZIP for shots_data
+    if "linestats_regular_2024" in table_name:
+        process_lines_csv(url, table_name)
+    elif "shots_data" in table_name:  # Process the ZIP for shots_data
         process_shots_data(url, table_name)
     else:
         process_csv(url, table_name)
 
 print("All specified tables have been updated in the database.")
-
-# Close connection
-cursor.close()
-conn.close()
