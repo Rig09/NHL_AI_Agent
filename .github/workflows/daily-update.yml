@@ -33,5 +33,5 @@ jobs:
 
     - name: Download and run script
       run: |
-        curl -L https://github.com/Rig09/NHL_AI_Agent/src/utils/data_updating.py -o data_updating.py
+        curl -L https://raw.githubusercontent.com/Rig09/NHL_AI_Agent/main/src/utils/data_updating.py -o data_updating.py
         python data_updating.py
