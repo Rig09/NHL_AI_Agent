@@ -25,7 +25,7 @@ def get_sql_chain(db, llm):
 
     #database functions. Get information from the databases to be used in the chain
     def get_table_schema(db):
-        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2023', 'LineStats_playoffs_2023', 'PairStats_regular_2023', 'teamstats_regular_2023']
+        relevent_tables = ['SkaterStats_regular_2023', 'GoalieStats_regular_2024', 'LineStats_playoffs_2023', 'PairStats_regular_2024', 'teamstats_regular_2023']
         return get_table_info(db, relevent_tables) #return the schema of the first table in the list
 
     #print(run_query("SELECT * FROM RegularSeason2023 LIMIT 1")) # Test the database connection
@@ -44,6 +44,8 @@ def get_sql_chain(db, llm):
 
     For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
+    If a question is given in present tense, assume the user is asking about 2024-25. If no season is given, assume the user is asking about the 2024-25 season.
+    For example if someone asks "Who leads the NHL in Goals" this would be the same as "who lead the NHL in goals in the 2024-25 season"
     If someone does not specify the season type assume the season is regular.
 
     If someone asks what 'pair', 'defensive pairing', 'd pair', or 'pairing' they mean defensive pairing from the PairStats_regular_<year> or PairStats_playoffs_<year> tables.
