@@ -94,9 +94,6 @@ if user_query is not None and user_query.strip() != "":
 
     # Set loading state and display temporary message
     st.session_state["loading"] = True
-    with st.chat_message("AI"):
-        st.markdown("Thinking... Please wait.")
-
     try:
         with st.chat_message("AI"):
             with st.spinner("processing..."):
