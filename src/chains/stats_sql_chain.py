@@ -46,8 +46,7 @@ def get_sql_chain(db, llm):
 
     A query for a shots table will often take the follwing form:
                                 return from the shots_data table with all of the columns in the table  intact, Given the conditions: followed by some conditions like "shots by the Florida pathers", 
-                                In the seasons between (a lower bound) for seasons to (an upper bound for seasons). For this query please use the _ (powerplay, even strength, shorthanded, or all situations) is how it will be passed you can infer these with your knowledge of the dataset.
-                                Return the list of shots so they can be put into a dataframe.
+                                In the seasons between (a lower bound) for seasons to (an upper bound for seasons).
 
     For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
