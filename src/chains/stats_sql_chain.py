@@ -36,14 +36,19 @@ def get_sql_chain(db, llm):
     DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
     {schema}
     If a request is to return an entire table, allways use the shots_data table.
-   
-
+    If a request is made for shots by toronto maple leafs or shots my leafs players, or something similar, use the shots_data table. Get all shots where the team is the toronto maple leafs.
+    Reminder that if a query especially for a table asks for shots between two years that are the same, for example between 2023 and 2023. This means all shots in the 2023 season. Treat this as an equality.
+    
     For skaters, lines, pairs, teams, and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
     - Regular season → <playerType>Stats_regular_<year> 
     - Playoffs → <PlayerType>Stats_playoffs_<year>
     where player type refers to whether the player is a skater, goalie, pairing, line, or team. 
 
-    
+    A query for a shots table will often take the follwing form:
+                                return from the shots_data table with all of the columns in the table  intact, Given the conditions: followed by some conditions like "shots by the Florida pathers", 
+                                In the seasons between (a lower bound) for seasons to (an upper bound for seasons). For this query please use the _ (powerplay, even strength, shorthanded, or all situations) is how it will be passed you can infer these with your knowledge of the dataset.
+                                Return the list of shots so they can be put into a dataframe.
+
     For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
     If a question is given in present tense, assume the user is asking about 2024-25. If no season is given, assume the user is asking about the 2024-25 season.
