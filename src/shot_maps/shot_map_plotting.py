@@ -38,12 +38,13 @@ def extract_shot_data(db, llm, conditions, season_lower_bound, season_upper_boun
     # AND season <= {season_upper_bound}
     # """
     template_for_sql_query = f"""return from the shots_data table with all of the columns in the table  intact, Given the conditions: {conditions}, In the seasons between {season_lower_bound} to {season_upper_bound}.
-                                Return the list of shots so they can be put into a dataframe. Also note to find the team of a shot, compare home team with is_home the attribute."""
+                                Return the list of shots so they can be put into a dataframe."""
     
     query = sql_chain.invoke({"question" : template_for_sql_query})
+    print(query)
     shot_data = pd.DataFrame(run_query_mysql(query, db))
     if shot_data.empty:
-        raise ValueError("There was an error with the query. Please try again with a different query.")
+        raise ValueError("There was an error with the query. Please try again with a different query. The query generated was : {query}")
     # Filter for the player name
     # shot_data = shot_data[shot_data['shooterName'] == player_name]
 

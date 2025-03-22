@@ -35,7 +35,7 @@ def get_sql_chain(db, llm):
     Tables for skaters, goalies, pairings, teams, and lines. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
     DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
     {schema}
-    If a request is to return an entire table, allways use the shots_data table.
+    If a request is to return a list of shots allways use the shots_data table. This request wants to return a list of shots given some conditions. This list will be made into a dataframe, so make sure it is returned in a format that can be put into a dataframe.
     If a request is made for shots by toronto maple leafs or shots my leafs players, or something similar, use the shots_data table. Get all shots where the team is the toronto maple leafs.
     Reminder that if a query especially for a table asks for shots between two years that are the same, for example between 2023 and 2023. This means all shots in the 2023 season. Treat this as an equality.
     
@@ -44,9 +44,13 @@ def get_sql_chain(db, llm):
     - Playoffs → <PlayerType>Stats_playoffs_<year>
     where player type refers to whether the player is a skater, goalie, pairing, line, or team. 
 
-    A query for a shots table will often take the follwing form:
-                                return from the shots_data table with all of the columns in the table  intact, Given the conditions: followed by some conditions like "shots by the Florida pathers", 
-                                In the seasons between (a lower bound) for seasons to (an upper bound for seasons).
+    A query for a shots table will often take the follwing form: return from the shots_data table with all of the columns in the table  intact, Given the conditions: followed by some conditions like "shots by the Florida pathers", 
+    In the seasons between (a lower bound) for seasons to (an upper bound for seasons). 
+    
+    
+    For example the query: return from the shots_data table with all of the columns in the table  intact, Given the conditions: shots by the Florida panthers In the seasons between 2023 to 2023.  
+    Return the list of shots so they can be put into a dataframe.
+    This would be the same as : return a list of all shots taken by the florida panthers in the 2023 season.
 
     For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
@@ -175,6 +179,7 @@ def get_chain(db, llm):
     Quesiton: {question}
     SQL Query: {query}
     SQL Response: {response}
+
     Please note that  Save percentage should be presented as a decimal value NOT AS A PERCENTAGE, for example 0.916. There should NEVER be percentage sign. It should have three decimal places.
     So 91.6% would be 0.916. Never return with a percent sign for a goalie. Allways use a decimal value. NEVER use the form 91.6%. ONLY USE 0.916. This is counter intuitive but it is important convention.
     Do this only for save percentage. All other stats that are percentages are fine to return as a percentage. Use decimal only for save percentage. 
