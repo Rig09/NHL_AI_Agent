@@ -135,7 +135,7 @@ def process_shots_data(zip_url, table_name):
         new_records = merged[merged['_merge'] == 'left_only'].drop('_merge', axis=1)
 
         # Write to MySQL (replace table each time)
-        df.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
+        new_records.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
         print(f"✔ Data saved in table '{table_name}'")
         
         # Clean up the extracted files
