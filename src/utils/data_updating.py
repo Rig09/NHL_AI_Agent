@@ -129,6 +129,11 @@ def process_shots_data(zip_url, table_name):
         # Keep only the required columns
         df = df[required_columns]
 
+        existing_data = get_existing_data(table_name)
+
+        merged = pd.merge(df, existing_data[['shotID']], how="left", on="shotID", indicator=True)
+        new_records = merged[merged['_merge'] == 'left_only'].drop('_merge', axis=1)
+
         # Write to MySQL (replace table each time)
         df.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
         print(f"✔ Data saved in table '{table_name}'")
