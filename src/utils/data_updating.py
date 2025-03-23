@@ -130,7 +130,7 @@ def process_shots_data(zip_url, table_name):
         df = df[required_columns]
 
         # Write to MySQL (replace table each time)
-        df.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
+        df.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
         print(f"✔ Data saved in table '{table_name}'")
         
         # Clean up the extracted files

@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
+print("running the file")
 load_dotenv()
 
 # Retrieve MySQL connection details from environment variables
@@ -20,11 +21,11 @@ conn = mysql.connector.connect(
     password=MYSQL_PASSWORD
 )
 cursor = conn.cursor()
-
+print("connected")
 # Create database if it doesn't exist
-cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE};")
+#cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE};")
 cursor.execute(f"USE {MYSQL_DATABASE};")
-
+print("using db")
 # Define seasons to process
 seasons = range(2015, 2024)  # Adjust range as needed
 
@@ -43,8 +44,9 @@ seasons = range(2015, 2024)  # Adjust range as needed
 #     print(f"✔ Dropped table '{table_name}'")
 
 # Use SQLAlchemy for Pandas `.to_sql()` with MySQL
+print("got to engine create")
 engine = create_engine(f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}")
-
+print("created")
 # Function to process CSV files and save to MySQL
 def process_csv(file_path, table_name, season=None, is_playoff=None):
     if os.path.exists(file_path):
@@ -122,7 +124,7 @@ shots_df['season'] = shots_df['season'].astype(int)
 # Save filtered data to a temporary file
 filtered_shots_file = "filtered_shots.csv"
 shots_df.to_csv(filtered_shots_file, index=False)
-
+print("got to process csv call")
 # Process CSV
 process_csv(filtered_shots_file, "shots_data")
 
