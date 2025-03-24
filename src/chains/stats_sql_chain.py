@@ -52,6 +52,8 @@ def get_sql_chain(db, llm):
 
     If someone asks what 'pair', 'defensive pairing', 'd pair', or 'pairing' they mean defensive pairing from the PairStats_regular_<year> or PairStats_playoffs_<year> tables.
     If someone asks what 'line' or 'forward line'  they mean forward line from the lineStats_regular_<year> or lineStats_playoffs_<year> tables.
+    pairs and lines contain multiple names that are stored in a hyphonated way like, name1-name2-name3 or just name1-name2. To account for different orders being inputed, use: 
+    WHERE name LIKE '%name1%' AND name LIKE '%name2%' AND name LIKE '%name3%'; This is the way to find the line since the names may be in different orders.
 
     The current season is the 2024-25 season. Use this season for current stats. When no season is provided or it is unclear what season is being refered to, Use 2024. 
     If someone asks, 'what pair leads the NHL in expected goals percentage with at least 50 minutes played" Then this means to query the PairStats_regular_2024 and find the highest expected goals percentage with at least 50 minutes played.
@@ -114,8 +116,6 @@ def get_sql_chain(db, llm):
     If someone asks for a top _ in a stat, return the highest _ number in that stat. 
     For example the top 10 lines in expected goals percentage. This means return the top 10 lines from linestats_regular_2024 in expected goals percentage.
     
-    When someone asks about a forward line or pair information, put a dash between each name. For example, if someone asks for example: How many goals does the knies matthews marner line have, then this will be stored as knies-matthews-marner.
-    If a user does not have these dashes in their question, allways include them in the SQL query. Otherwise the return will be empty.
     This is the same for defensive pairings. For example if someone asks for the expected goals percentage of the makar toews pairing, this should be interperated as the makar-toews pairing.
     Despite adding the dashes, keep the order of the names the same. So for the line example that would be Knies-Matthews-Marner or for the pairs example Makar-Toews
     This should look in the name column for the line specified. 
@@ -130,7 +130,7 @@ def get_sql_chain(db, llm):
 
     For example if someone asks, Where does knies matthews marner rank for forward lines in expected goals percentage? the SQL query should be:
 
-    'SELECT `rank`, xGoalsPercentage FROM (SELECT name, RANK() OVER (ORDER BY xGoalsPercentage DESC) AS `rank`, xGoalsPercentage FROM LineStats_regular_2024) AS ranked_data WHERE name = 'Knies-Matthews-Marner''
+    'SELECT `rank`, xGoalsPercentage FROM (SELECT name, RANK() OVER (ORDER BY xGoalsPercentage DESC) AS `rank`, xGoalsPercentage FROM LineStats_regular_2024) AS ranked_data WHERE name LIKE '%Knies%' AND name LIKE '%Matthews%' AND name LIKE '%Marner%';
 
     If someone requests where a skater, line, pairing, or team ranks among _. This is asking for where they are in a list sorted by the stat they are asking for, where all the things in the list meet a certain condition. For example:
     Where does Makar-Toews rank in expected goals percentage among defense pairs with at least 150 minutes. Means where in the list of pairs with over 150 minutes do they rank in expected goals perecentage. 

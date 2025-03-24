@@ -145,8 +145,6 @@ def get_agent(db, rules_db, cba_db, llm):
                             In the special case that the user asks for save percentage, despite the name, the tool will return a decimal. Keep that value as is. 
                             If the tool returns a percentage or decimal, never change it. The tool knows correct conventions.
                             If a user asks you to evaluate a player you can use this tool to get common statistics to measure performance. These include: goals, points, assists, expected goals percentage, ect.
-                            If a user asks for a statistic about a line or defensive pair, for example the 'Mccabe Tanev pair' or the 'kucherov point hagel line' and this tool returns nothing, then reinvoke this tool with the names in a different order. Do this until every order has been tried.
-                            The tool will only return a result in the correct order, but there is no way of knowing what that is. Try until every order fails, or you recieve a response with stat information.
                             This tool should be invoked to determine the rank of a line, pair, skater, or team in a statistic. Include the ask for this ranking when invoking this tool.
                             For example: if the user asks where does the Makar-Toews pairing rank in expected goals percentage, YOU MUST PASS THAT YOU WOULD LIKE THE RANKING. Pass: ranking for Makar Toews pairing in expected goals percentage.
                             Also infer similair meanings to what rank, like what place are they in, or where are they in the league ect. pass those asking for a ranking."""
