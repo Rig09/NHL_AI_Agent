@@ -146,7 +146,9 @@ def get_agent(db, rules_db, cba_db, llm):
                             If the tool returns a percentage or decimal, never change it. The tool knows correct conventions.
                             If a user asks you to evaluate a player you can use this tool to get common statistics to measure performance. These include: goals, points, assists, expected goals percentage, ect.
                             If a user asks for a statistic about a line or defensive pair, for example the 'Mccabe Tanev pair' or the 'kucherov point hagel line' and this tool returns nothing, then reinvoke this tool with the names in a different order. Do this until every order has been tried.
-                            The tool will only return a result in the correct order, but there is no way of knowing what that is. Try until every order fails, or you recieve a response with stat information."""
+                            The tool will only return a result in the correct order, but there is no way of knowing what that is. Try until every order fails, or you recieve a response with stat information.
+                            If a user asks for a raiting in a statistic or how high they are in the best in a stat, and they are top 15 in that stat after asking the tool. 
+                            Then reinvoke the tool to list of the top 15 of the asked for statistic."""
         ),
         Tool(
             name="Player_BIO_information",
