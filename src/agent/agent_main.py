@@ -144,7 +144,9 @@ def get_agent(db, rules_db, cba_db, llm):
                             somtimes for a ratio statistic the tool will return too names if a minumum minutes or shots against is not given. Return both, unless they are the same person. 
                             In the special case that the user asks for save percentage, despite the name, the tool will return a decimal. Keep that value as is. 
                             If the tool returns a percentage or decimal, never change it. The tool knows correct conventions.
-                            If a user asks you to evaluate a player you can use this tool to get common statistics to measure performance. These include: goals, points, assists, expected goals percentage, ect."""
+                            If a user asks you to evaluate a player you can use this tool to get common statistics to measure performance. These include: goals, points, assists, expected goals percentage, ect.
+                            If a user asks for a statistic about a line or defensive pair, for example the 'Mccabe Tanev pair' or the 'kucherov point hagel line' and this tool returns nothing, then reinvoke this tool with the names in a different order. Do this until every order has been tried.
+                            The tool will only return a result in the correct order, but there is no way of knowing what that is. Try until every order fails, or you recieve a response with stat information."""
         ),
         Tool(
             name="Player_BIO_information",

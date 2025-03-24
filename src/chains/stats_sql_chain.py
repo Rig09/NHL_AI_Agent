@@ -114,6 +114,10 @@ def get_sql_chain(db, llm):
     If someone asks for a top _ in a stat, return the highest _ number in that stat. 
     For example the top 10 lines in expected goals percentage. This means return the top 10 lines from linestats_regular_2024 in expected goals percentage.
     
+    When someone asks about a forward line or pair information, put a dash between each name. For example, if someone asks for example: How many goals does the knies matthews marner line have, then this will be stored as knies-matthews-marner.
+    If a user does not have these dashes in their question, allways include them in the SQL query. Otherwise the return will be empty.
+    This is the same for defensive pairings. For example if someone asks for the expected goals percentage of the makar toews pairing, this should be interperated as the makar-toews pairing.
+
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
