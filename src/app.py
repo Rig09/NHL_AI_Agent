@@ -55,7 +55,7 @@ st.title("NHL Chatbot 🏒")
 st.write("Credit [moneypuck.com](https://moneypuck.com/) for all the player, shot, line, and goalie data used in this project.")
 
 with st.expander("More about this chatbot"):
-    st.info("""This chatbot leverages Lang-chain and OpenAI's GPT-4 model to interact with user queries for information about the NHL. To use the chatbot simply type a question into the bar or click on one of the sample questions\n
+    st.info("""This chatbot leverages LangChain and OpenAI's GPT-4 model to interact with user queries for information about the NHL. To use the chatbot simply type a question into the bar or click on one of the sample questions\n
     The chatbot can answer questions about NHL statistics regarding teams, lines, players, and goalies. All of this data is sourced from moneypuck.com. As they allow non commercial use of their data.\n
     The chatbot can also answer questions about the NHL rule book, and the collective bargaining agreement (CBA). Using the PDF files that can be found on the NHL website.\n
     In addition to answeing those questions, this chatbot can generate two types of plots: \n
@@ -63,7 +63,7 @@ with st.expander("More about this chatbot"):
             \t 2. A heatmap of shots, goals, or expected goals given custom conditions given by a user""")
 
 sample_queries = [
-    "Who lead the NHL in goals in the 2023-24 season?",
+    "Who led the NHL in goals in the 2023-24 season?",
     "Generate an expected goal heatmap of all shots in the 2023-24 season",
     "Explain what determines whether a body check that makes head contact is legal or illegal",
     "Show me a heatmap of shots for the leafs on the powerplay in 2023-24",
