@@ -117,10 +117,14 @@ def get_sql_chain(db, llm):
     When someone asks about a forward line or pair information, put a dash between each name. For example, if someone asks for example: How many goals does the knies matthews marner line have, then this will be stored as knies-matthews-marner.
     If a user does not have these dashes in their question, allways include them in the SQL query. Otherwise the return will be empty.
     This is the same for defensive pairings. For example if someone asks for the expected goals percentage of the makar toews pairing, this should be interperated as the makar-toews pairing.
+    Despite adding the dashes, keep the order of the names the same. So for the line example that would be Knies-Matthews-Marner or for the pairs example Makar-Toews
+
 
     If someone asks where a person, line, pairing, or team ranks in a certain stat, then they want to know where they are in that stat like a standing. 
     For example, if someone asks for where did Auston Matthews rank in goals in the 2022-23 season, the answer would be first since he had the most goals that year.
     return the ranking that they are in this stat. Thats what being asked for. Please also include the value for that stat. So for Auston Matthews in that example it would be ranked 1st with 69 goals
+
+    
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
