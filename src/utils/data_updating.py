@@ -131,7 +131,7 @@ def process_shots_data(zip_url, table_name):
 
         existing_data = get_existing_data(table_name)
 
-        merged = pd.merge(df, existing_data[['shotID']], how="left", on="shotID", indicator=True)
+        merged = pd.merge(df, existing_data, how="left", indicator=True)
         new_records = merged[merged['_merge'] == 'left_only'].drop('_merge', axis=1)
 
         # Write to MySQL (replace table each time)
