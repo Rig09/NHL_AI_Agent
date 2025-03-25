@@ -2,13 +2,12 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
 # Configure SQLite3 for ChromaDB
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# __import__('pysqlite3')
+# import sys
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # TODO: Can make this more modular
-def get_rules_information(vector_db, api_key, query: str) -> str:
-    model = ChatOpenAI(model="gpt-4o", api_key = api_key)
+def get_rules_information(vector_db, llm, query: str) -> str:
 
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
@@ -29,15 +28,14 @@ def get_rules_information(vector_db, api_key, query: str) -> str:
     SystemMessage(content="You are a helpful assistant."),
     HumanMessage(content=combined_input),
     ]
-    return model.invoke(messages).content
+    return llm.invoke(messages).content
 
 
-def get_cba_information(vector_db, api_key, query: str) -> str:
-    model = ChatOpenAI(model="gpt-4o", api_key = api_key)
+def get_cba_information(vector_db, llm, query: str) -> str:
 
     retriever = vector_db.as_retriever(
     search_type="similarity_score_threshold",
-    search_kwargs={'k': 3, "score_threshold": 0.01}
+    search_kwargs={'k': 3, "score_threshold": 0.001}
     )
 
     relevant_docs = retriever.invoke(query)
@@ -47,11 +45,12 @@ def get_cba_information(vector_db, api_key, query: str) -> str:
     + query
     + "\n\nRelevant Documents:\n"
     + "\n\n".join([doc.page_content for doc in relevant_docs])
-    + "\n\nPlease provide an answer based only on the provided documents. If the answer is not found in the documents, respond with 'I'm not sure'. Please include the part of the CBA being referenced when it is used."
+    + "\n\nPlease provide an answer based only on the provided documents. If the answer is not found in the documents, "
+    "respond with 'I'm not sure'. Please include the part of the CBA being referenced when it is used. For example per CBA Sections 50.12(g)-(m)"
     )
     
     messages = [
     SystemMessage(content="You are a helpful assistant."),
     HumanMessage(content=combined_input),
     ]
-    return model.invoke(messages).content
+    return llm.invoke(messages).content

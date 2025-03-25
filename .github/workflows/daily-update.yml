@@ -1,0 +1,37 @@
+name: Daily Update Script
+
+on:
+  schedule:
+    # This cron expression schedules the workflow to run every day at 7 AM UTC
+    - cron: '0 12 * * *'  # 12:00 PM UTC, which corresponds to 7:00 AM EST
+  workflow_dispatch:  # Allows you to manually trigger the workflow if needed
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r data_update_requirements.txt
+
+    - name: Set up environment variables
+      run: |
+        echo "MYSQL_HOST=${{ secrets.MYSQL_HOST }}" >> $GITHUB_ENV
+        echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> $GITHUB_ENV
+        echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> $GITHUB_ENV
+        echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> $GITHUB_ENV
+
+    - name: Download and run script
+      run: |
+        curl -L https://raw.githubusercontent.com/Rig09/NHL_AI_Agent/main/src/utils/data_updating.py -o data_updating.py
+        python data_updating.py

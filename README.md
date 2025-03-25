@@ -1,53 +1,16 @@
 # NHL AI Agent
-<!-- TODO: Explain XG Context -->
-<!-- TODO: Explain AI Agent Context -->
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_red.svg)](https://nhlchatbot.streamlit.app/)
 
-## Repository Setup
-### Data Fetching
-To clone all of the necessary input data from this project, run the `data_install.sh` shell script.
-
-_Bash Terminal Code_
-```
-cd data
-chmod +x data_install.sh
-./data_install.sh
-```
-
-### Conda Environment
-To create a Conda environment with all required packages, run the following bash commands (starting from the root directory):
-- Line 1 gives exec permission to the shell script
-- Lines 2 and 3 allow conda commands to be run in a bash terminal and reset the bash profile
-- Line 4 runs the script
-
-<!-- TODO: Look into making this cleaner, opening VSCode using the code command with the env set up? -->
-_Bash Terminal Code_
-```
-chmod +x ./env/setup_env.sh
-conda init bash
-source ~/.bashrc
-./env/setup_env.sh
-```
-
-### Data Preprocessing and Feature Extraction
-- Missing values, categorical features, which features we created.
-- Link to sections in the code
-
-### Model Selection
-Leading xG models use Logistic Regression or Gradient Boosted models ([source](https://evolving-hockey.com/blog/a-new-expected-goals-model-for-predicting-goals-in-the-nhl/)). We implmented these approaches with our data, to assess performance relative to existing models (this also verifies that our feature extraction is done correctly, by comparing results to the current state of the art).
-- Link to section in the code
-
-### Model Training and Hyperparameter Tuning
-
-### Model Testing and Evaluation
-
-### Visualization?
-
-### Future Work?
+AI Agent created using [LangChain](https://www.langchain.com). 
+Currently a demo using Streamlit is up and running and can be found at: https://nhlchatbot.streamlit.app/
 
 ### Citations
-- Link in all python packages
-- Cite [MoneyPuck](https://moneypuck.com) data
+- Thank you [MoneyPuck](https://moneypuck.com) for providing all data used for statistical queries
+- CBA and NHL rulebook sourced from the [official NHL website](https://www.nhl.com/)
+- [The Commute Sports](https://thecommutesports.com/2022/08/06/creating-nhl-shot-maps-with-python/) for a starting point and inspiration on plotting hockey data.
 
 ### Authors
 Adrian Rigby, [GitHub](https://github.com/Rig09/), [LinkedIn](https://www.linkedin.com/in/adrian-rigby-9293bb272/)
 Leo Sandler: [GitHub](https://github.com/L-Sandler/), [LinkedIn](https://www.linkedin.com/in/leo-sandler/)
+
+More detailed README file to come.
