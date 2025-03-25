@@ -197,7 +197,7 @@ class NHLResponseParser(BaseModel):
             }
         }
 
-def create_nhl_chain() -> Chain:
+def create_nhl_api_chain() -> Chain:
     """Create a chain for querying the NHL API and parsing responses."""
     return NHLAPIChain()
 
@@ -257,10 +257,11 @@ def prepare_api_params(api_spec: Dict[str, Any]) -> Dict[str, Any]:
             
     return api_spec
 
-def query_nhl(query: str, debug: bool = False) -> Dict[str, Any]:
+def query_nhl(llm, query: str, debug: bool = False) -> Dict[str, Any]:
     """Query the NHL API using natural language.
     
     Args:
+        llm: The language model to use for the query
         query: Natural language query about NHL data
         debug: Whether to print debug information
         
@@ -269,7 +270,6 @@ def query_nhl(query: str, debug: bool = False) -> Dict[str, Any]:
     """
     try:
         # Create the query chain
-        llm = ChatOpenAI(temperature=0)
         prompt = PromptTemplate(template=QUERY_PROMPT, input_variables=["query"])
         
         # Create the runnable sequence
@@ -289,7 +289,7 @@ def query_nhl(query: str, debug: bool = False) -> Dict[str, Any]:
             print(json.dumps(api_spec, indent=2))
         
         # Create and invoke the NHL API chain
-        nhl_chain = create_nhl_chain()
+        nhl_chain = create_nhl_api_chain()
         response = nhl_chain.invoke(api_spec)
         
         if debug:
@@ -336,11 +336,13 @@ if __name__ == "__main__":
     ]
     
     for query in queries:
+        llm = ChatOpenAI(temperature=0)
+        
         print(f"\n{'='*50}")
         print(f"Testing query: {query}")
         print('='*50)
         
-        result = query_nhl(query, debug=True)
+        result = query_nhl(llm, query, debug=True)
         
         print("\nFinal Result:")
         if "error" in result:
