@@ -1,8 +1,26 @@
+Priorities:
+1. 3 lines with sql imports, changed depending on how you run in terminal (sqlite imports in rag chains and db init). Candidate solution would be through argparse in app.py, but can explore other solutions
+    a. Accounting for Streamlit local vs Streamlit remote run config
+    b. Accounting for local vs Azure DB run config
+2. Home plate plotting
+    a. See NHLRink Python plot code for location dimensions to make chart boundaries. https://github.com/the-bucketless/hockey_rink/blob/master/examples/drawing.ipynb
+3. PuckPedia API interaction (in progress, waiting on reply)
+4. Being able to handle the following query: In the last 30 days, which 3 forward lines lead the NHL in expected goals%? (and similar)
+    a. Append game date to shots DB (Possibly using NHL API to extract date from game IDs?)
+    b. Logic for finding the last 30 days listed? Possibly get date tool?
+
+
+
+I. Possible NHL API interaction, started https://github.com/Rig09/NHL_AI_Agent/blob/nhl-api-tool/src/chains/nhl_api_chain.py
+    a. Understand how to determine between normal API + Azure MoneyPuck advanced stats 
+    b. Possibly look at other endpoints in the API, as example only code above has a few endpoints
+
+II. Move RAG Chroma DB to cloud.
+
 Code Reorganization
 - Function comments 
 - File + function renaming
 - Retest all src/util files
-- Config with remote or local dbs
 - Debug deprecation warnings after running streamlit run
 
 Environment/Setup
@@ -19,9 +37,6 @@ Cloud
 - Request throttling
 - API Key Usage monitoring
 
-Data Visualization
-- Dynamic rendering of scatterplots in Streamlit
-
 Admin
 - Rewrite README
 
@@ -33,8 +48,6 @@ Player Cards
 - DISCUSS: MoneyPuck skater data only includes the last team that they played for. Does not include the same player's season split over multiple teams.
 - Considerations for player card efficiency (calculation, storing, frontend rendering, etc.)
 - Player card headshots? https://assets.nhle.com/mugs/nhl/20232024/TOR/8479318.png, or NHL API?
-- Per60 Stats
-- Correct gradient to BWR
 
 Our Own XG Modelling
 - Discuss additional features from new MoneyPuck dataset in XG Modelling
@@ -42,16 +55,11 @@ Our Own XG Modelling
 
 MISC STRETCH IDEAS
 - Tune LLM related settings. Try multiple models?
-- Sample queries to try in the frontend
 - If you know a player's XG% you can see how that changes over game stages? (OT, 3rd period, etc). 
     Can also see how well they convert on their XG during those times.
 - Input a shot and see the XG from it?
-- Heatmaps
-    - Player specific 
-    - Shot type or location based
 - Player similarity/comparisons
 - Player progression predictions/forecasting
-- Live updating of stats and XG databases? (based on updated to MP data)
 
 MISC RESOURCES:
 Evolving Article: https://evolving-hockey.com/blog/a-new-expected-goals-model-for-predicting-goals-in-the-nhl/
