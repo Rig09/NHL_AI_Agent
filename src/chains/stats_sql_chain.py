@@ -169,7 +169,7 @@ def get_sql_chain(db, llm):
         | prompt
         | llm
         | StrOutputParser()
-        |(lambda sql_query: print("Generated SQL Query:", sql_query) or sql_query) 
+        #|(lambda sql_query: print("Generated SQL Query:", sql_query) or sql_query) 
         #|(lambda output: extract_sql_query(output)) 
     )
     return sql_chain

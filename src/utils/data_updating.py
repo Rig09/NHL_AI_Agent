@@ -94,9 +94,9 @@ def update_table(df, table_name):
         merged = pd.merge(df, existing_data, how="left", indicator=True)
         new_records = merged[merged['_merge'] == 'left_only'].drop('_merge', axis=1)
         
-        # Insert the new records into the table
+        #Insert the new records into the table
         if not new_records.empty:
-            new_records.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
+            merged.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
             print(f"✔ {len(new_records)} new records added to '{table_name}'.")
         else:
             print(f"No new records to add for '{table_name}'.")
