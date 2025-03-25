@@ -11,8 +11,8 @@ from langchain_openai import ChatOpenAI
 # parser = argparse.ArgumentParser()
 # # Use local environment variables by default
 # parser.add_argument("--remote", action="store_true", help="If specified, use remote st secrets config.Otherwise, use local dotenv.") 
-# # To run local config, use streamlit run app.py
-# # To run remote config, use streamlit run app.py -- --remote
+# To run local config, use streamlit run app.py
+# To run remote config, use streamlit run app.py -- --remote
 
 
 # # TODO: make function cleaner, remove duplicate code, naming
