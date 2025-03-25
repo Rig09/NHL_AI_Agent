@@ -9,6 +9,7 @@ from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_g
 from chains.rag_chains import get_cba_information, get_rules_information
 from chains.bio_info_chain import get_bio_chain
 from pydantic import BaseModel, Field
+from chains.nhl_api_chain import query_nhl
 
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
@@ -34,8 +35,11 @@ class goal_map_scatter_schema(BaseModel):
                            "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations")
 
 class rag_args_schema(BaseModel):
-    #vector_db: Any = Field(..., description='A vector database for the RAG chain to interact with. This should be passed to the tool from the rules_db or cba_db depending on the tool used')
     query: str = Field(..., description='The query to be executed by a RAG system. This will be fed into a function which will provide an answer to the query based on text files relevant to the query')
+
+class NHLAPI_schema(BaseModel):
+    query: str = Field(..., description='The query to be executed by an API chain. This will process a natural language query and use the NHL api to return an answer. The query should be asking for current information about the NHL, such as scheduling information.'
+    'The query can also ask about historic data, current scores and more.')
 
 # Helper function to create wrappers for tools
 def create_tool_wrapper(func, vector_db):
@@ -114,7 +118,14 @@ def get_agent(db, rules_db, cba_db, llm):
         This also includes information like information about revenue, profit, or any other buissness information about the NHL. 
         If a specific component of the CBA is refrenced keep that in the response. For example the return may say per CBA Section 50.12(g)-(m). Keep that in the final response"""
         return get_cba_information(cba_db, llm, query)
-
+    
+    @tool(args_schema=NHLAPI_schema)
+    def nhl_api_question(query:str):
+        """
+        This tool interacts with the NHL API to get information on a couple of different hockey related queries. It can get current data, for example the schedule of todays games, or current scores
+        It can also get historical data, like the all time leaders in a certain stat like "the all time leader in goals" for example. It can also return the schedule or scores for a specific date.
+        """
+        return query_nhl(llm, query)
     chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
@@ -134,6 +145,7 @@ def get_agent(db, rules_db, cba_db, llm):
         shot_heatmap_getter,
         goal_heatmap_getter,
         xg_heatmap_getter,
+        nhl_api_question,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),

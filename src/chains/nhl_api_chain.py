@@ -5,9 +5,10 @@ It provides functionality to query various NHL endpoints and parse responses.
 
 from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timedelta
-from langchain_core.runnables import RunnableConfig, RunnableSequence
-from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnableConfig, RunnableSequence, RunnablePassthrough
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_core.messages import AIMessage
+from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 from langchain.chains.base import Chain
@@ -19,6 +20,26 @@ import os
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
+
+def extract_relevant_data(endpoint: str, response_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Extract only the relevant parts of the API response based on the endpoint."""
+    try:
+        if "player-spotlight" in endpoint:
+            return {"player_spotlight": response_data.get("players", [])}
+        elif "schedule" in endpoint:
+            return {"games": response_data.get("dates", [])}
+        elif "standings" in endpoint:
+            return {"standings": response_data.get("records", [])}
+        elif "score" in endpoint:
+            return {"scores": response_data.get("games", [])}
+        elif "stats-leaders" in endpoint:
+            return {"leaders": response_data.get("playerStats", [])}
+        else:
+            # Fallback: Return the entire response if not recognized
+            return {"data": response_data}
+    except Exception as e:
+        return {"error": str(e)}
+
 
 QUERY_PROMPT = """You are an NHL API expert. Convert the following natural language query into an API request specification.
 Available endpoints and their required parameters:
@@ -84,7 +105,13 @@ Example Responses:
     "path_params": {{}}
 }}
 
-Response:"""
+Return only JSON and no additional text.
+- Ensure proper JSON format with key-value pairs.
+- Provide clear and concise information without extra commentary.
+
+DO NOT INCLUDE ``` or a heading of json or JSON in your response. This will be passed directly, ONLY PROVIDE THE JSON output. Do not add any formating or tittle. DO NOT INCLUDE ```.
+
+Provide the JSON output:"""
 
 class NHLAPIChain(Chain):
     """Chain for interacting with the NHL API."""
@@ -236,7 +263,7 @@ def parse_llm_output(llm_output: str) -> Dict[str, Any]:
     try:
         return json.loads(llm_output)
     except json.JSONDecodeError:
-        raise ValueError("Failed to parse LLM output as JSON")
+        raise ValueError(f"Failed to parse LLM output as JSON Output was: {llm_output}")
 
 def prepare_api_params(api_spec: Dict[str, Any]) -> Dict[str, Any]:
     """Prepare API parameters with proper date and season handling."""
@@ -257,6 +284,29 @@ def prepare_api_params(api_spec: Dict[str, Any]) -> Dict[str, Any]:
             
     return api_spec
 
+def processJSON_chain(llm, original_query, json_output) -> str :
+    """Take in the JSON from the query and return a natural language response."""
+    template = """
+    You are a helpful assistant that takes in information in the form of a JSON response and returns a clear, concise natural language answer to a user query.
+    
+    The users original question was: {original_query}
+    The API call returned the following data: {json_output}
+    
+    Please respond in a conversational tone with an appropriate level of detail.
+    If the API data is empty or incomplete, respond with a helpful explanation.
+    """
+    prompt = ChatPromptTemplate.from_template(template)
+
+    processing_chain = (
+         prompt
+        | llm
+        | StrOutputParser()
+    )
+    return processing_chain.invoke({'original_query': original_query, 'json_output': json_output})
+
+
+import json
+
 def query_nhl(llm, query: str, debug: bool = False) -> Dict[str, Any]:
     """Query the NHL API using natural language.
     
@@ -275,7 +325,7 @@ def query_nhl(llm, query: str, debug: bool = False) -> Dict[str, Any]:
         # Create the runnable sequence
         query_chain = (
             prompt 
-            | llm 
+            | llm
             | extract_message_content 
             | parse_llm_output 
             | prepare_api_params
@@ -296,30 +346,42 @@ def query_nhl(llm, query: str, debug: bool = False) -> Dict[str, Any]:
             print("\nRaw API Response:")
             print(json.dumps(response, indent=2))
         
+        # Handle API errors
+        if not response or "error" in response.get("response", {}):
+            return {"error": response.get("response", {}).get("error", "Unknown API error")}
+
         # Parse the response if successful
-        if "error" not in response["response"]:
-            parser = NHLResponseParser(response=response["response"])
-            endpoint = api_spec["endpoint"]
-            
-            if "player-spotlight" in endpoint:
-                return parser.parse_player_spotlight()
-            elif "schedule" in endpoint:
-                return parser.parse_schedule()
-            elif "standings" in endpoint:
-                return parser.parse_standings()
-            elif "score" in endpoint:
-                return parser.parse_scores()
-            elif "stats-leaders" in endpoint:
-                return parser.parse_stats_leaders()
-            else:
-                return {
-                    "parsed_data": {
-                        "type": "raw",
-                        "data": response["response"]
-                    }
-                }
+        parser = NHLResponseParser(response=response["response"])
+        endpoint = api_spec["endpoint"]
         
-        return response
+        if "player-spotlight" in endpoint:
+            result = parser.parse_player_spotlight()
+        elif "schedule" in endpoint:
+            result = parser.parse_schedule()
+        elif "standings" in endpoint:
+            result = parser.parse_standings()
+        elif "score" in endpoint:
+            result = parser.parse_scores()
+        elif "stats-leaders" in endpoint:
+            result = parser.parse_stats_leaders()
+        else:
+            result = {
+                "parsed_data": {
+                    "type": "raw",
+                    "data": response["response"]
+                }
+            }
+
+        #relevant_data = extract_relevant_data(endpoint, response["response"])    
+
+        # Convert API output to natural language using processJSON_chain
+        final_result = processJSON_chain(llm, query, response["response"])
+        
+        if debug:
+            print("\nFinal Natural Language Response:")
+            print(final_result)
+        
+        return final_result
         
     except ValueError as e:
         return {"error": str(e)}
@@ -342,7 +404,7 @@ if __name__ == "__main__":
         print(f"Testing query: {query}")
         print('='*50)
         
-        result = query_nhl(llm, query, debug=True)
+        result = query_nhl(llm, query, debug=False)
         
         print("\nFinal Result:")
         if "error" in result:
