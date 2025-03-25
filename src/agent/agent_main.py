@@ -124,6 +124,7 @@ def get_agent(db, rules_db, cba_db, llm):
         """
         This tool interacts with the NHL API to get information on a couple of different hockey related queries. It can get current data, for example the schedule of todays games, or current scores
         It can also get historical data, like the all time leaders in a certain stat like "the all time leader in goals" for example. It can also return the schedule or scores for a specific date.
+        The tool should also be invoked about stats from outside the scope of the Statistic Getter. So any stat that is from before the 2015 season should invoke this tool. Otherwise use the other tool.
         """
         return query_nhl(llm, query)
     chain = get_chain(db, llm)
@@ -151,8 +152,9 @@ def get_agent(db, rules_db, cba_db, llm):
             func=lambda input, **kwargs: chain.invoke({"question": input}),
             description="""Useful when you want statistics about a player, line, defensive pairing, or goalie. The tool should not be invoked with an sql query. 
                             It should be invoked with a natural language question about what statistics are needed to answer the user query.
-                            It will generate and perform an sql query on data from the 2015-2024 NHL seasons. Note someone may refer to a season using two years. So the 2024-25 season
-                            also counts and should be invoke this tool. Questions about current statstics should use the 2024 season. If a question about that is asked, it will return a string with the answer to that question in natural language.
+                            It will generate and perform an sql query on data from the 2015-2024 NHL seasons. Do not invoke this tool if it is outside the season range 2015-2024
+                            Note someone may refer to a season using two years. So the 2024-25 season also counts and should be invoke this tool. 
+                            Questions about current statstics should use the 2024 season. If a question about that is asked, it will return a string with the answer to that question in natural language.
                             somtimes for a ratio statistic the tool will return too names if a minumum minutes or shots against is not given. Return both, unless they are the same person. 
                             In the special case that the user asks for save percentage, despite the name, the tool will return a decimal. Keep that value as is. 
                             If the tool returns a percentage or decimal, never change it. The tool knows correct conventions.
