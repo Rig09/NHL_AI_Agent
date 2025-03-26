@@ -14,6 +14,14 @@ col_list = [
     'defendingTeamForwardsOnIce', 'defendingTeamDefencemenOnIce'
 ]
 
+# def assign_season(date):
+#     year = date.year
+#     if pd.Timestamp(f'{year}-09-01').date() <= date <= pd.Timestamp(f'{year+1}-07-01').date():
+#         return year
+#     elif pd.Timestamp(f'{year-1}-09-01').date() <= date <= pd.Timestamp(f'{year}-07-01').date():
+#         return year - 1
+#     return None  # In case the date doesn't fit the range
+
 # Read CSV with only required columns
 shots_df = pd.read_csv(shots_data, usecols=col_list)
 shots_2024 = pd.read_csv(shots_2024, usecols=col_list)
@@ -21,44 +29,32 @@ shots_2024 = pd.read_csv(shots_2024, usecols=col_list)
 # Combine the two shot dataframes
 shots_df = pd.concat([shots_df, shots_2024], ignore_index=True)
 
-# Initialize current_game_id as None before starting the loop
-current_game_id = None
-# Convert 'season' to numeric (to handle any potential issues with data types)
-shots_df['season'] = pd.to_numeric(shots_df['season'], errors='coerce')
-shots_df['season'] = shots_df['season'].astype(int)
+# Create nhl_game_id column
+shots_df['nhl_game_id'] = shots_df['season'].astype(str) + shots_df['game_id'].astype(str).str.zfill(6)
 
-# Read the game data CSV (from the API with game dates)
-game_data_df = pd.read_csv('nhl_game_data.csv')
+game_data = pd.read_csv(r'C:\Users\agjri\Desktop\NHL_Chatbot\NHL_AI_Agent\all_teams.csv')
 
-# Sort shots dataframe by season and game_id
-shots_df = shots_df.sort_values(by=['season', 'game_id'])
+game_data = game_data[game_data['season'] >= 2015]
 
-# Initialize the 'date' column in the shots dataframe
-shots_df['date'] = None
+game_data = game_data[game_data['home_or_away'] == 'HOME']
 
-# Create an index to keep track of which row to assign a date
-shot_index = 0
+shots_df['nhl_game_id'] = shots_df['nhl_game_id'].astype(str)
+game_data['gameId'] = game_data['gameId'].astype(str)
 
-for index, row in game_data_df.iterrows():
-    date = row['Date']  # The date for this set of games
-    num_games = row['Number of Game IDs']  # Number of games on this date
+# Perform a left join to add date from game_data to shots_df
+shots_df = pd.merge(shots_df, game_data[['gameId', 'gameDate']], 
+                     left_on='nhl_game_id', right_on='gameId', 
+                     how='left')
 
-    # Skip if no games for this date (num_games == 0)
-    if num_games == 0:
-        continue
+# Drop the extra gameID column
+shots_df.drop(columns='gameId', inplace=True)
 
-    # Get the unique game_ids that still need to have a date assigned
-    game_ids_to_assign = shots_df[shots_df['date'].isna()]['game_id'].unique()
 
-    # For each of the first `num_games` game_ids, assign the date
-    for i in range(min(num_games, len(game_ids_to_assign))):
-        game_id = game_ids_to_assign[i]
-        
-        # Assign the date to all shots that belong to this game_id
-        shots_df.loc[shots_df['game_id'] == game_id, 'date'] = date
+if shots_df['gameDate'].isnull().sum() > 0:
+    print("Warning: Some shots could not be matched to a game date.")
+else:
+    print("All shots matched successfully.")
 
-# After processing, check if the date column is populated correctly
-print(shots_df.head())  # Check the first few rows to verify
+print(shots_df.head())
 
-# Save the modified shots dataframe to a new CSV (if needed)
 shots_df.to_csv('updated_shots_with_dates.csv', index=False)

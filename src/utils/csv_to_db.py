@@ -23,7 +23,7 @@ conn = mysql.connector.connect(
 cursor = conn.cursor()
 print("connected")
 # Create database if it doesn't exist
-#cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE};")
+cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE};")
 cursor.execute(f"USE {MYSQL_DATABASE};")
 print("using db")
 # Define seasons to process
@@ -62,61 +62,47 @@ def process_csv(file_path, table_name, season=None, is_playoff=None):
     else:
         print(f"⚠ File not found: {file_path}")
 
-# # Process skaters, goalies, lines, and pairs data
-# for season in seasons:
-#     for is_playoff, game_type in [(0, "regular"), (1, "playoffs")]:
-#         # Skaters
-#         process_csv(f"data/skaters/{season}/skaters_{game_type}_{season}.csv", f"SkaterStats_{game_type}_{season}", season, is_playoff)
+# Process skaters, goalies, lines, and pairs data
+for season in seasons:
+    for is_playoff, game_type in [(0, "regular"), (1, "playoffs")]:
+        # Skaters
+        process_csv(f"data/skaters/{season}/skaters_{game_type}_{season}.csv", f"SkaterStats_{game_type}_{season}", season, is_playoff)
         
-#         # Goalies
-#         process_csv(f"data/goalies/{season}/goalies_{game_type}_{season}.csv", f"GoalieStats_{game_type}_{season}", season, is_playoff)
+        # Goalies
+        process_csv(f"data/goalies/{season}/goalies_{game_type}_{season}.csv", f"GoalieStats_{game_type}_{season}", season, is_playoff)
         
-#         # Lines and Pairs (from the same CSV, separated by 'position')
-#         lines_csv = f"data/pairings/{season}/pairings_{game_type}_{season}.csv"
-#         if os.path.exists(lines_csv):
-#             print(f"Processing {lines_csv}...")
-#             df = pd.read_csv(lines_csv, encoding="utf-8", low_memory=False)
-#             df["season"] = season
-#             df["is_playoff"] = is_playoff
+        # Lines and Pairs (from the same CSV, separated by 'position')
+        lines_csv = f"data/pairings/{season}/pairings_{game_type}_{season}.csv"
+        if os.path.exists(lines_csv):
+            print(f"Processing {lines_csv}...")
+            df = pd.read_csv(lines_csv, encoding="utf-8", low_memory=False)
+            df["season"] = season
+            df["is_playoff"] = is_playoff
             
-#             # Separate into lines and pairs
-#             df_lines = df[df["position"] == "line"]
-#             df_pairs = df[df["position"] == "pairing"]
+            # Separate into lines and pairs
+            df_lines = df[df["position"] == "line"]
+            df_pairs = df[df["position"] == "pairing"]
             
-#             if not df_lines.empty:
-#                 df_lines.to_sql(f"LineStats_{game_type}_{season}", engine, if_exists="replace", index=False, chunksize=5000, method="multi")
-#                 print(f"✔ LineStats_{game_type}_{season} table saved.")
-#             else:
-#                 print(f"⚠ No line data found in {lines_csv}.")
+            if not df_lines.empty:
+                df_lines.to_sql(f"LineStats_{game_type}_{season}", engine, if_exists="replace", index=False, chunksize=5000, method="multi")
+                print(f"✔ LineStats_{game_type}_{season} table saved.")
+            else:
+                print(f"⚠ No line data found in {lines_csv}.")
             
-#             if not df_pairs.empty:
-#                 df_pairs.to_sql(f"PairStats_{game_type}_{season}", engine, if_exists="replace", index=False, chunksize=5000, method="multi")
-#                 print(f"✔ PairStats_{game_type}_{season} table saved.")
-#             else:
-#                 print(f"⚠ No pair data found in {lines_csv}.")
-#         else:
-#             print(f"⚠ File not found: {lines_csv}")
+            if not df_pairs.empty:
+                df_pairs.to_sql(f"PairStats_{game_type}_{season}", engine, if_exists="replace", index=False, chunksize=5000, method="multi")
+                print(f"✔ PairStats_{game_type}_{season} table saved.")
+            else:
+                print(f"⚠ No pair data found in {lines_csv}.")
+        else:
+            print(f"⚠ File not found: {lines_csv}")
 
-# # Process player bio information
-# data_bio = "data/bio_information/allPlayersLookup.csv"
-# process_csv(data_bio, "BIO_Info")
-
-shots_data = r'C:\Users\agjri\Desktop\NHL_agent\NHL_AI_Agent\data\shots\shots_2015-2023.csv'
-
-col_list = [
-    'shotID', 'homeTeamCode', 'awayTeamCode', 'season', 'isPlayoffGame', 'game_id', 
-    'homeTeamWon', 'id', 'time', 'period', 'team', 'xCord', 'yCord', 'location', 
-    'event', 'goal', 'shotDistance', 'shotType', 'shotOnEmptyNet', 
-    'goalieNameForShot', 'shooterPlayerId', 'shooterName', 'shooterLeftRight', 
-    'xCordAdjusted', 'yCordAdjusted', 'isHomeTeam', 'awaySkatersOnIce', 'homeSkatersOnIce', 
-    'xGoal', 'homeTeamGoals', 'awayTeamGoals', 'shotAngle', 
-    'playerPositionThatDidEvent', 'shootingTeamForwardsOnIce', 'shootingTeamDefencemenOnIce', 
-    'defendingTeamForwardsOnIce', 'defendingTeamDefencemenOnIce'
-]
+# Process player bio information
+data_bio = "data/bio_information/allPlayersLookup.csv"
+process_csv(data_bio, "BIO_Info")
 
 
-# Read CSV with only required columns
-shots_df = pd.read_csv(shots_data, usecols=col_list)
+shots_df = pd.read_csv(r'C:\Users\agjri\Desktop\NHL_Chatbot\NHL_AI_Agent\updated_shots_with_dates.csv')
 
 # Convert 'season' to numeric (to handle any potential issues with data types)
 shots_df['season'] = pd.to_numeric(shots_df['season'], errors='coerce')
@@ -135,9 +121,9 @@ print("\nColumns in 'shots_data' table:")
 for column in columns:
     print(column[0])
 
-cursor.execute("SELECT season FROM shots_data LIMIT 5;")
-seasons_check = cursor.fetchall()
-print("\nSample stored seasons:", seasons_check)
+# cursor.execute("SELECT season FROM shots_data LIMIT 5;")
+# seasons_check = cursor.fetchall()
+# print("\nSample stored seasons:", seasons_check)
 
 # Close connection
 cursor.close()
