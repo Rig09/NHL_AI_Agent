@@ -90,6 +90,7 @@ def get_sql_chain(db, llm):
     If it is taken by the home team than the homeSkatersOnIce attribute comes first in the strenth. For example, if the shot is taken and isHomeTeam = 1, and awaySkatersOnIce = 4 and homeSkatersOnIce = 5, then the strength is 5on4. The first number corrisponds to the number of players on the ice that took the shot. 
     Use that logic, to change queries to fit with the strength if it is passed asking for a query on the shots_data table.
     
+    Also note that you can tell what team took a shot by the team code attribute in shots_data.
 
     ALL GOALIE STATS SHOULD ONLY USE ROWS that have the situation 'all' unless otherwise specified. If someone asks what was <goalie name>'s save percentage, use the situation 'all' to find the save percentage. 
     If someone asks for a leader in a statistic for goalies without specifying the situation, this is the leader in rows with the situation 'all'.
@@ -138,6 +139,45 @@ def get_sql_chain(db, llm):
     For lines, reminder that expected goals percentage is stored as xGoalsPercentage, and it stored as a decimal value. If someone asks for over 60% they mean that xGoalsPercentage is over 0.6
 
     If someone requests a current rank, where does __ rank in ___ stat. Use the 2024 tables.
+    
+    A user may request a list or table from the shots_data table. Give a list back that can be interperated to find the stat of the user query. So for example if you are prompted to return a table of shots for finding expected goals percentage, then find the table and include the xgoals column.
+    Here is a data dictionary with correct titles for the shots_data table to help you return lists of shots: 
+    shotID: Unique id for each shot
+    homeTeamCode: The home team in the game. For example: TOR, MTL, NYR, etc
+    awayTeamCode: The away team in the game
+    season: Season the shot took place in. Example: 2009 for the 2009-2010 season
+    isPlayoffGame: Set to 1 if a playoff game, otherwise 0
+    game_id: The NHL Game_id of the game the shot took place in
+    time: Seconds into the game of the shot
+    period: Period of the game
+    team: The team taking the shot. HOME or AWAY
+    location: The zone the shot took place in. HOMEZONE, AWAYZONE, or Neu. Zone
+    event: Whether the shot was a shot on goal (SHOT), goal, (GOAL), or missed the net (MISS)
+    goal: Set to 1 if shot was a goal. Otherwise 0
+    xCord: The X coordinate "North South" on the ice of the shot. Feet from red line.  -89 and 89 are the goal lines at each of the rink
+    yCord: The Y coordinate  "East West" on the ice of the shot. The middle of the ice has a y-coordinate of 0
+    xCordAdjusted: Adjusts the x coordinate as if all shots were at the right end of the rink. Usually makes the coordinate a positive number
+    yCordAdjusted: Adjusts the y coordinate as if all shots were at the right end of the rink.
+    homeTeamGoals: Home team goals before the shot took place
+    awayTeamGoals: Away team goals before the shot took palce
+    homeSkatersOnIce: The number of skaters on the ice for the home team. Does not count the goalie
+    awaySkatersOnIce: The number of skaters on the ice for the away team. Does not count the goalie
+    goalieNameForShot: The First and Last name of the goalie the shot is on.
+    shooterPlayerId: The NHL player id of the skater taking the shot
+    shooterName: The First and Last name of the player taking the shot
+    xGoal: The probability the shot will be a goal. Also known as "Expected Goals"
+    playerPositionThatDidEvent: The position of the player doing the shot. L for Left Wing, R for Right Wing, D for Defenceman, C for Centre.
+    teamCode: The team code of the shooting team. For example, TOR, NYR, etc
+    gameDate: a date when the shot took place. Repersented as year-month-day. For example, November 27th 2024 would be: 2024-11-27
+    
+    An example of a request for a shots_data table would be: 'Please return a list of shots from the shots_data table that contains only the columns and rows relavent to the query: What was the expected goals percentage for the Oilers between Jan 1st 2020 and Jan 10th 2020. Note today's date is _ '
+    Here you would return a list of all shots between 2020-01-01 and 2020-01-10, where either the home or away team was the edmonton oilers. You would only need the columns that make it clear which team took the shots and teams that played. So include the teamCode and the xgoals column.
+    fo
+    This may also require some thinking, for example, if someone asks for a stat 'in the month of march' return a list for all marches in the past seasons. But if someone says this march, take the year from the current date thats provided in the question and ask for that march.
+    If no year is provided, use the current year passed in the date.
+    When someone is requesitng a ratio of percentage value and getting a table to do so, make sure you include all shots for BOTH teams in shots involving the party asked for since both teams shots are important to calculate this value. Leave teamcode so it can be determined by which team each shot was taken.
+    If someone asks for a on expected goal stat, please remove any shot that was blocked. If you can tell that it was.
+    Also note that corsi is just proportion of shots taken by the team. So if someone requests a table for this perpose, return all the shots for that player, or team.
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
@@ -169,7 +209,7 @@ def get_sql_chain(db, llm):
         | prompt
         | llm
         | StrOutputParser()
-        #|(lambda sql_query: print("Generated SQL Query:", sql_query) or sql_query) 
+        |(lambda sql_query: print("Generated SQL Query:", sql_query) or sql_query) 
         #|(lambda output: extract_sql_query(output)) 
     )
     return sql_chain

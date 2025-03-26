@@ -4,12 +4,15 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
 from langchain.tools import tool
-from chains.stats_sql_chain import get_chain
+from chains.stats_sql_chain import get_chain, get_sql_chain
 from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get, shot_heat_map_get, goal_heat_map_get, xg_heat_map_get
 from chains.rag_chains import get_cba_information, get_rules_information
 from chains.bio_info_chain import get_bio_chain
 from pydantic import BaseModel, Field
 from chains.nhl_api_chain import query_nhl
+from datetime import datetime, date
+from chains.dated_stats import get_stats_by_dates
+
 
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
@@ -41,6 +44,9 @@ class NHLAPI_schema(BaseModel):
     query: str = Field(..., description='The query to be executed by an API chain. This will process a natural language query and use the NHL api to return an answer. The query should be asking for current information about the NHL, such as scheduling information.'
     'The query can also ask about historic data, current scores and more.')
 
+class dated_stats_schema(BaseModel):
+    natural_language_query: str = Field(..., description="""This should be a natural language description of the question the person is asking, if the tool is invoked, this should be the question that was asked of the agent.'
+    'This should allway include a natural language description of a condition on the dates. Like for example 'in the month of march' or 'over the last month' """)
 # Helper function to create wrappers for tools
 def create_tool_wrapper(func, vector_db):
     def wrapper(query: str):
@@ -48,6 +54,8 @@ def create_tool_wrapper(func, vector_db):
     return wrapper
 
 def get_agent(db, rules_db, cba_db, llm):
+    
+    todays_date = date.today()
 
     @tool(args_schema=goal_map_scatter_schema)
     def goal_map_scatter(conditions, season_lower_bound =2024, season_upper_bound=2024, season_type = "regular", situation = "all"):
@@ -55,7 +63,7 @@ def get_agent(db, rules_db, cba_db, llm):
         The lower bound and upper bound of the range are the same if a single season is requested. Otherwise pass the bounds of the range.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        goal_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
@@ -64,7 +72,7 @@ def get_agent(db, rules_db, cba_db, llm):
         It is the same as goal_map_scatter but for shots. It uses the same schema and arguments.
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season"""
-        shot_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal map scatter plot generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
@@ -74,7 +82,7 @@ def get_agent(db, rules_db, cba_db, llm):
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of shots, or a shot heatmap, it should invoke this tool"""
-        shot_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        shot_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Shot heatmap generated successfully"
 
     @tool(args_schema=goal_map_scatter_schema)
@@ -84,7 +92,7 @@ def get_agent(db, rules_db, cba_db, llm):
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of goals, or a goal heatmap, it should invoke this tool"""
-        goal_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        goal_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Goal heatmap generated successfully"
     
     @tool(args_schema=goal_map_scatter_schema)
@@ -94,7 +102,7 @@ def get_agent(db, rules_db, cba_db, llm):
         if a situation is not provided, we will assume the situation to be all situations
         if a season type is not provided, we will assume the season type to be regular season
         if the user requests a heatmap of expected goals, or an xg heatmap or a expected goal heatmap, or something similar it should invoke this tool"""
-        xg_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type)
+        xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type)
         return "Expected Goal heatmap generated successfully"
 
     @tool(args_schema=rag_args_schema)
@@ -127,9 +135,20 @@ def get_agent(db, rules_db, cba_db, llm):
         The tool should also be invoked about stats from outside the scope of the Statistic Getter. So any stat that is from before the 2015 season should invoke this tool. Otherwise use the other tool.
         """
         return query_nhl(llm, query)
+    
+    @tool(args_schema=dated_stats_schema)
+    def dated_stat_getter(natural_language_query:str):
+        """
+        This tool should be invoked whenever a user has a question about a stat that involves a date. For example if a user asks about goals this march, or over the past 30 days who has the most _.
+        Any statistical query about stats that is has any relation to dates should invoke this tool
+        """
+        return get_stats_by_dates(llm, db, sql_chain, natural_language_query, todays_date)
+
     chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
+
+    sql_chain = get_sql_chain(db, llm)
 
     memory = ConversationBufferMemory(
         memory_key="chat_history", return_messages=True)
@@ -147,6 +166,7 @@ def get_agent(db, rules_db, cba_db, llm):
         goal_heatmap_getter,
         xg_heatmap_getter,
         nhl_api_question,
+        dated_stat_getter,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),

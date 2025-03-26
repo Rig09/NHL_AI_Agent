@@ -13,7 +13,7 @@ import pandas as pd
 # Retrieve MySQL credentials from .env
 
 # Load environment variables from the .env file
-# load_dotenv()
+load_dotenv()
 # MYSQL_HOST = os.getenv("MYSQL_HOST")
 # MYSQL_USER = os.getenv("MYSQL_USER")
 # MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
