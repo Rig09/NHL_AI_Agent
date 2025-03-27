@@ -64,10 +64,49 @@ Available endpoints and their required parameters:
 - /skater-stats-leaders/{{season}}/{{game-type}} (GET) - Get historical skater stats leaders
   Required path_params: 
   - season: 8-digit format (e.g., "20232024")
-  - game-type: integer
+  - game-type: integer (1=regular season, 2=playoffs, 3=pre-season)
   Optional params:
   - categories: Stats categories to retrieve
   - limit: Number of players to return
+
+4. Player Information Endpoints:
+- /player/{{playerId}} (GET) - Get detailed player information
+  Required path_params: {{"playerId": "player_id"}}
+- /player/{{playerId}}/landing (GET) - Get player landing page data
+  Required path_params: {{"playerId": "player_id"}}
+- /player/{{playerId}}/stats (GET) - Get player statistics
+  Required path_params: {{"playerId": "player_id"}}
+  Optional params:
+  - stats: Stats categories to retrieve
+  - season: Season to get stats for (format: YYYY-YYYY)
+
+5. Team Information Endpoints:
+- /team/{{teamId}} (GET) - Get team information
+  Required path_params: {{"teamId": "team_id"}}
+- /team/{{teamId}}/roster (GET) - Get team roster
+  Required path_params: {{"teamId": "team_id"}}
+- /team/{{teamId}}/schedule (GET) - Get team schedule
+  Required path_params: {{"teamId": "team_id"}}
+  Optional params:
+  - startDate: Start date (YYYY-MM-DD)
+  - endDate: End date (YYYY-MM-DD)
+
+6. Game Information Endpoints:
+- /game/{{gameId}} (GET) - Get game information
+  Required path_params: {{"gameId": "game_id"}}
+- /game/{{gameId}}/feed/live (GET) - Get live game feed
+  Required path_params: {{"gameId": "game_id"}}
+- /game/{{gameId}}/feed/live/diffPatch (GET) - Get live game feed updates
+  Required path_params: {{"gameId": "game_id"}}
+
+7. League Information Endpoints:
+- /divisions (GET) - Get all divisions
+- /conferences (GET) - Get all conferences
+- /teams (GET) - Get all teams
+- /standings (GET) - Get current standings
+  Optional params:
+  - expand: team.schedule
+  - season: Season to get standings for (format: YYYY-YYYY)
 
 For current data, use the /now endpoints instead of providing a date.
 For example:
@@ -223,6 +262,105 @@ class NHLResponseParser(BaseModel):
                 "data": self.response
             }
         }
+    
+    def parse_player_info(self) -> Dict[str, Any]:
+        """Parse player information response."""
+        return {
+            "parsed_data": {
+                "type": "player_info",
+                "data": self.response
+            }
+        }
+    
+    def parse_player_landing(self) -> Dict[str, Any]:
+        """Parse player landing page response."""
+        return {
+            "parsed_data": {
+                "type": "player_landing",
+                "data": self.response
+            }
+        }
+    
+    def parse_player_stats(self) -> Dict[str, Any]:
+        """Parse player statistics response."""
+        return {
+            "parsed_data": {
+                "type": "player_stats",
+                "data": self.response
+            }
+        }
+    
+    def parse_team_info(self) -> Dict[str, Any]:
+        """Parse team information response."""
+        return {
+            "parsed_data": {
+                "type": "team_info",
+                "data": self.response
+            }
+        }
+    
+    def parse_team_roster(self) -> Dict[str, Any]:
+        """Parse team roster response."""
+        return {
+            "parsed_data": {
+                "type": "team_roster",
+                "data": self.response
+            }
+        }
+    
+    def parse_team_schedule(self) -> Dict[str, Any]:
+        """Parse team schedule response."""
+        return {
+            "parsed_data": {
+                "type": "team_schedule",
+                "data": self.response
+            }
+        }
+    
+    def parse_game_info(self) -> Dict[str, Any]:
+        """Parse game information response."""
+        return {
+            "parsed_data": {
+                "type": "game_info",
+                "data": self.response
+            }
+        }
+    
+    def parse_game_feed(self) -> Dict[str, Any]:
+        """Parse game feed response."""
+        return {
+            "parsed_data": {
+                "type": "game_feed",
+                "data": self.response
+            }
+        }
+    
+    def parse_divisions(self) -> Dict[str, Any]:
+        """Parse divisions response."""
+        return {
+            "parsed_data": {
+                "type": "divisions",
+                "data": self.response
+            }
+        }
+    
+    def parse_conferences(self) -> Dict[str, Any]:
+        """Parse conferences response."""
+        return {
+            "parsed_data": {
+                "type": "conferences",
+                "data": self.response
+            }
+        }
+    
+    def parse_teams(self) -> Dict[str, Any]:
+        """Parse teams response."""
+        return {
+            "parsed_data": {
+                "type": "teams",
+                "data": self.response
+            }
+        }
 
 def create_nhl_api_chain() -> Chain:
     """Create a chain for querying the NHL API and parsing responses."""
@@ -284,8 +422,221 @@ def prepare_api_params(api_spec: Dict[str, Any]) -> Dict[str, Any]:
             
     return api_spec
 
-def processJSON_chain(llm, original_query, json_output) -> str :
+def trim_json_data(json_data: Dict[str, Any], endpoint: str) -> Dict[str, Any]:
+    """Trim JSON data to only include relevant fields based on the endpoint."""
+    if not isinstance(json_data, dict):
+        return json_data
+        
+    if "player-spotlight" in endpoint:
+        # For player spotlight, only keep essential player info
+        players = json_data.get("players", [])
+        trimmed_players = []
+        for player in players:
+            trimmed_players.append({
+                "name": player.get("name"),
+                "position": player.get("position"),
+                "team": player.get("team"),
+                "stats": {
+                    "goals": player.get("stats", {}).get("goals"),
+                    "assists": player.get("stats", {}).get("assists"),
+                    "points": player.get("stats", {}).get("points")
+                }
+            })
+        return {"players": trimmed_players}
+    
+    elif "schedule" in endpoint:
+        # For schedule, only keep game times and teams
+        dates = json_data.get("dates", [])
+        trimmed_dates = []
+        for date in dates:
+            trimmed_games = []
+            for game in date.get("games", []):
+                trimmed_games.append({
+                    "gameDate": game.get("gameDate"),
+                    "homeTeam": game.get("homeTeam", {}).get("name"),
+                    "awayTeam": game.get("awayTeam", {}).get("name"),
+                    "status": game.get("status", {}).get("state")
+                })
+            trimmed_dates.append({"date": date.get("date"), "games": trimmed_games})
+        return {"dates": trimmed_dates}
+    
+    elif "standings" in endpoint:
+        # For standings, only keep team records
+        records = json_data.get("records", [])
+        trimmed_records = []
+        for record in records:
+            trimmed_records.append({
+                "team": record.get("team", {}).get("name"),
+                "points": record.get("points"),
+                "gamesPlayed": record.get("gamesPlayed"),
+                "wins": record.get("wins"),
+                "losses": record.get("losses")
+            })
+        return {"records": trimmed_records}
+    
+    elif "score" in endpoint:
+        # For scores, only keep game results
+        games = json_data.get("games", [])
+        trimmed_games = []
+        for game in games:
+            trimmed_games.append({
+                "gameDate": game.get("gameDate"),
+                "homeTeam": {
+                    "name": game.get("homeTeam", {}).get("name"),
+                    "score": game.get("homeTeam", {}).get("score")
+                },
+                "awayTeam": {
+                    "name": game.get("awayTeam", {}).get("name"),
+                    "score": game.get("awayTeam", {}).get("score")
+                },
+                "status": game.get("status", {}).get("state")
+            })
+        return {"games": trimmed_games}
+    
+    elif "stats-leaders" in endpoint:
+        # For stats leaders, only keep player names and relevant stats
+        stats = json_data.get("playerStats", [])
+        trimmed_stats = []
+        for stat in stats:
+            trimmed_stats.append({
+                "name": stat.get("name"),
+                "team": stat.get("team"),
+                "stats": {
+                    k: v for k, v in stat.get("stats", {}).items() 
+                    if k in ["goals", "assists", "points", "gamesPlayed"]
+                }
+            })
+        return {"playerStats": trimmed_stats}
+    
+    elif "player/" in endpoint:
+        # For player endpoints, keep essential player information
+        if "/landing" in endpoint:
+            return {
+                "player": {
+                    "name": json_data.get("player", {}).get("name"),
+                    "position": json_data.get("player", {}).get("position"),
+                    "team": json_data.get("player", {}).get("team"),
+                    "stats": json_data.get("player", {}).get("stats", {})
+                }
+            }
+        elif "/stats" in endpoint:
+            return {
+                "player": {
+                    "name": json_data.get("player", {}).get("name"),
+                    "stats": json_data.get("stats", [])
+                }
+            }
+        else:
+            return {
+                "player": {
+                    "name": json_data.get("name"),
+                    "position": json_data.get("position"),
+                    "team": json_data.get("team"),
+                    "height": json_data.get("height"),
+                    "weight": json_data.get("weight"),
+                    "birthDate": json_data.get("birthDate"),
+                    "nationality": json_data.get("nationality")
+                }
+            }
+    
+    elif "team/" in endpoint:
+        # For team endpoints, keep essential team information
+        if "/roster" in endpoint:
+            roster = json_data.get("roster", [])
+            trimmed_roster = []
+            for player in roster:
+                trimmed_roster.append({
+                    "name": player.get("name"),
+                    "position": player.get("position"),
+                    "number": player.get("number")
+                })
+            return {"roster": trimmed_roster}
+        elif "/schedule" in endpoint:
+            dates = json_data.get("dates", [])
+            trimmed_dates = []
+            for date in dates:
+                trimmed_games = []
+                for game in date.get("games", []):
+                    trimmed_games.append({
+                        "gameDate": game.get("gameDate"),
+                        "opponent": game.get("homeTeam", {}).get("name") if game.get("homeTeam", {}).get("id") == json_data.get("team", {}).get("id") else game.get("awayTeam", {}).get("name"),
+                        "score": f"{game.get('homeTeam', {}).get('score')}-{game.get('awayTeam', {}).get('score')}"
+                    })
+                trimmed_dates.append({"date": date.get("date"), "games": trimmed_games})
+            return {"schedule": trimmed_dates}
+        else:
+            return {
+                "team": {
+                    "name": json_data.get("name"),
+                    "abbreviation": json_data.get("abbreviation"),
+                    "division": json_data.get("division", {}).get("name"),
+                    "conference": json_data.get("conference", {}).get("name")
+                }
+            }
+    
+    elif "game/" in endpoint:
+        # For game endpoints, keep essential game information
+        if "/feed/live" in endpoint:
+            return {
+                "gameData": {
+                    "status": json_data.get("gameData", {}).get("status", {}).get("state"),
+                    "homeTeam": json_data.get("gameData", {}).get("teams", {}).get("home", {}).get("name"),
+                    "awayTeam": json_data.get("gameData", {}).get("teams", {}).get("away", {}).get("name"),
+                    "score": json_data.get("liveData", {}).get("linescore", {}).get("currentPeriodOrdinal")
+                },
+                "liveData": {
+                    "plays": json_data.get("liveData", {}).get("plays", {}).get("allPlays", [])[-5:]  # Last 5 plays
+                }
+            }
+        else:
+            return {
+                "gameData": {
+                    "status": json_data.get("gameData", {}).get("status", {}).get("state"),
+                    "homeTeam": json_data.get("gameData", {}).get("teams", {}).get("home", {}).get("name"),
+                    "awayTeam": json_data.get("gameData", {}).get("teams", {}).get("away", {}).get("name"),
+                    "score": json_data.get("liveData", {}).get("linescore", {}).get("currentPeriodOrdinal")
+                }
+            }
+    
+    elif endpoint in ["/divisions", "/conferences", "/teams"]:
+        # For league information endpoints, keep essential organizational data
+        if endpoint == "/divisions":
+            return {
+                "divisions": [
+                    {
+                        "name": div.get("name"),
+                        "conference": div.get("conference", {}).get("name")
+                    } for div in json_data.get("divisions", [])
+                ]
+            }
+        elif endpoint == "/conferences":
+            return {
+                "conferences": [
+                    {
+                        "name": conf.get("name"),
+                        "divisions": [div.get("name") for div in conf.get("divisions", [])]
+                    } for conf in json_data.get("conferences", [])
+                ]
+            }
+        else:  # /teams
+            return {
+                "teams": [
+                    {
+                        "name": team.get("name"),
+                        "abbreviation": team.get("abbreviation"),
+                        "division": team.get("division", {}).get("name"),
+                        "conference": team.get("conference", {}).get("name")
+                    } for team in json_data.get("teams", [])
+                ]
+            }
+    
+    return json_data
+
+def processJSON_chain(llm, original_query, json_output, endpoint: str) -> str:
     """Take in the JSON from the query and return a natural language response."""
+    # Trim the JSON data before processing
+    trimmed_data = trim_json_data(json_output, endpoint)
+    
     template = """
     You are a helpful assistant that takes in information in the form of a JSON response and returns a clear, concise natural language answer to a user query.
     
@@ -302,10 +653,7 @@ def processJSON_chain(llm, original_query, json_output) -> str :
         | llm
         | StrOutputParser()
     )
-    return processing_chain.invoke({'original_query': original_query, 'json_output': json_output})
-
-
-import json
+    return processing_chain.invoke({'original_query': original_query, 'json_output': trimmed_data})
 
 def query_nhl(llm, query: str, debug: bool = False) -> Dict[str, Any]:
     """Query the NHL API using natural language.
@@ -354,16 +702,35 @@ def query_nhl(llm, query: str, debug: bool = False) -> Dict[str, Any]:
         parser = NHLResponseParser(response=response["response"])
         endpoint = api_spec["endpoint"]
         
-        if "player-spotlight" in endpoint:
-            result = parser.parse_player_spotlight()
-        elif "schedule" in endpoint:
-            result = parser.parse_schedule()
-        elif "standings" in endpoint:
-            result = parser.parse_standings()
-        elif "score" in endpoint:
-            result = parser.parse_scores()
-        elif "stats-leaders" in endpoint:
-            result = parser.parse_stats_leaders()
+        # Map endpoints to parser methods
+        endpoint_parsers = {
+            "player-spotlight": parser.parse_player_spotlight,
+            "schedule": parser.parse_schedule,
+            "standings": parser.parse_standings,
+            "score": parser.parse_scores,
+            "stats-leaders": parser.parse_stats_leaders,
+            "/player/": parser.parse_player_info,
+            "/player/landing": parser.parse_player_landing,
+            "/player/stats": parser.parse_player_stats,
+            "/team/": parser.parse_team_info,
+            "/team/roster": parser.parse_team_roster,
+            "/team/schedule": parser.parse_team_schedule,
+            "/game/": parser.parse_game_info,
+            "/game/feed/live": parser.parse_game_feed,
+            "/divisions": parser.parse_divisions,
+            "/conferences": parser.parse_conferences,
+            "/teams": parser.parse_teams
+        }
+        
+        # Find the appropriate parser method
+        parser_method = None
+        for key, method in endpoint_parsers.items():
+            if key in endpoint:
+                parser_method = method
+                break
+        
+        if parser_method:
+            result = parser_method()
         else:
             result = {
                 "parsed_data": {
@@ -372,10 +739,8 @@ def query_nhl(llm, query: str, debug: bool = False) -> Dict[str, Any]:
                 }
             }
 
-        #relevant_data = extract_relevant_data(endpoint, response["response"])    
-
         # Convert API output to natural language using processJSON_chain
-        final_result = processJSON_chain(llm, query, response["response"])
+        final_result = processJSON_chain(llm, query, response["response"], endpoint)
         
         if debug:
             print("\nFinal Natural Language Response:")
