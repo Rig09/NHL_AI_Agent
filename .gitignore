@@ -2,7 +2,7 @@
 
 .DS_Store
 .vscode
-.env
+.env*
 *.csv
 *.db
 *.png
@@ -11,6 +11,7 @@
 tempCodeRunnerFile.py
 load_new_shots.py
 add_2024_data.py
+
 # Chroma DB files
 # **/chroma_db/
 *.sqlite3

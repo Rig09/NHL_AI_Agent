@@ -2,54 +2,59 @@ from dotenv import load_dotenv
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 import os
-import argparse
 from agent.agent_main import get_agent
 from utils.database_init import init_db, init_vector_db
+from utils.config import load_environment_config
 import matplotlib.pyplot as plt
 from langchain_openai import ChatOpenAI
+from pathlib import Path
 
-# parser = argparse.ArgumentParser()
-# # Use local environment variables by default
-# parser.add_argument("--remote", action="store_true", help="If specified, use remote st secrets config.Otherwise, use local dotenv.") 
-# To run local config, use streamlit run app.py
-# To run remote config, use streamlit run app.py -- --remote
+st.set_page_config(page_title="NHL Stats Chatbot", page_icon="🏒", layout="wide")
 
+# Initialize configuration
+if "config" not in st.session_state:
+    print("LOADING ENVIRONMENT")
+    st.session_state.config = load_environment_config()
+    # Debug logging
+    config_debug = {k: '***' if 'password' in k.lower() else v for k, v in st.session_state.config.items()}
+    print(f"Loaded configuration: {config_debug}")
 
-# # TODO: make function cleaner, remove duplicate code, naming
-def get_secrets_or_env(remote):
-    if remote is True:
-        MYSQL_HOST = st.secrets["MYSQL_HOST"]
-        MYSQL_USER = st.secrets["MYSQL_USER"]
-        MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
-        MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
-        open_ai_key = st.secrets["OPENAI_API_KEY"]
-    else:  # Local config
-        load_dotenv()
-        MYSQL_HOST = os.getenv("MYSQL_HOST")
-        MYSQL_USER = os.getenv("MYSQL_USER")
-        MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-        MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-        open_ai_key = os.getenv("OPENAI_API_KEY")
-    return MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key
-
+# Initialize database connections
 if "database" not in st.session_state:
-    # args = parser.parse_args()
-    # TODO: remote to true before pushing on this branch
-    MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, open_ai_key = get_secrets_or_env(remote=True)
-    
-    db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
-    rules_db = init_vector_db('rules', open_ai_key)
-    cba_db = init_vector_db('cba', open_ai_key)
+    config = st.session_state.config
+    try:
+        print("Attempting database connection...")
+        db = init_db(
+            config["MYSQL_HOST"],
+            config["MYSQL_USER"],
+            config["MYSQL_PASSWORD"],
+            config["MYSQL_DATABASE"]
+        )
+        print("Database connection successful!")
+    except Exception as e:
+        print(f"Database connection error: {str(e)}")
+        st.error("Failed to connect to database. Please check your configuration.")
+        st.stop()
+    rules_db = init_vector_db('rules', config["OPENAI_API_KEY"])
+    cba_db = init_vector_db('cba', config["OPENAI_API_KEY"])
 
+# Initialize agent
 if "agent_chain" not in st.session_state:
-    NHLStatsAgent = get_agent(db, rules_db, cba_db, llm=ChatOpenAI(model="gpt-4o", api_key=open_ai_key))
+    NHLStatsAgent = get_agent(
+        db, 
+        rules_db, 
+        cba_db, 
+        llm=ChatOpenAI(
+            model="gpt-4o",
+            api_key=st.session_state.config["OPENAI_API_KEY"]
+        )
+    )
 
+# Initialize chat history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         AIMessage(content="Welcome to the NHL Chatbot! Ask me anything about the NHL I will do my best to answer your questions!")
     ]
-
-st.set_page_config(page_title="NHL Stats Chatbot", page_icon="🏒", layout="wide")
 
 st.title("NHL Chatbot 🏒")
 st.write("Credit [moneypuck.com](https://moneypuck.com/) for all the player, shot, line, and goalie data used in this project.")

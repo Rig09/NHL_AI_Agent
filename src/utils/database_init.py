@@ -10,27 +10,45 @@ import pandas as pd
 # import sys
 # sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
-# Retrieve MySQL credentials from .env
-
-# Load environment variables from the .env file
-load_dotenv()
-# MYSQL_HOST = os.getenv("MYSQL_HOST")
-# MYSQL_USER = os.getenv("MYSQL_USER")
-# MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-# MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-# open_ai_key = os.getenv("OPENAI_API_KEY")
-
-model = ChatOpenAI(model="gpt-4o")
 
 def init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD,MYSQL_DATABASE):
     """Initialize and return the database connection"""
-    return mysql.connector.connect(
-        host=MYSQL_HOST,
-        user=MYSQL_USER,
-        password=MYSQL_PASSWORD,
-        database=MYSQL_DATABASE,
-        ssl_disabled=True
-    )
+    config = {
+        'host': MYSQL_HOST,
+        'user': MYSQL_USER,
+        'password': MYSQL_PASSWORD,
+        'database': MYSQL_DATABASE,
+        # 'auth_plugin': 'caching_sha2_password',
+        # 'ssl_disabled': True,
+        # 'get_warnings': True,
+        # 'raise_on_warnings': False,
+        # 'connection_timeout': 10
+    }
+    
+    # Debug logging
+    debug_config = {k: '***' if k == 'password' else v for k, v in config.items()}
+    print(f"Attempting MySQL connection with config: {debug_config}")
+    
+    try:
+        connection = mysql.connector.connect(**config)
+        print("MySQL connection successful!")
+        return connection
+    except mysql.connector.Error as err:
+        error_msg = ""
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            error_msg = f"Access denied: Check username and password. Error: {err}"
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            error_msg = f"Database '{MYSQL_DATABASE}' does not exist. Error: {err}"
+        elif err.errno == errorcode.CR_CONN_HOST_ERROR:
+            error_msg = f"Failed to connect to host '{MYSQL_HOST}'. Error: {err}"
+        else:
+            error_msg = f"MySQL Error [{err.errno}]: {err}"
+        print(f"MySQL connection error: {error_msg}")
+        raise Exception(error_msg) from err
+    except Exception as e:
+        error_msg = f"Unexpected error during MySQL connection: {str(e)}"
+        print(error_msg)
+        raise Exception(error_msg) from e
 
 def find_persistent_dir(db_name):
     """Find the persistent directory for vector database storage.
