@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-from datetime import datetime, date
+
 
 col_list = [
     'shotID', 'homeTeamCode', 'awayTeamCode', 'season', 'isPlayoffGame', 'game_id', 

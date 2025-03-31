@@ -41,7 +41,7 @@ def get_ngame_data(llm, db, sql_chain, natural_language_query):
     print(template_for_sql_query)
     query = sql_chain.invoke({"question" : template_for_sql_query})
     shot_data = pd.DataFrame(run_query_mysql(query, db))
-    print(shot_data.head(5))
+    shot_data.to_csv('testingNGame.csv')
     if shot_data.empty:
         raise ValueError("There was an error with the query. Please try again with a different query.")
     return shot_data

@@ -189,6 +189,9 @@ def get_sql_chain(db, llm):
     This may also require some thinking, for example, if someone asks for a stat 'in the month of march' return a list for all marches in the past seasons. But if someone says this march, take the year from the current date thats provided in the question and ask for that march.
     If no year is provided, use the current year passed in the date.
 
+    For queries using the last _ games, Here is a sample sql query to help generate one that will work with the version of MySQL used in this database:
+    "sELECT shooterName, teamCode, goal, shots_data.nhl_game_id, shotID FROM nhlstats.shots_data JOIN (sELECT nhl_game_id FROM shots_data WHERE shooterName = 'shooter name' GROUP BY nhl_game_id ORDER BY nhl_game_id DESC LIMIT game number) recent_games ON shots_data.nhl_game_id = shots_data.nhl_game_id WHERE shooterName = 'shooter name';"
+    This would be the query for the shots for a player in the last _ number of games, where game number is the number of games asked about and shooter name is the player asked about.
     Also reminder: MySQL does not support using LIMIT inside a subquery within an IN clause.
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.

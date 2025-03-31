@@ -176,6 +176,7 @@ def get_agent(db, rules_db, cba_db, llm):
         """
         This tool should be invoked whenever a user has a question about a stat that involves a date. For example if a user asks about goals this march, or over the past 30 days who has the most _.
         Any statistical query about stats that is has any relation to dates should invoke this tool. Only counting stats should invoke this tool. So if someone asks for expected goals percentage, corsi, possesion, ect. Do not invoke this tool.
+        If a user says something like this calendar year, or this month, or this week. DO NOT INFER what that means. Pass that information to this tool, it has the context of todays date.
         """
         return get_stats_by_dates(llm, db, sql_chain, natural_language_query, todays_date)
     
@@ -216,6 +217,13 @@ def get_agent(db, rules_db, cba_db, llm):
         This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
         """
         return ngames_team_xgpercent(db, teamCode, start_date, end_date)
+    
+    @tool(getDate)
+    def getDate():
+        """
+        returns the current date. This could be useful if a user asks a question that requires context about the date.
+        """
+        return todays_date
     chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
