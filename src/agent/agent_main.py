@@ -11,8 +11,8 @@ from chains.bio_info_chain import get_bio_chain
 from pydantic import BaseModel, Field
 from chains.nhl_api_chain import query_nhl
 from datetime import datetime, date
-from chains.dated_stats import get_stats_by_dates
-
+from chains.dated_stats import get_stats_by_dates, get_stats_ngames
+from stat_hardcode.xg_percent import ngames_player_xgpercent, date_player_xgpercent, ngames_team_xgpercent, date_player_xgpercent
 
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
@@ -46,7 +46,42 @@ class NHLAPI_schema(BaseModel):
 
 class dated_stats_schema(BaseModel):
     natural_language_query: str = Field(..., description="""This should be a natural language description of the question the person is asking, if the tool is invoked, this should be the question that was asked of the agent.'
-    'This should allway include a natural language description of a condition on the dates. Like for example 'in the month of march' or 'over the last month' """)
+    'This should allways include a natural language description of a condition on the dates. Like for example 'in the month of march' or 'over the last month' """)
+
+class ngames_stats_schema(BaseModel):
+    natural_language_query: str = Field(..., description="""This should be a natural language description of the question the person is asking, if the tool is invoked, this should be the question that was asked of the agent.'
+    'This should allways include a natural language description of a condition on the games. This is either using game numbers, like 'between games 30 and 40' or 'in the last 5 games' """)    
+
+class ngames_xg_percent_schema(BaseModel):
+    player_name: str = Field(..., description= 'The name of the player for which the request is being made')
+    game_number: int = Field(..., description= "The number of games being asked about. So if someone says what is Connor Mcdavid's expected goals percentage in the last 10 games. Then this would take the value of 10.")
+
+class ngames_xg_team_percent_schema(BaseModel):
+    teamCode: str = Field(..., description= """The team code for the team which is being asked about, Note for the team codes: Anaheim Ducks -> ANA, Arizona Coyotes -> ARI, Boston Bruins -> BOS, 
+                          Buffalo Sabres -> BUF, Calgary Flames -> CGY, Carolina Hurricanes -> CAR, Chicago Blackhawks -> CHI, Colorado Avalanche -> COL, Columbus Blue Jackets -> CBJ, 
+                          Dallas Stars -> DAL, Detroit Red Wings -> DET, Edmonton Oilers -> EDM, Florida Panthers -> FLA, Los Angeles Kings -> LAK, Minnesota Wild -> MIN, 
+                          Montreal Canadiens -> MTL, Nashville Predators -> NSH, New Jersey Devils -> NJD, New York Islanders -> NYI, New York Rangers -> NYR, Ottawa Senators -> OTT,
+                           Philadelphia Flyers -> PHI, Pittsburgh Penguins -> PIT, San Jose Sharks -> SJS, Seattle Kraken -> SEA, St. Louis Blues -> STL, Tampa Bay Lightning -> TBL, 
+                          Toronto Maple Leafs -> TOR, Vancouver Canucks -> VAN, Washington Capitals -> WSH, Winnipeg Jets -> WPG. Also imply nicknames, like The jets, leafs, habs, sharks, ect.""")
+    game_number: int = Field(..., description= "The number of games being asked about. So if someone says what is the Jets expected goals percentage in the last 10 games. Then this would take the value of 10.")
+
+
+class date_xg_percent_schema(BaseModel):
+    player_name: str = Field(..., description= 'The name of the player for which the request is being made')
+    start_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Connor Mcdavid's expected goals percentage Since January 1st. Then this would take the value of 2024-01-01.")
+    end_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Connor Mcdavid's expected goals percentage from January 1st to January 10th. Then this would take the value of 2024-01-10. If someone says since _ or doesnt give an end date use todays date")
+
+class date_team_xg_percent_schema(BaseModel):
+    teamCode: str = Field(..., description= """The team code for the team which is being asked about, Note for the team codes: Anaheim Ducks -> ANA, Arizona Coyotes -> ARI, Boston Bruins -> BOS, 
+                          Buffalo Sabres -> BUF, Calgary Flames -> CGY, Carolina Hurricanes -> CAR, Chicago Blackhawks -> CHI, Colorado Avalanche -> COL, Columbus Blue Jackets -> CBJ, 
+                          Dallas Stars -> DAL, Detroit Red Wings -> DET, Edmonton Oilers -> EDM, Florida Panthers -> FLA, Los Angeles Kings -> LAK, Minnesota Wild -> MIN, 
+                          Montreal Canadiens -> MTL, Nashville Predators -> NSH, New Jersey Devils -> NJD, New York Islanders -> NYI, New York Rangers -> NYR, Ottawa Senators -> OTT,
+                          Philadelphia Flyers -> PHI, Pittsburgh Penguins -> PIT, San Jose Sharks -> SJS, Seattle Kraken -> SEA, St. Louis Blues -> STL, Tampa Bay Lightning -> TBL, 
+                          Toronto Maple Leafs -> TOR, Vancouver Canucks -> VAN, Washington Capitals -> WSH, Winnipeg Jets -> WPG. Also imply nicknames, like The jets, leafs, habs, sharks, ect.""")
+    start_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is the Habs expected goals percentage Since January 1st. Then this would take the value of 2024-01-01.")
+    end_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Oiler's expected goals percentage from January 1st to January 10th. Then this would take the value of 2024-01-10. If someone says since _ or doesnt give an end date use todays date")
+
+
 # Helper function to create wrappers for tools
 def create_tool_wrapper(func, vector_db):
     def wrapper(query: str):
@@ -140,10 +175,47 @@ def get_agent(db, rules_db, cba_db, llm):
     def dated_stat_getter(natural_language_query:str):
         """
         This tool should be invoked whenever a user has a question about a stat that involves a date. For example if a user asks about goals this march, or over the past 30 days who has the most _.
-        Any statistical query about stats that is has any relation to dates should invoke this tool
+        Any statistical query about stats that is has any relation to dates should invoke this tool. Only counting stats should invoke this tool. So if someone asks for expected goals percentage, corsi, possesion, ect. Do not invoke this tool.
         """
         return get_stats_by_dates(llm, db, sql_chain, natural_language_query, todays_date)
+    
+    @tool(args_schema=ngames_stats_schema)
+    def n_games_stat_getter(natural_language_query:str):
+        """
+        This tool should be invoked whenever a user has a question about a stat using a range of games. For example if a user asks about goals in the last 5 games. Or between game 40 and 50. ect.
+        Any statistical query about asking about a range of games, should invoke this tool. Only counting stats should invoke this tool. So if someone asks for expected goals percentage, corsi, possesion, ect. Do not invoke this tool
+        """
+        return get_stats_ngames(llm, db, sql_chain, natural_language_query)
+    
+    @tool(args_schema=ngames_xg_percent_schema)
+    def n_games_xgpercent_getter(player_name, game_number):
+        """
+        This tool should be invoked when someone asks for a player's expected goals percentage over the last _ number of games. This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
+        """
+        return ngames_player_xgpercent(db, player_name, game_number)
+    
+    @tool(args_schema=ngames_xg_percent_schema)
+    def n_games_team_xgpercent_getter(teamCode, game_number):
+        """
+        This tool should be invoked when someone asks for a team's expected goals percentage over the last _ number of games. This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
+        """
+        return ngames_team_xgpercent(db, teamCode, game_number)
 
+    @tool(args_schema=date_xg_percent_schema)
+    def date_xg_percent_getter(player_name, start_date, end_date = todays_date):
+        """
+        This tool should be invoked when someone asks for a player's expected goals percentage over a certain date range.
+        This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
+        """
+        return date_player_xgpercent(db, player_name, start_date, end_date)
+    
+    @tool(args_schema=date_team_xg_percent_schema)
+    def date_team_xg_percent_getter(teamCode, start_date, end_date = todays_date):
+        """
+        This tool should be invoked when someone asks for a team's expected goals percentage over a certain date range.
+        This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
+        """
+        return ngames_team_xgpercent(db, teamCode, start_date, end_date)
     chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
@@ -167,6 +239,11 @@ def get_agent(db, rules_db, cba_db, llm):
         xg_heatmap_getter,
         nhl_api_question,
         dated_stat_getter,
+        n_games_stat_getter,
+        n_games_xgpercent_getter,
+        n_games_team_xgpercent_getter,
+        date_xg_percent_getter,
+        date_team_xg_percent_getter,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),

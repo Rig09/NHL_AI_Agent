@@ -168,16 +168,28 @@ def get_sql_chain(db, llm):
     xGoal: The probability the shot will be a goal. Also known as "Expected Goals"
     playerPositionThatDidEvent: The position of the player doing the shot. L for Left Wing, R for Right Wing, D for Defenceman, C for Centre.
     teamCode: The team code of the shooting team. For example, TOR, NYR, etc
+    nhl_game_id: This is the unique identifier for each individual game the shot took place in. This number begins with the season, then has an indicator for season type, and then a number. More recent games, allways have a larger number.
     gameDate: a date when the shot took place. Repersented as year-month-day. For example, November 27th 2024 would be: 2024-11-27
+    shooting_team_players: This is a list of the players on the ice for the shooting team at the time of the shot. They are listed as the full names seperated by a comma. Often times a players last name will be the only name given. Use like keyword in a SQL query.
+    opposing_team_players: This is a list of the players on the ice for the opposing team at the time of the shot. They are listed as the full names seperated by a comma. Here is an example of what the column would have: "Nicolas Aube-Kubel, Sam Lafferty, Beck Malenstyn, Henri Jokiharju, Rasmus Dahlin"
     
     An example of a request for a shots_data table would be: 'Please return a list of shots from the shots_data table that contains only the columns and rows relavent to the query: What was the expected goals percentage for the Oilers between Jan 1st 2020 and Jan 10th 2020. Note today's date is _ '
     Here you would return a list of all shots between 2020-01-01 and 2020-01-10, where either the home or away team was the edmonton oilers. You would only need the columns that make it clear which team took the shots and teams that played. So include the teamCode and the xgoals column.
-    fo
+    
+    If somone asks for a stat over the last _ number of games. First satisfy the conditions, and then return a list with only the _ greatest unique values for nhl_game_id.
+    If somone asks for the number of goals over a stretch, its important to only report from the last 20 games. This means you cannot return only shots with goals, since this will only find games where the player scored. Remember that.
+    In that case, just return all the shots taken by the player in each of the last 20 games. This will be put into a dataframe to determine the number, so its important to include every shot, and insure its only coming from the last 20 games. Even if he did not shoot in a game.
+
+    When someone asks for the amount of shots, goals, expected goals, ect. And wants to use the shots_data table, return a list of ALL shots from the last n unique nhl_game_id values. ALL shots from the past 10 games. each game is identified with this id.
+
+    If someone asks for a line's stat over a date range or in the last _ games, return all the shots where all three of the names are listed. Lines will often only include the last name when requested, the full name is listed in the shots_data table. Keep that in mind.
+
+    If someone asks for a ranking using the shots_data table then return all the shots for all teams and players meeting the conditions so they can find a rankning.
+
     This may also require some thinking, for example, if someone asks for a stat 'in the month of march' return a list for all marches in the past seasons. But if someone says this march, take the year from the current date thats provided in the question and ask for that march.
     If no year is provided, use the current year passed in the date.
-    When someone is requesitng a ratio of percentage value and getting a table to do so, make sure you include all shots for BOTH teams in shots involving the party asked for since both teams shots are important to calculate this value. Leave teamcode so it can be determined by which team each shot was taken.
-    If someone asks for a on expected goal stat, please remove any shot that was blocked. If you can tell that it was.
-    Also note that corsi is just proportion of shots taken by the team. So if someone requests a table for this perpose, return all the shots for that player, or team.
+
+    Also reminder: MySQL does not support using LIMIT inside a subquery within an IN clause.
 
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}

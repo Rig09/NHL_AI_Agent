@@ -1,8 +1,6 @@
-import pandas as pd
 import requests
-
-shots_data = r'C:\Users\agjri\Desktop\NHL_agent\NHL_AI_Agent\data\shots\shots_2015-2023.csv'
-shots_2024 = r'C:\Users\agjri\Desktop\shots_2024.csv'
+import pandas as pd
+from datetime import datetime, date
 
 col_list = [
     'shotID', 'homeTeamCode', 'awayTeamCode', 'season', 'isPlayoffGame', 'game_id', 
@@ -15,16 +13,12 @@ col_list = [
     'defendingTeamForwardsOnIce', 'defendingTeamDefencemenOnIce', 'teamCode'
 ]
 
+
 def time_to_seconds(time_str):
-    if pd.isnull(time_str) or time_str == '':
+    if pd.isnull(time_str):
         return 0
-    try:
-        minutes, seconds = map(int, time_str.split(':'))
-        return minutes * 60 + seconds
-    except ValueError:
-        # Handle cases where the time format is not valid
-        print(f"Invalid time format: {time_str}")
-        return 0  # or another default value you prefer
+    minutes, seconds = map(int, time_str.split(':'))
+    return minutes * 60 + seconds
 
 def fetch_shifts(nhl_game_id):
     url = f"https://api.nhle.com/stats/rest/en/shiftcharts?cayenneExp=gameId={nhl_game_id}"
@@ -78,18 +72,12 @@ def process_shots(shots_df):
         shots_df.at[idx, 'opposing_team_players'] = opposing_team_players
 
     return shots_df
+# Example usage
 
+shots_2024 = r'C:\Users\agjri\Desktop\shots_2024.csv'
 
-# Read CSV with only required columns
-shots_df = pd.read_csv(shots_data, usecols=col_list, index_col=None)
-shots_2024 = pd.read_csv(shots_2024, usecols=col_list, index_col=None)
+shots_df = pd.read_csv(shots_2024, usecols=col_list, index_col=None)
 
-# Combine the two shot dataframes
-shots_df = pd.concat([shots_df, shots_2024], ignore_index=True)
-
-#shots_df.to_csv('shots_before_dates.csv', index=False)
-
-# Create nhl_game_id column
 shots_df['nhl_game_id'] = shots_df['season'].astype(str) + shots_df['game_id'].astype(str).str.zfill(6)
 
 
@@ -125,16 +113,8 @@ else:
 
 shots_df['gameDate'] = pd.to_datetime(shots_df['gameDate'], format='%Y%m%d').dt.strftime('%Y-%m-%d')
 
-# print("Before dropping duplicates:", shots_df.duplicated(subset=['shotID', 'season']).sum())
-shots_df = shots_df.drop_duplicates(subset=['shotID', 'nhl_game_id'])
-# print("After dropping duplicates:", shots_df.duplicated(subset=['shotID', 'season']).sum())
-
-# print(shots_df.head(5))
-# print(shots_df[shots_df['shotID'] == 0].head(5))
-shots_csv_path = 'shots_with_dates.csv'
-
-shots_df.to_csv(shots_csv_path, index=False)
-print('finished adding dates')
 
 shots_df = process_shots(shots_df)
-shots_df.to_csv('shots_with_line_data.csv', index=False)
+print(shots_df.head(5))
+
+shots_df.to_csv('shots2024_with_line_data.csv', index=False)
