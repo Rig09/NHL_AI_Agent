@@ -1,18 +1,10 @@
 import pandas as pd
-import urllib.request
-import urllib.error
 import os
 from dotenv import load_dotenv
 from chains.stats_sql_chain import get_sql_chain
 from langchain_openai import ChatOpenAI
 from openai import OpenAI 
-import numpy as np
-from langchain_community.utilities import SQLDatabase
-import re
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
-from datetime import datetime, date
+from datetime import date
 from utils.database_init import init_db, run_query_mysql
 
 load_dotenv()
@@ -23,25 +15,25 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 open_ai_key = os.getenv("OPENAI_API_KEY")
 
-def get_date_data_from_table(llm, db, sql_chain, natural_language_query, today_date):
+def get_date_data_from_table(db, sql_chain, natural_language_query, today_date):
         template_for_sql_query = f"""Please return a list of shots from the shots_data table that contains only the columns and rows relavent to the query: {natural_language_query}.
         Allways add a condition for the dates of the shots, use the natural language query to determine this. Again return only the needed columns. Also note for context today's date is {today_date}"""
         print(template_for_sql_query)
         query = sql_chain.invoke({"question" : template_for_sql_query})
         shot_data = pd.DataFrame(run_query_mysql(query, db))
-        print(shot_data.head(5))
+        #print(shot_data.head(5))
         if shot_data.empty:
             raise ValueError("There was an error with the query. Please try again with a different query.")
         return shot_data
 
-def get_ngame_data(llm, db, sql_chain, natural_language_query):
+def get_ngame_data(db, sql_chain, natural_language_query):
     template_for_sql_query = f"""Please return a list of shots from the shots_data table that contains only the columns and rows relavent to the query: {natural_language_query}.
     This should be a query asking for a stat over the last _ number of games. Or between game numbers for a team. Use the fact that the greater the nhl_game_id value, the more recent the game was.
     When somone refers to a game number though, they mean within a certain season value"""
     print(template_for_sql_query)
     query = sql_chain.invoke({"question" : template_for_sql_query})
     shot_data = pd.DataFrame(run_query_mysql(query, db))
-    shot_data.to_csv('testingNGame.csv')
+    #shot_data.to_csv('testingNGame.csv')
     if shot_data.empty:
         raise ValueError("There was an error with the query. Please try again with a different query.")
     return shot_data
@@ -49,7 +41,7 @@ def get_ngame_data(llm, db, sql_chain, natural_language_query):
 
 def get_stats_by_dates(llm, db, sql_chain, natural_language_query, today_date):
 
-    table = get_date_data_from_table(llm, db, sql_chain, natural_language_query, today_date)
+    table = get_date_data_from_table(db, sql_chain, natural_language_query, today_date)
 
     table_str = table.to_string()
 
@@ -99,7 +91,7 @@ def get_stats_by_dates(llm, db, sql_chain, natural_language_query, today_date):
 
 def get_stats_ngames(llm, db, sql_chain, natural_language_query):
 
-    table = get_ngame_data(llm, db, sql_chain, natural_language_query)
+    table = get_ngame_data(db, sql_chain, natural_language_query)
 
     table_str = table.to_string()
 

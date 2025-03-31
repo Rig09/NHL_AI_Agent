@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from chains.nhl_api_chain import query_nhl
 from datetime import datetime, date
 from chains.dated_stats import get_stats_by_dates, get_stats_ngames
-from stat_hardcode.xg_percent import ngames_player_xgpercent, date_player_xgpercent, ngames_team_xgpercent, date_player_xgpercent
+from stat_hardcode.xg_percent import ngames_player_xgpercent, date_player_xgpercent, ngames_team_xgpercent, date_team_xgpercent,ngames_line_xgpercent, date_line_xgpercent
 
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
@@ -81,6 +81,18 @@ class date_team_xg_percent_schema(BaseModel):
     start_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is the Habs expected goals percentage Since January 1st. Then this would take the value of 2024-01-01.")
     end_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Oiler's expected goals percentage from January 1st to January 10th. Then this would take the value of 2024-01-10. If someone says since _ or doesnt give an end date use todays date")
 
+class date_lines_xg_percent_schema(BaseModel):
+    player_one: str = Field(..., description= 'The name of the first player for which the request is being made')
+    player_two: str = Field(..., description= 'The name of the second player for which the request is being made')
+    player_three: str = Field(..., description= """The name of the third player for which the request is being made. Somtimes a request will be made for only two players. For this request it should pass 'None'""")
+    start_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Connor Mcdavid's expected goals percentage Since January 1st. Then this would take the value of 2024-01-01.")
+    end_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Connor Mcdavid's expected goals percentage from January 1st to January 10th. Then this would take the value of 2024-01-10. If someone says since _ or doesnt give an end date use todays date")
+
+class ngames_lines_xg_percent_schema(BaseModel):
+    player_one: str = Field(..., description= 'The name of the first player for which the request is being made')
+    player_two: str = Field(..., description= 'The name of the second player for which the request is being made')
+    player_three: str = Field(..., description= """The name of the third player for which the request is being made. Somtimes a request will be made for only two players. For this request it should pass 'None'""")
+    game_number: int = Field(..., description= "The number of games being asked about. So if someone says what is the Jets expected goals percentage in the last 10 games. Then this would take the value of 10.")
 
 # Helper function to create wrappers for tools
 def create_tool_wrapper(func, vector_db):
@@ -216,12 +228,29 @@ def get_agent(db, rules_db, cba_db, llm):
         This tool should be invoked when someone asks for a team's expected goals percentage over a certain date range.
         This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
         """
-        return ngames_team_xgpercent(db, teamCode, start_date, end_date)
+        return date_team_xgpercent(db, teamCode, start_date, end_date)
     
-    @tool(getDate)
+    @tool(args_schema=date_lines_xg_percent_schema)
+    def date_lines_xg_percent_getter(player_one, player_two, start_date, end_date, player_three = 'None'):
+        """
+        This tool should be invoked when the user asks for a line or pairings expected goals percentage over a specified date range. 
+        Defensive pairings only have two player, if someone asks for a line or pairing with only two players, simply pass the defualt 'None' to player_three
+        This is the only use. The tool will return a decimal, convert this to a percentage.
+        """
+        return date_line_xgpercent(db, player_one, player_two, player_three, start_date, end_date)
+    
+    @tool(args_schema=ngames_lines_xg_percent_schema)
+    def ngames_lines_xg_percent_getter(player_one, player_two, game_number, player_three = 'None'):
+        """
+        This tool should be invoked when someone asks for a player's expected goals percentage over the last _ number of games. This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
+         Defensive pairings only have two player, if someone asks for a line or pairing with only two players, simply pass the defualt 'None' to player_three
+        """
+        return ngames_line_xgpercent(db, player_one, player_two, player_three, game_number)
+    @tool
     def getDate():
         """
-        returns the current date. This could be useful if a user asks a question that requires context about the date.
+        returns the current date. This could be useful if a user asks a question that requires context about the date. 
+        This allows you to pass to other tools and infer the meaning if the dates given are ambiguous and require todays date to imply them
         """
         return todays_date
     chain = get_chain(db, llm)
@@ -252,6 +281,9 @@ def get_agent(db, rules_db, cba_db, llm):
         n_games_team_xgpercent_getter,
         date_xg_percent_getter,
         date_team_xg_percent_getter,
+        getDate,
+        ngames_lines_xg_percent_getter,
+        date_lines_xg_percent_getter,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
