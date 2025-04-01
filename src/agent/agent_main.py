@@ -13,6 +13,7 @@ from chains.nhl_api_chain import query_nhl
 from datetime import datetime, date
 from chains.dated_stats import get_stats_by_dates, get_stats_ngames
 from stat_hardcode.xg_percent import ngames_player_xgpercent, date_player_xgpercent, ngames_team_xgpercent, date_team_xgpercent,ngames_line_xgpercent, date_line_xgpercent
+from stat_hardcode.career_totals import get_nhl_player_career_stats
 
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
@@ -253,6 +254,18 @@ def get_agent(db, rules_db, cba_db, llm):
         This allows you to pass to other tools and infer the meaning if the dates given are ambiguous and require todays date to imply them
         """
         return todays_date
+    
+    @tool
+    def player_career_stats(player_name: str):
+        """
+        Invoke this tool to find the career totals for a given player based on the players name. This will return the career totals for a player in the following stats:
+        assits, average time on ice (avgToi), game winning goals (gameWinningGoals), games played (gamesPlayed), goals, overtime goals (otGoals), penalty minutes (pims), plus minus (plusMinus), points, powerplay goals (powerPlayGoals),
+        power play points (powerPlayPoints), shooting percentage (shootingPctg) (this is stored as a decimal, convert to percentage), shorthanded goals (shorthandedGoals), shorthanded points (shorthandedPoints), and shots.
+        It will return all of those stats for both the regular season and playoffs. It will give full career totals for those stats. If anyone asks for the amount of any of those stats a player has in there career either in the playoffs or regular season, invoke this tool.
+        If someone does not specify give the amount of regular season of a stat, and the playoff amounts. If someone asks for a players career totals, and doesnt specify the stat, show all of these stats.
+        """
+        return get_nhl_player_career_stats(db, player_name)
+
     chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
@@ -284,6 +297,7 @@ def get_agent(db, rules_db, cba_db, llm):
         getDate,
         ngames_lines_xg_percent_getter,
         date_lines_xg_percent_getter,
+        player_career_stats,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
