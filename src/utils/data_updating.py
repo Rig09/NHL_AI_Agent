@@ -181,10 +181,9 @@ def update_table(df, table_name):
         #Insert the new records into the table
         if not new_records.empty:
             if table_name == "game_logs":
-                merged.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
+                new_records.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
             else:
-                merged.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
-            print(f"✔ {len(new_records)} new records added to '{table_name}'.")
+                new_records.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
         else:
             print(f"No new records to add for '{table_name}'.")
 
