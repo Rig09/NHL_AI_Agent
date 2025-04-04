@@ -12,11 +12,10 @@ from langchain_openai import ChatOpenAI
 from openai import OpenAI 
 import numpy as np
 
-def extract_shot_data(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type, shot_result):
+def extract_shot_data(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type, shot_result):
     """
     Extracts shot data for a given natural language description of conditions, season upper and lower bounds, situation, and shot result type
     """
-    sql_chain = get_sql_chain(db, llm)
     # Validate input parameters
     valid_situations = ['5on5', '5on4', '4on5', 'all', 'other']
     valid_shot_results = ['GOAL', 'SOG_OR_GOAL', 'ANY']
@@ -107,7 +106,7 @@ def extract_shot_data(db, llm, conditions, season_lower_bound, season_upper_boun
     return shot_data
 
 
-def goal_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
+def goal_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a scatter plot of a player's goals on a hockey rink, excluding empty net goals and shots from behind half
     :param conditions: str, Natural language conditions to filter the data
@@ -117,7 +116,7 @@ def goal_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_b
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
     # TODO: Defensive programming if no goals are found for the player in the given season/situation???
 
     fig, ax = plt.subplots(1,1, figsize=(10,9), facecolor='w', edgecolor='k')
@@ -149,7 +148,7 @@ def goal_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_b
     return fig
     
 
-def shot_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
+def shot_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a scatter plot of a player's shots and goals on a hockey rink, excluding empty net shots and shots from behind half
     :param conditions: str, Natural language conditions to filter the data
@@ -159,7 +158,7 @@ def shot_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_b
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,9), facecolor='w', edgecolor='k')
     
@@ -207,7 +206,7 @@ def shot_map_scatter_get(db, llm, conditions, season_lower_bound, season_upper_b
 
 
 # TODO: Include heatmaps in this file
-def shot_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
+def shot_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a heatmap of a shots on a hockey rink, given an input query.
     :param conditions: str, Natural language conditions to filter the data
@@ -217,7 +216,7 @@ def shot_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_boun
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,10), facecolor='w', edgecolor='k')
     
@@ -254,7 +253,7 @@ def shot_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_boun
     return fig
 
 # TODO: Include heatmaps in this file
-def goal_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
+def goal_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a heatmap of a goals on a hockey rink, given an input query.
     :param conditions: str, Natural language conditions to filter the data
@@ -264,7 +263,7 @@ def goal_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_boun
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, shot_result="GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,10), facecolor='w', edgecolor='k')
     
@@ -299,7 +298,7 @@ def goal_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_boun
 
     return fig
 
-def xg_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound, situation, season_type):
+def xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type):
     """
     Generates a heatmap of a shots on a hockey rink, given an input query.
     :param conditions: str, Natural language conditions to filter the data
@@ -309,7 +308,7 @@ def xg_heat_map_get(db, llm, conditions, season_lower_bound, season_upper_bound,
     :param season_type: str, type of season to extract data for, between the following options (regular, playoffs, all)
     :returns: matplotlib figure object
     """
-    player_shots = extract_shot_data(db, llm, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
+    player_shots = extract_shot_data(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, shot_result="SOG_OR_GOAL", season_type=season_type)
 
     fig, ax = plt.subplots(1,1, figsize=(10,10), facecolor='w', edgecolor='k')
     

@@ -23,7 +23,7 @@ conn = mysql.connector.connect(
 cursor = conn.cursor()
 print("connected")
 # Create database if it doesn't exist
-#cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE};")
+cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE};")
 cursor.execute(f"USE {MYSQL_DATABASE};")
 print("using db")
 # Define seasons to process
@@ -53,6 +53,8 @@ def process_csv(file_path, table_name, season=None, is_playoff=None):
         print(f"Processing {file_path}...")
 
         df = pd.read_csv(file_path, encoding="utf-8", low_memory=False)
+        if 'gameDate' in df.columns:
+            df['gameDate'] = pd.to_datetime(df['gameDate'], errors='coerce').dt.date
         #df["season"] = season
         #df["is_playoff"] = is_playoff
 
@@ -101,31 +103,19 @@ def process_csv(file_path, table_name, season=None, is_playoff=None):
 # data_bio = "data/bio_information/allPlayersLookup.csv"
 # process_csv(data_bio, "BIO_Info")
 
-shots_data = r'C:\Users\agjri\Desktop\NHL_agent\NHL_AI_Agent\data\shots\shots_2015-2023.csv'
 
-col_list = [
-    'shotID', 'homeTeamCode', 'awayTeamCode', 'season', 'isPlayoffGame', 'game_id', 
-    'homeTeamWon', 'id', 'time', 'period', 'team', 'xCord', 'yCord', 'location', 
-    'event', 'goal', 'shotDistance', 'shotType', 'shotOnEmptyNet', 
-    'goalieNameForShot', 'shooterPlayerId', 'shooterName', 'shooterLeftRight', 
-    'xCordAdjusted', 'yCordAdjusted', 'isHomeTeam', 'awaySkatersOnIce', 'homeSkatersOnIce', 
-    'xGoal', 'homeTeamGoals', 'awayTeamGoals', 'shotAngle', 
-    'playerPositionThatDidEvent', 'shootingTeamForwardsOnIce', 'shootingTeamDefencemenOnIce', 
-    'defendingTeamForwardsOnIce', 'defendingTeamDefencemenOnIce'
-]
-
-
-# Read CSV with only required columns
-shots_df = pd.read_csv(shots_data, usecols=col_list)
+shots_df = pd.read_csv(r'C:\Users\agjri\Desktop\NHL_Chatbot\shots_with_line_data.csv')
 
 # Convert 'season' to numeric (to handle any potential issues with data types)
 shots_df['season'] = pd.to_numeric(shots_df['season'], errors='coerce')
 shots_df['season'] = shots_df['season'].astype(int) 
+shots_df['gameDate'] = pd.to_datetime(shots_df['gameDate'], errors='coerce').dt.date
 # Save filtered data to a temporary file
 filtered_shots_file = "filtered_shots.csv"
 shots_df.to_csv(filtered_shots_file, index=False)
 print("got to process csv call")
 # Process CSV
+
 process_csv(filtered_shots_file, "shots_data")
 
 cursor.execute("SHOW COLUMNS FROM shots_data;")
