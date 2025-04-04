@@ -178,6 +178,8 @@ def update_table(df, table_name):
         merged = pd.merge(df, existing_data, how="left", indicator=True)
         new_records = merged[merged['_merge'] == 'left_only'].drop('_merge', axis=1)
     
+
+        new_records = new_records.drop(columns=['_merge'], errors='ignore')
         #Insert the new records into the table
         if not new_records.empty:
             if table_name == "game_logs":
@@ -227,6 +229,8 @@ def process_shots_data(zip_url, table_name):
 
         merged = pd.merge(df, existing_data, how="left", indicator=True)
         new_records = merged[merged['_merge'] == 'left_only'].drop('_merge', axis=1)
+
+        new_records = new_records.drop(columns=['_merge'], errors='ignore')
 
         new_records = process_shots(new_records)
         new_records = add_game_dates(new_records)
