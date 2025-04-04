@@ -104,7 +104,7 @@ def process_csv(file_path, table_name, season=None, is_playoff=None):
 # process_csv(data_bio, "BIO_Info")
 
 
-shots_df = pd.read_csv(r'C:\Users\agjri\Desktop\NHL_Chatbot\shots_with_dates.csv')
+shots_df = pd.read_csv(r'C:\Users\agjri\Desktop\NHL_Chatbot\shots_with_line_data.csv')
 
 # Convert 'season' to numeric (to handle any potential issues with data types)
 shots_df['season'] = pd.to_numeric(shots_df['season'], errors='coerce')
