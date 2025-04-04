@@ -39,7 +39,8 @@ urls = {
     'goaliestats_regular_2024': "https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/goalies.csv",
     'linestats_regular_2024': "https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/lines.csv",
     'teamstats_regular_2024': "https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/teams.csv",
-    'shots_data': "https://peter-tanner.com/moneypuck/downloads/shots_2024.zip"  # New shots data URL
+    'shots_data': "https://peter-tanner.com/moneypuck/downloads/shots_2024.zip",  # New shots data URL
+    'game_logs': "https://moneypuck.com/moneypuck/playerData/careers/gameByGame/all_teams.csv"
 }
 
 required_columns = [
@@ -179,10 +180,15 @@ def update_table(df, table_name):
     
         #Insert the new records into the table
         if not new_records.empty:
-            merged.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
+            if table_name == "game_logs":
+                merged.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
+            else:
+                merged.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
             print(f"✔ {len(new_records)} new records added to '{table_name}'.")
         else:
             print(f"No new records to add for '{table_name}'.")
+
+            
 
 def process_csv(url, table_name):
     # Download the CSV file into memory

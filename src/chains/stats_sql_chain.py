@@ -35,15 +35,18 @@ def get_sql_chain(db, llm):
     Tables for skaters, goalies, pairings, teams, and lines. Based on the statistical question it can be deduced which one is being asked about. There tables have different queries. These can be found below.
     DO NOT include explanations, comments, code blocks, or duplicate queries. Return only a single SQL query. DO NOT include ```sql or ``` in the response.
     {schema}
-    If a request is to return an entire table, allways use the shots_data table.
    
-
     For skaters, lines, pairs, teams, and goalies there is a table for regular season and playoffs in each year. Table names are using the following format:
     - Regular season → <playerType>Stats_regular_<year> 
     - Playoffs → <PlayerType>Stats_playoffs_<year>
     where player type refers to whether the player is a skater, goalie, pairing, line, or team. 
 
-    
+    Shots_data contains information on every shot taken in the NHL since 2015. More detail about how to query this table is provided below.
+
+    Game_logs contains information about every game since the 2008 season. Each game will be listed twice, since it is listed for each team. If someone asks about a specific game or games, query this table to find information about the game.
+    Game_logs only contains information about TEAM level stats. Do not use this table for any skater, goalie, or individual. An example of when to use this would be, 'What is the leafs record against the boston bruins in the last 5 years.'
+
+
     For the year. A user may say 2023-24 or 2023-2024. In this case the season is stored as the first year. So 2023-24 would be 2023.
 
     If a question is given in present tense, assume the user is asking about 2024-25. If no season is given, assume the user is asking about the 2024-25 season.
@@ -194,6 +197,10 @@ def get_sql_chain(db, llm):
     This would be the query for the shots for a player in the last _ number of games, where game number is the number of games asked about and shooter name is the player asked about.
     Also reminder: MySQL does not support using LIMIT inside a subquery within an IN clause.
 
+    A user may also request a list of gameID's that meet a certain condition. This may mean finding the destinct nhl_game_id values that meet a certain shot condition, for example, games where 'Connor Mcdavid scored' would be destinct nhl_game_id values for shots_data where there were connor mcdavid goals.
+    Use shots_data if the user requests a a list of gameIDs given a condition about a player, or very specific information like where the Montreal Canadians scored in the second period ect. Use game_logs for TEAM level information that is about the entire game. 
+
+    
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
@@ -245,7 +252,7 @@ def get_chain(db, llm):
     #print(sql_chain.invoke({"question": "How many goals did Sidney Crosby score in the 2023 regular season?"})) #Test the first chain generating sql query
 
     template = """
-    Based on the table schema below, quesiton, sql query, and sql response, write a natural language response to the user's question.
+    Based on the table schema below, quesiton, sql query, and sql response, write a natural language response to the user question.
     {schema}
 
 
@@ -257,7 +264,8 @@ def get_chain(db, llm):
     Do this only for save percentage. All other stats that are percentages are fine to return as a percentage. Use decimal only for save percentage.
 
     Note that if the question asks for a rank or where does something rank among _ include the simple number along with the stat. 
-    For example someone asks where a line ranks in expected goals percentage return where they are in a list sorted by the highest percentages. For example a pair would rank fifth. The percentage is 60%. Return both of these, but make sure you return the ranking. 
+    For example someone asks where a line ranks in expected goals percentage return where they are in a list sorted by the highest percentages. For example a pair would rank fifth. The percentage is 60%. Return both of these, but make sure you return the ranking.
+    If a user requests a record, find the number of regulation losses by substracting wins and overtime losses from the total games. Records are presented as Wins - Regulation losses - overtime losses. For example 3-2-1.
     """
     prompt = ChatPromptTemplate.from_template(template)
 

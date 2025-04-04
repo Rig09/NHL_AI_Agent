@@ -14,6 +14,8 @@ from datetime import datetime, date
 from chains.dated_stats import get_stats_by_dates, get_stats_ngames
 from stat_hardcode.xg_percent import ngames_player_xgpercent, date_player_xgpercent, ngames_team_xgpercent, date_team_xgpercent,ngames_line_xgpercent, date_line_xgpercent
 from stat_hardcode.career_totals import get_nhl_player_career_stats
+from stat_hardcode.game_information import game_information
+from stat_hardcode.team_record import team_record
 
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
@@ -95,6 +97,11 @@ class ngames_lines_xg_percent_schema(BaseModel):
     player_three: str = Field(..., description= """The name of the third player for which the request is being made. Somtimes a request will be made for only two players. For this request it should pass 'None'""")
     game_number: int = Field(..., description= "The number of games being asked about. So if someone says what is the Jets expected goals percentage in the last 10 games. Then this would take the value of 10.")
 
+class game_information_schema(BaseModel):
+    game_ids: list[int] = Field(title="Situation", description="This is a list of the game_ids that the information is needed about. Invoke the stats tool to find these given the user conditions. Find the gameids and then invoke this function to find information about the games")
+    situation: str = Field(title="Situation", description="The situation which can be on the powerplay, even strength," 
+                           "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations")
+    
 # Helper function to create wrappers for tools
 def create_tool_wrapper(func, vector_db):
     def wrapper(query: str):
@@ -187,8 +194,8 @@ def get_agent(db, rules_db, cba_db, llm):
     @tool(args_schema=dated_stats_schema)
     def dated_stat_getter(natural_language_query:str):
         """
-        This tool should be invoked whenever a user has a question about a stat that involves a date. For example if a user asks about goals this march, or over the past 30 days who has the most _.
-        Any statistical query about stats that is has any relation to dates should invoke this tool. Only counting stats should invoke this tool. So if someone asks for expected goals percentage, corsi, possesion, ect. Do not invoke this tool.
+        This tool should be invoked whenever a user has a question about a stat about an individual that involves a date. This tool is only for skaters, lines, and goalies. DO not use it for team stats. An example us is if a user asks about goals this march for Connor Mcdavid, 
+        or over the past 30 days who has the most assists. Any statistical query about stats that is has any relation to dates should invoke this tool. Only counting stats should invoke this tool. So if someone asks for expected goals percentage, corsi, possesion, ect. Do not invoke this tool.
         If a user says something like this calendar year, or this month, or this week. DO NOT INFER what that means. Pass that information to this tool, it has the context of todays date.
         """
         return get_stats_by_dates(llm, db, sql_chain, natural_language_query, todays_date)
@@ -251,7 +258,9 @@ def get_agent(db, rules_db, cba_db, llm):
     def getDate():
         """
         returns the current date. This could be useful if a user asks a question that requires context about the date. 
-        This allows you to pass to other tools and infer the meaning if the dates given are ambiguous and require todays date to imply them
+        This allows you to pass to other tools and infer the meaning if the dates given are ambiguous and require todays date to imply them. Use this tool to get extra information about a date.
+        For example, if the user says 'since march' Then use this tool to find the current date so you can pass the correct year to the tool thats needed. Allways invoke when someone refrences a month and does not provide a year.
+        This is important context to use for other tools.
         """
         return todays_date
     
@@ -266,6 +275,24 @@ def get_agent(db, rules_db, cba_db, llm):
         """
         return get_nhl_player_career_stats(db, player_name)
 
+    @tool(args_schema=game_information_schema)
+    def get_game_information(game_ids: list[int], situation: str = 'all'):
+        """
+        This tool returns all the information about games given a list of gameIDs and situation being asked about. It should be invoked with a list of game ids and a situation, and will return all sorts of information about each game in the specified situation.
+        This includes a teams expected goals percentage, corsi for, goals for, ect. Interperate this information to provide the user an answer to his query.
+        This tool should NOT be used for team records or for counting win/loss/overtime loss. ONLY USE THIS TOOL FOR MORE IN DEPTH STATS. For example expected goals percentage, goals for, corsi for, ect. That is what it returns.
+        DO NOT USE FOR TEAMR RECORDS. DO NOT EVER USE FOR TEAM RECORDS.
+        """
+        return game_information(db, situation, game_ids)
+    @tool
+    def get_record(query: str):
+        """
+        This tool should be invoked to return the record of a team given a certain set of conditions. It will return the wins, total games, and overtime losses. The final product should be presented as follows:
+        wins-regulationLosses-OverTimeLosses. For example: 3-2-1. or 10-5-2. Note that you find regulation losses by taking the toal games and subtracting the other two values. Always invoke this tool for any question about a teams record.
+        Simply pass it the natural language description of the conditions for the record. Add context to the date if it is needed. For example adding the year to a date using the getDate tool.
+        This tool will return a string value that describes the three outputs. Interperate this and return a natural language response to the user. Dont invoke this tool using a date without year information.
+        """
+        return team_record(db, llm, query)
     chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
@@ -298,6 +325,8 @@ def get_agent(db, rules_db, cba_db, llm):
         ngames_lines_xg_percent_getter,
         date_lines_xg_percent_getter,
         player_career_stats,
+        #get_game_information,
+        get_record,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
@@ -312,7 +341,8 @@ def get_agent(db, rules_db, cba_db, llm):
                             If a user asks you to evaluate a player you can use this tool to get common statistics to measure performance. These include: goals, points, assists, expected goals percentage, ect.
                             This tool should be invoked to determine the rank of a line, pair, skater, or team in a statistic. Include the ask for this ranking when invoking this tool.
                             For example: if the user asks where does the Makar-Toews pairing rank in expected goals percentage, YOU MUST PASS THAT YOU WOULD LIKE THE RANKING. Pass: ranking for Makar Toews pairing in expected goals percentage.
-                            Also infer similair meanings to what rank, like what place are they in, or where are they in the league ect. pass those asking for a ranking."""
+                            Also infer similair meanings to what rank, like what place are they in, or where are they in the league ect. pass those asking for a ranking.
+                            When there is an ambigious date argument, like 'since January' where the year is not provided, use the date tool to pass the year when you invoke this tool."""
         ),
         Tool(
             name="Player_BIO_information",
