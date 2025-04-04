@@ -66,12 +66,13 @@ sample_queries = [
     "Who led the NHL in goals in the 2023-24 season?",
     "Generate an expected goal heatmap of all shots in the 2023-24 season",
     "Explain what determines whether a body check that makes head contact is legal or illegal",
-    "Show me a heatmap of shots for the leafs on the powerplay in 2023-24",
-    "Based on statistical that you can access, who is the best player in the NHL?",
+    "Show me a heatmap of shots for the Capital's on the powerplay in 2023-24",
+    "What is the Edmonton Oilers record in games with a powerplay goal since March 1st?",
     "Generate a shot scatterplot of Auston Matthews shots this season",
     "Explain escrow and hockey related revenue in the NHL CBA", 
     "Top 10 pairs in expected goals percentage with at least 50 minutes played",
     "How tall is Matt Rempe?"
+    "Who is the next Toronto Maple Leafs game against?"
 ]
 
 # Display sample queries as pills
