@@ -164,6 +164,7 @@ def get_existing_data(table_name):
 def update_table(df, table_name):
     # Retrieve existing data from the table
     existing_data = get_existing_data(table_name)
+    existing_data = existing_data.drop(columns=['_merge'], errors='ignore')
     
     # Compare existing data with new data and find rows that need to be inserted
     if existing_data.empty:
