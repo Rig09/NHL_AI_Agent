@@ -71,7 +71,7 @@ sample_queries = [
     "Generate a shot scatterplot of Auston Matthews shots this season",
     "Explain escrow and hockey related revenue in the NHL CBA", 
     "Top 10 pairs in expected goals percentage with at least 50 minutes played",
-    "How tall is Matt Rempe?"
+    "How tall is Matt Rempe?",
     "Who is the next Toronto Maple Leafs game against?"
 ]
 
