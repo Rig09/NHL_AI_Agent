@@ -72,7 +72,8 @@ sample_queries = [
     "Explain escrow and hockey related revenue in the NHL CBA", 
     "Top 10 pairs in expected goals percentage with at least 50 minutes played",
     "How tall is Matt Rempe?",
-    "Who is the next Toronto Maple Leafs game against?"
+    "What is the Guentzel Point Kucherov line's expected goals percentage in the last 10 games?",
+    "Player card for Jaccob Slavin since 2020-21"
 ]
 
 # Display sample queries as pills

@@ -5,7 +5,7 @@ from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
 from langchain.tools import tool
 from chains.stats_sql_chain import get_chain, get_sql_chain
-from shot_maps.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get, shot_heat_map_get, goal_heat_map_get, xg_heat_map_get
+from figure_generation.shot_map_plotting import goal_map_scatter_get, shot_map_scatter_get, shot_heat_map_get, goal_heat_map_get, xg_heat_map_get
 from chains.rag_chains import get_cba_information, get_rules_information
 from chains.bio_info_chain import get_bio_chain
 from pydantic import BaseModel, Field
@@ -16,6 +16,7 @@ from stat_hardcode.xg_percent import ngames_player_xgpercent, date_player_xgperc
 from stat_hardcode.career_totals import get_nhl_player_career_stats
 from stat_hardcode.game_information import game_information
 from stat_hardcode.team_record import team_record
+from figure_generation.player_cards import fetch_player_card
 
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
@@ -58,7 +59,8 @@ class ngames_stats_schema(BaseModel):
 class ngames_xg_percent_schema(BaseModel):
     player_name: str = Field(..., description= 'The name of the player for which the request is being made')
     game_number: int = Field(..., description= "The number of games being asked about. So if someone says what is Connor Mcdavid's expected goals percentage in the last 10 games. Then this would take the value of 10.")
-
+    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
+                          Only invoke with one of those two. If it is not specified, default to 'even strength'""")
 class ngames_xg_team_percent_schema(BaseModel):
     teamCode: str = Field(..., description= """The team code for the team which is being asked about, Note for the team codes: Anaheim Ducks -> ANA, Arizona Coyotes -> ARI, Boston Bruins -> BOS, 
                           Buffalo Sabres -> BUF, Calgary Flames -> CGY, Carolina Hurricanes -> CAR, Chicago Blackhawks -> CHI, Colorado Avalanche -> COL, Columbus Blue Jackets -> CBJ, 
@@ -67,13 +69,15 @@ class ngames_xg_team_percent_schema(BaseModel):
                            Philadelphia Flyers -> PHI, Pittsburgh Penguins -> PIT, San Jose Sharks -> SJS, Seattle Kraken -> SEA, St. Louis Blues -> STL, Tampa Bay Lightning -> TBL, 
                           Toronto Maple Leafs -> TOR, Vancouver Canucks -> VAN, Washington Capitals -> WSH, Winnipeg Jets -> WPG. Also imply nicknames, like The jets, leafs, habs, sharks, ect.""")
     game_number: int = Field(..., description= "The number of games being asked about. So if someone says what is the Jets expected goals percentage in the last 10 games. Then this would take the value of 10.")
-
+    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
+                          Only invoke with one of those two. If it is not specified, default to 'even strength'""")
 
 class date_xg_percent_schema(BaseModel):
     player_name: str = Field(..., description= 'The name of the player for which the request is being made')
     start_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Connor Mcdavid's expected goals percentage Since January 1st. Then this would take the value of 2024-01-01.")
     end_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Connor Mcdavid's expected goals percentage from January 1st to January 10th. Then this would take the value of 2024-01-10. If someone says since _ or doesnt give an end date use todays date")
-
+    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
+                          Only invoke with one of those two. If it is not specified, default to 'even strength'""")
 class date_team_xg_percent_schema(BaseModel):
     teamCode: str = Field(..., description= """The team code for the team which is being asked about, Note for the team codes: Anaheim Ducks -> ANA, Arizona Coyotes -> ARI, Boston Bruins -> BOS, 
                           Buffalo Sabres -> BUF, Calgary Flames -> CGY, Carolina Hurricanes -> CAR, Chicago Blackhawks -> CHI, Colorado Avalanche -> COL, Columbus Blue Jackets -> CBJ, 
@@ -83,7 +87,8 @@ class date_team_xg_percent_schema(BaseModel):
                           Toronto Maple Leafs -> TOR, Vancouver Canucks -> VAN, Washington Capitals -> WSH, Winnipeg Jets -> WPG. Also imply nicknames, like The jets, leafs, habs, sharks, ect.""")
     start_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is the Habs expected goals percentage Since January 1st. Then this would take the value of 2024-01-01.")
     end_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Oiler's expected goals percentage from January 1st to January 10th. Then this would take the value of 2024-01-10. If someone says since _ or doesnt give an end date use todays date")
-
+    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
+                          Only invoke with one of those two. If it is not specified, default to 'even strength'""")
 class date_lines_xg_percent_schema(BaseModel):
     player_one: str = Field(..., description= 'The name of the first player for which the request is being made')
     player_two: str = Field(..., description= 'The name of the second player for which the request is being made')
@@ -101,7 +106,14 @@ class game_information_schema(BaseModel):
     game_ids: list[int] = Field(title="Situation", description="This is a list of the game_ids that the information is needed about. Invoke the stats tool to find these given the user conditions. Find the gameids and then invoke this function to find information about the games")
     situation: str = Field(title="Situation", description="The situation which can be on the powerplay, even strength," 
                            "shorthanded, or all situations depending on the number of players on the ice. Default to all situations if not specified. to generate the goal map scatter plot for. Pass these situations as 5on4 for powerplay, 4on5 for shorthanded, 5on5 for even strength, and all for all situations")
-    
+
+class player_card_schema(BaseModel):
+    player_name: str = Field(..., description= 'The name of the player for which the request is being made')
+    season: list[int] = Field(..., description= """The seasons for which the request is being made. This should be a list of integers. For example [2024, 2023] for the 2024 and 2023 seasons.
+                              If someone says for the last _ seasons, then this should be a list of the last _ seasons. For example if someone says for the last 3 seasons, then this should be [2024, 2023, 2022].
+                              If someone says for the last _ years, then this should be a list of the last _ seasons. For example if someone says for the last 3 years, then this should be [2024, 2023, 2022]. This can also be a list with only a single season.
+                              If someone does not specify a season, or they ask for career stats then this should be an empty list. This will let the tool know to get the career statss since 2015. Make sure its an empty list given for this scenario.
+                             If somsone says 'this season' give the list [2024]""")
 # Helper function to create wrappers for tools
 def create_tool_wrapper(func, vector_db):
     def wrapper(query: str):
@@ -209,34 +221,34 @@ def get_agent(db, rules_db, cba_db, llm):
         return get_stats_ngames(llm, db, sql_chain, natural_language_query)
     
     @tool(args_schema=ngames_xg_percent_schema)
-    def n_games_xgpercent_getter(player_name, game_number):
+    def n_games_xgpercent_getter(player_name, game_number, strength: str = 'even strength'):
         """
         This tool should be invoked when someone asks for a player's expected goals percentage over the last _ number of games. This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
         """
-        return ngames_player_xgpercent(db, player_name, game_number)
+        return ngames_player_xgpercent(db, player_name, game_number, strength)
     
     @tool(args_schema=ngames_xg_percent_schema)
-    def n_games_team_xgpercent_getter(teamCode, game_number):
+    def n_games_team_xgpercent_getter(teamCode, game_number, strength: str = 'even strength'):
         """
         This tool should be invoked when someone asks for a team's expected goals percentage over the last _ number of games. This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
         """
-        return ngames_team_xgpercent(db, teamCode, game_number)
+        return ngames_team_xgpercent(db, teamCode, game_number, strength)
 
     @tool(args_schema=date_xg_percent_schema)
-    def date_xg_percent_getter(player_name, start_date, end_date = todays_date):
+    def date_xg_percent_getter(player_name, start_date, end_date = todays_date, strength: str = 'even strength'):
         """
         This tool should be invoked when someone asks for a player's expected goals percentage over a certain date range.
         This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
         """
-        return date_player_xgpercent(db, player_name, start_date, end_date)
+        return date_player_xgpercent(db, player_name, start_date, end_date, strength)
     
     @tool(args_schema=date_team_xg_percent_schema)
-    def date_team_xg_percent_getter(teamCode, start_date, end_date = todays_date):
+    def date_team_xg_percent_getter(teamCode, start_date, end_date = todays_date, strength: str = 'even strength'):
         """
         This tool should be invoked when someone asks for a team's expected goals percentage over a certain date range.
         This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
         """
-        return date_team_xgpercent(db, teamCode, start_date, end_date)
+        return date_team_xgpercent(db, teamCode, start_date, end_date, strength)
     
     @tool(args_schema=date_lines_xg_percent_schema)
     def date_lines_xg_percent_getter(player_one, player_two, start_date, end_date, player_three = 'None'):
@@ -293,6 +305,17 @@ def get_agent(db, rules_db, cba_db, llm):
         This tool will return a string value that describes the three outputs. Interperate this and return a natural language response to the user. Dont invoke this tool using a date without year information.
         """
         return team_record(db, llm, query)
+    @tool(args_schema=player_card_schema)
+    def player_card_getter(player_name: str, season: list[int] = []):
+        """
+        This tool should be invoked to get a player card for a given player. It will return the player card for the player in the specified seasons. 
+        If no seasons are specified, it will return the players career totals. If someone asks for a player card, invoke this tool.
+        If no seasons are specified, invoke this tool with an empty list. If someone asks for a player card, and they specify a season, pass that season as a list of integers.
+        For example if someone asks for a player card for Connor Mcdavid in the 2024 season, pass the list [2024]. If someone asks for a player card for Connor Mcdavid in the 2023 and 2024 seasons, pass the list [2023, 2024].
+        Also invoke this tool if someone asks for a career summary, or season summary for a player.
+        """
+        fetch_player_card(db, player_name, season)
+        return "Player card generated successfully"
     chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
@@ -327,6 +350,7 @@ def get_agent(db, rules_db, cba_db, llm):
         player_career_stats,
         #get_game_information,
         get_record,
+        player_card_getter,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),
