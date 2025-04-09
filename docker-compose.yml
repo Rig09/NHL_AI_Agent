@@ -1,0 +1,16 @@
+services:
+  nhl-ai-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./src:/app/src
+      - ./.streamlit:/app/.streamlit
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app
+    command: streamlit run src/app.py
+    restart: unless-stopped
