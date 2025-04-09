@@ -185,7 +185,7 @@ def update_table(df, table_name):
             if table_name == "game_logs":
                 new_records.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
             else:
-                new_records.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
+                df.to_sql(table_name, engine, if_exists="replace", index=False, chunksize=5000, method="multi")
         else:
             print(f"No new records to add for '{table_name}'.")
 
