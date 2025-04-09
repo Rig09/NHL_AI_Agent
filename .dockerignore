@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+
+# Development
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/ 
