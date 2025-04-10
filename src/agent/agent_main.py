@@ -13,7 +13,8 @@ from chains.nhl_api_chain import query_nhl
 from datetime import datetime, date
 from chains.dated_stats import get_stats_by_dates, get_stats_ngames
 from stat_hardcode.xg_percent import ngames_player_xgpercent, date_player_xgpercent, ngames_team_xgpercent, date_team_xgpercent,ngames_line_xgpercent, date_line_xgpercent
-from stat_hardcode.career_totals import get_nhl_player_career_stats
+from api_tools.career_totals import get_nhl_player_career_stats
+from api_tools.api_endpoints import get_nhl_standings, nhl_schedule_info_by_date
 from stat_hardcode.game_information import game_information
 from stat_hardcode.team_record import team_record
 from figure_generation.player_cards import fetch_player_card
@@ -316,6 +317,24 @@ def get_agent(db, rules_db, cba_db, llm):
         """
         fetch_player_card(db, player_name, season)
         return "Player card generated successfully"
+    @tool
+    def get_standings(date: date):
+        """
+        This tool should be invoked to get the standings for the NHL on a given date. It will genertate a figure with the standings for the NHL on that date, including the wins, losses, and overtime losses for each team.
+        The tool will return a message saying that the standings have been generated successfully. If someone does not specify a date then imply and use todays date. If a date is ambigious look for todays date to imply context.
+        Its important to pass the correct date. 
+        """
+        get_nhl_standings(date)
+        return "Standings generated successfully"
+
+    @tool
+    def get_schedule_for_date(date: date):
+        """
+        This tool should be invoked to get the schedule for the NHL on a given date. It will return a dictionary with informations on all the games on that date. 
+        Please use this if the user asks for schedule information about a certain date in the NHL. Use a tool to get context about the date if its unclear. 
+        If no date is provided, use the getDate tool to get the current date. Also Add a note in the response that if there have been reschedules or changes to the schedule, this may not be accurate.
+        """
+        return nhl_schedule_info_by_date(date)
     chain = get_chain(db, llm)
 
     bio_chain = get_bio_chain(db, llm)
@@ -351,6 +370,8 @@ def get_agent(db, rules_db, cba_db, llm):
         #get_game_information,
         get_record,
         player_card_getter,
+        get_standings,
+        get_schedule_for_date,
         Tool(
             name="StatisticsGetter",
             func=lambda input, **kwargs: chain.invoke({"question": input}),

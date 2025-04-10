@@ -33,13 +33,13 @@ def load_image_from_url(url):
 
 
 
-load_dotenv()
+# load_dotenv()
 
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-open_ai_key = os.getenv("OPENAI_API_KEY")
+# MYSQL_HOST = os.getenv("MYSQL_HOST")
+# MYSQL_USER = os.getenv("MYSQL_USER")
+# MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
+# MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
+# open_ai_key = os.getenv("OPENAI_API_KEY")
 
 def find_player_id(db, player_name):
     query = f"""SELECT playerId FROM bio_info WHERE name LIKE '%{player_name}%'
@@ -98,43 +98,16 @@ def get_percentile_query(db_connection, situation, player_name, season_value):
                 player_rank AS (
                     SELECT 
                         ps.name,
-                        ROW_NUMBER() OVER (ORDER BY ps.ICETIME DESC) AS ICETIME_rank,
                         ROW_NUMBER() OVER (ORDER BY ps.onIce_xGoalsPercentage DESC) AS onIce_xGoalsPercentage_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.offIce_xGoalsPercentage DESC) AS offIce_xGoalsPercentage_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.onIce_corsiPercentage DESC) AS onIce_corsiPercentage_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.offIce_corsiPercentage DESC) AS offIce_corsiPercentage_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_xGoals DESC) AS I_F_xGoals_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_primaryAssists DESC) AS I_F_primaryAssists_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_shotsOnGoal DESC) AS I_F_shotsOnGoal_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_points DESC) AS I_F_points_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_goals DESC) AS I_F_goals_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_penalityMinutes ASC) AS I_F_penalityMinutes_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_takeaways DESC) AS I_F_takeaways_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_giveaways DESC) AS I_F_giveaways_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_lowDangerShots DESC) AS I_F_lowDangerShots_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_mediumDangerShots DESC) AS I_F_mediumDangerShots_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_highDangerShots DESC) AS I_F_highDangerShots_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.OnIce_F_xGoals DESC) AS OnIce_F_xGoals_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.OnIce_F_goals DESC) AS OnIce_F_goals_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.OnIce_A_xGoals DESC) AS OnIce_A_xGoals_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.OnIce_A_goals ASC) AS OnIce_A_goals_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.OffIce_F_xGoals DESC) AS OffIce_F_xGoals_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.OffIce_A_xGoals DESC) AS OffIce_A_xGoals_rank, 
                         ROW_NUMBER() OVER (ORDER BY ((ps.I_F_goals / ps.ICETIME)*3600) DESC) AS goals_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY ((ps.I_F_points / ps.ICETIME)*3600) DESC) AS points_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY ((ps.I_F_primaryAssists / ps.ICETIME)*3600) DESC) AS primary_assists_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY ((ps.I_F_primaryAssists + ps.I_F_goals) / ps.ICETIME) DESC) AS primary_points_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY (ps.OnIce_F_xGoals/ps.ICETIME) DESC) AS OnIce_F_xGoals_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.OnIce_F_goals/ps.ICETIME) DESC) AS OnIce_F_goals_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY (ps.OnIce_A_xGoals/ps.ICETIME) ASC) AS OnIce_A_xGoals_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.OnIce_A_goals/ps.ICETIME) ASC) AS OnIce_A_goals_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY ((ps.OnIce_F_xGoals/ps.ICETIME) - (ps.OffIce_F_xGoals/((ps.GAMES_PLAYED*3600) - ICETIME)))  DESC) AS Offense_impact_rank,
                         ROW_NUMBER() OVER (ORDER BY ((ps.OnIce_A_xGoals/ps.ICETIME) - (ps.OffIce_A_xGoals/((ps.GAMES_PLAYED*3600) - ICETIME)))  ASC) AS Defense_impact_rank,
                         ROW_NUMBER() OVER (ORDER BY ((ps.I_F_goals / ps.I_F_shotsOnGoal) * 100) DESC) AS shooting_percentage_rank,
                         ROW_NUMBER() OVER (ORDER BY (ps.I_F_goals / ps.I_F_xGoals) DESC) AS goals_per_xg_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.I_F_points - ps.I_F_goals) DESC) AS assists_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.I_F_hits DESC) AS I_F_hits_rank,
-                        ROW_NUMBER() OVER (ORDER BY ps.shotsBlockedByPlayer DESC) AS shotsBlockedByPlayer_rank,
                         ROW_NUMBER() OVER (ORDER BY ((ps.I_F_points - ps.I_F_goals)/ps.ICETIME) DESC) AS assists_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY (ps.I_F_hits/ps.ICETIME) DESC) AS hits_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY (ps.shotsBlockedByPlayer/ps.ICETIME) DESC) AS shotsBlockedByPlayer_per_60_rank,
@@ -146,58 +119,12 @@ def get_percentile_query(db_connection, situation, player_name, season_value):
                 )
                 SELECT 
                     pr.name,
-                    pr.ICETIME_rank,
-                    pr.onIce_xGoalsPercentage_rank,
-                    pr.offIce_xGoalsPercentage_rank,
-                    pr.onIce_corsiPercentage_rank,
-                    pr.offIce_corsiPercentage_rank,
-                    pr.I_F_xGoals_rank,
-                    pr.I_F_primaryAssists_rank,
-                    pr.I_F_shotsOnGoal_rank,
-                    pr.I_F_points_rank,
-                    pr.I_F_goals_rank,
-                    pr.I_F_penalityMinutes_rank,
-                    pr.I_F_takeaways_rank,
-                    pr.I_F_giveaways_rank,
-                    pr.I_F_lowDangerShots_rank,
-                    pr.I_F_mediumDangerShots_rank,
-                    pr.I_F_highDangerShots_rank,
-                    pr.OnIce_F_xGoals_rank,
-                    pr.OnIce_F_goals_rank,
-                    pr.OnIce_A_xGoals_rank,
-                    pr.OnIce_A_goals_rank,
-                    pr.OffIce_F_xGoals_rank,
-                    pr.OffIce_A_xGoals_rank,
-                    pr.assists_rank,
-                    pr.I_F_xGoals_per_60_rank,
-                    (100 - (pr.ICETIME_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ICETIME IS NOT NULL AND ICETIME > 6000) * 100)) AS ICETIME_percentile,
                     (100 - (pr.onIce_xGoalsPercentage_rank / (SELECT COUNT(*) FROM all_players_stats WHERE onIce_xGoalsPercentage IS NOT NULL AND ICETIME > 6000) * 100)) AS onIce_xGoalsPercentage_percentile,
-                    (100 - (pr.offIce_xGoalsPercentage_rank / (SELECT COUNT(*) FROM all_players_stats WHERE offIce_xGoalsPercentage IS NOT NULL AND ICETIME > 6000) * 100)) AS offIce_xGoalsPercentage_percentile,
-                    (100 - (pr.onIce_corsiPercentage_rank / (SELECT COUNT(*) FROM all_players_stats WHERE onIce_corsiPercentage IS NOT NULL AND ICETIME > 6000) * 100)) AS onIce_corsiPercentage_percentile,
-                    (100 - (pr.offIce_corsiPercentage_rank / (SELECT COUNT(*) FROM all_players_stats WHERE offIce_corsiPercentage IS NOT NULL AND ICETIME > 6000) * 100)) AS offIce_corsiPercentage_percentile,
-                    (100 - (pr.I_F_xGoals_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_xGoals IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_xGoals_percentile,
-                    (100 - (pr.I_F_primaryAssists_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_primaryAssists IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_primaryAssists_percentile,
-                    (100 - (pr.I_F_shotsOnGoal_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_shotsOnGoal IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_shotsOnGoal_percentile,
-                    (100 - (pr.I_F_points_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_points IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_points_percentile,
-                    (100 - (pr.I_F_goals_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_goals IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_goals_percentile,
-                    (100 - (pr.I_F_penalityMinutes_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_penalityMinutes IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_penalityMinutes_percentile,
-                    (100 - (pr.I_F_takeaways_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_takeaways IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_takeaways_percentile,
-                    (100 - (pr.I_F_giveaways_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_giveaways IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_giveaways_percentile,
-                    (100 - (pr.I_F_lowDangerShots_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_lowDangerShots IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_lowDangerShots_percentile,
-                    (100 - (pr.I_F_mediumDangerShots_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_mediumDangerShots IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_mediumDangerShots_percentile,
-                    (100 - (pr.I_F_highDangerShots_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_highDangerShots IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_highDangerShots_percentile,
-                    (100 - (pr.OnIce_F_xGoals_rank / (SELECT COUNT(*) FROM all_players_stats WHERE OnIce_F_xGoals IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_F_xGoals_percentile,
-                    (100 - (pr.OnIce_F_goals_rank / (SELECT COUNT(*) FROM all_players_stats WHERE OnIce_F_goals IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_F_goals_percentile,
-                    (100 - (pr.OnIce_A_xGoals_rank / (SELECT COUNT(*) FROM all_players_stats WHERE OnIce_A_xGoals IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_A_xGoals_percentile,
-                    (100 - (pr.OnIce_A_goals_rank / (SELECT COUNT(*) FROM all_players_stats WHERE OnIce_A_goals IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_A_goals_percentile,
                     (100 - (pr.goals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((I_F_goals / ICETIME) * 3600) IS NOT NULL AND ICETIME > 6000) * 100)) AS goals_per_60_percentile,
                     (100 - (pr.points_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((I_F_points / ICETIME) * 3600) IS NOT NULL AND ICETIME > 6000) * 100)) AS points_per_60_percentile,
                     (100 - (pr.primary_assists_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_primaryAssists IS NOT NULL AND ICETIME > 6000) * 100)) AS primary_assists_per_60_percentile,
-                    (100 - (pr.primary_points_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((I_F_primaryAssists + I_F_goals) / ICETIME) IS NOT NULL AND ICETIME > 6000) * 100)) AS primary_points_per_60_percentile,
                     (100 - (pr.OnIce_F_xGoals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE (OnIce_F_xGoals / ICETIME) IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_F_xGoals_per_60_percentile,
-                    (100 - (pr.OnIce_F_goals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE (OnIce_F_goals / ICETIME) IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_F_goals_per_60_percentile,
                     (100 - (pr.OnIce_A_xGoals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE (OnIce_A_xGoals / ICETIME) IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_A_xGoals_per_60_percentile,
-                    (100 - (pr.OnIce_A_goals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE (OnIce_A_goals / ICETIME) IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_A_goals_per_60_percentile,
                     (100 - (pr.Offense_impact_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((OnIce_F_xGoals / ICETIME) - (OffIce_F_xGoals / ((GAMES_PLAYED * 3600) - ICETIME))) IS NOT NULL AND ICETIME > 6000) * 100)) AS Offense_impact_percentile,
                     (100 - (pr.Defense_impact_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((OnIce_A_xGoals / ICETIME) - (OffIce_A_xGoals / ((GAMES_PLAYED * 3600) - ICETIME))) IS NOT NULL AND ICETIME > 6000) * 100)) AS Defense_impact_percentile,
                     (100 - (pr.shooting_percentage_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((I_F_goals / I_F_shotsOnGoal) * 100) IS NOT NULL AND ICETIME > 6000) * 100)) AS shooting_percentage_percentile,
@@ -335,11 +262,10 @@ def fetch_player_card(db, player_name, season):
             total_key = f"{season_value}"
             ev_percentile_key = f"{season_value}_ev_percentile"
             total_percentile_key = f"{season_value}_percentile"
-
+            
             ev_query = get_basic_stats_query("5on5", player_name, season_value)
             total_query = get_basic_stats_query("all", player_name, season_value)
-            # ev_percentile_query = get_percentile_query("5on5", player_name, season_value)
-            # total_percentile_query = get_percentile_query("all", player_name, season_value)
+
 
             Basic_stats_seasons[ev_key] = run_query_mysql(ev_query, db)
             Basic_stats_seasons[total_key] = run_query_mysql(total_query, db)
@@ -382,15 +308,6 @@ def fetch_player_card(db, player_name, season):
 
     ev_total["xgoals_on_ice_for_per_60"] = ev_total.get('OnIce_F_xGoals', 0) / (ev_total.get('ICETIME', 0) / 3600) if ev_total.get('ICETIME', 0) > 0 else 0
     ev_total["xgoals_on_ice_against_per_60"] = (ev_total.get('OnIce_A_xGoals', 0) / (ev_total.get('ICETIME', 0) / 3600)) if ev_total.get('ICETIME', 0) > 0 else 0
-
-    # Calculate xGoals off the ice per 60 minutes
-    total_ice_time_off_ice = (ev_total.get('GAMES_PLAYED', 0) * 3600) - ev_total.get('ICETIME', 0)
-    ev_total["xgoals_off_ice_for_per_60"] = (ev_total.get('OffIce_F_xGoals', 0) / total_ice_time_off_ice) * 3600 if total_ice_time_off_ice > 0 else 0
-    ev_total["xgoals_off_ice_against_per_60"] = (ev_total.get('OffIce_A_xGoals', 0) / total_ice_time_off_ice) * 3600 if total_ice_time_off_ice > 0 else 0
-
-    # Calculate the offensive and defensive impact
-    ev_total["offense_xgoal_impact"] = ev_total.get("xgoals_on_ice_for_per_60") - ev_total.get("xgoals_off_ice_for_per_60", 0)
-    ev_total["defense_xgoal_impact"] = ev_total.get("xgoals_off_ice_against_per_60") - ev_total.get("xgoals_on_ice_against_per_60")
 
     # Additional stats
     ev_total["shooting_percentage"] = (ev_total.get("I_F_goals", 0) / ev_total.get("I_F_shotsOnGoal", 1)) if ev_total.get("I_F_shotsOnGoal", 0) > 0 else 0
