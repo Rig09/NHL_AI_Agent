@@ -14,31 +14,3 @@ Adrian Rigby, [GitHub](https://github.com/Rig09/), [LinkedIn](https://www.linked
 Leo Sandler: [GitHub](https://github.com/L-Sandler/), [LinkedIn](https://www.linkedin.com/in/leo-sandler/)
 
 More detailed README file to come.
-
-## Running Tests
-
-This project uses pytest for testing. Test dependencies are kept separate from main application dependencies in the `test-requirements.txt` file.
-
-### Local Testing
-
-To run tests locally:
-
-```bash
-# Install test dependencies and run tests
-./run_tests.sh
-
-# Run tests with coverage report
-./run_tests.sh --coverage
-```
-
-### Docker Testing
-
-To run tests in Docker:
-
-```bash
-# Build the test container
-docker build -f Dockerfile.test -t nhl-ai-agent-test .
-
-# Run tests in the container
-docker run nhl-ai-agent-test
-```
