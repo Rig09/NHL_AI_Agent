@@ -5,7 +5,7 @@ from utils.database_init import run_query_mysql, init_db
 import requests
 from dotenv import load_dotenv
 import os
-#import cairosvg
+import cairosvg
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from PIL import Image
@@ -31,7 +31,12 @@ def load_image_from_url(url):
     response = requests.get(url)
     return Image.open(BytesIO(response.content))
 
-
+# Helper to load SVG image and convert to PNG
+def load_svg_from_url(url):
+    team_logo_png = BytesIO()
+    cairosvg.svg2png(url=url, write_to=team_logo_png)
+    team_logo_png.seek(0)  # Reset buffer position to the start
+    return Image.open(team_logo_png)
 
 # load_dotenv()
 
@@ -180,7 +185,9 @@ def fetch_player_card(db, player_name, season):
     birthDate = data.get("birthDate", None)
     shootsCatches = data.get("shootsCatches", None)
     birthCountry = data.get("birthCountry", None)
-
+    
+    # Get properly formatted player name from the API
+    formatted_player_name = f"{data.get('firstName', {}).get('default', '')} {data.get('lastName', {}).get('default', '')}"
     
     ev_total = {}
     non_ev_total = {}
@@ -346,22 +353,21 @@ def fetch_player_card(db, player_name, season):
     # Load headshot
     headshot = load_image_from_url(headshot_url)
 
-    # # Convert SVG to PNG if needed using cairosvg (install with pip install cairosvg)
-    # team_logo_png = BytesIO()
-    # cairosvg.svg2png(url=team_logo_url, write_to=team_logo_png)
-    # team_logo = Image.open(team_logo_png)
+    # Load team logo as SVG and convert to PNG
+    team_logo = load_svg_from_url(team_logo_url)
+    
     # Add headshot
     ax_headshot = fig.add_axes([0.05, 0.75, 0.2, 0.2]) # [left, bottom, width, height]
     ax_headshot.imshow(headshot)
     ax_headshot.axis('off')
 
-    # # Add team logo
-    # ax_logo = fig.add_axes([0.5, 0.4, 0.15, 0.5])
-    # ax_logo.imshow(team_logo)
-    # ax_logo.axis('off')
+    # Add team logo beside headshot and make it smaller
+    ax_logo = fig.add_axes([0.27, 0.78, 0.12, 0.12])
+    ax_logo.imshow(team_logo)
+    ax_logo.axis('off')
 
-    # Add player name
-    fig.text(0.05, 0.72, player_name, fontsize=14, fontweight='bold', ha='left')
+    # Add player name using the formatted name from the API
+    fig.text(0.05, 0.72, formatted_player_name, fontsize=14, fontweight='bold', ha='left')
     if len(season) == 0:
         fig.text(0.05, 0.7, f"Career Stats", fontsize=8, ha='left')
     elif len(season) == 1:

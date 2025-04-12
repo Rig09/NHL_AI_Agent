@@ -1,4 +1,4 @@
-dotenv==0.9.9
+python-dotenv>=1.0.0
 pysqlite3-binary
 chromadb==0.6.3
 streamlit==1.42.2
@@ -6,10 +6,8 @@ langchain==0.3.19
 langchain-chroma==0.2.2
 langchain-community==0.3.17
 langchain-core==0.3.36
-langchain-experimental==0.3.4
 langchain-openai==0.3.6
 langchain-text-splitters==0.3.6
-langsmith==0.3.8
 pandas==2.1.4
 matplotlib==3.8.2
 hockey-rink==1.1.3
@@ -20,8 +18,5 @@ openai==1.61.1
 scipy==1.11.4
 requests==2.32.3
 numpy==1.26.4
-protobuf==5.29.3
-torch==2.2.1
-python-dotenv
 cairosvg
 tiktoken>=0.7.0

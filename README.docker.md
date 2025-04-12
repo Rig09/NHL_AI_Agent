@@ -87,3 +87,19 @@ docker build -t nhl-ai-agent:latest .
 ## Cross-Platform Development
 
 This Docker setup ensures consistent behavior across macOS, Windows, and Linux environments, resolving dependency and compatibility issues between team members using different operating systems. 
+
+
+## Misc Commands
+To take down the docker container, rebuild it and start it
+`docker compose down && docker compose build && docker compose up -d`
+
+
+To remove all cached items and rebuild. 
+NOTE: This removes everything cached with docker, regardless of project.
+TODO: Update command to only remove nhl-ai-agent related content
+```
+docker compose down
+docker system prune -a --volumes
+docker compose build --no-cache
+docker compose up -d
+```
