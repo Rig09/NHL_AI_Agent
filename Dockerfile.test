@@ -1,0 +1,21 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Copy requirements files
+COPY requirements.txt .
+COPY test-requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r test-requirements.txt
+
+# Copy the application code
+COPY . .
+
+# Set environment variables for testing
+ENV PYTHONPATH=/app
+ENV TESTING=true
+
+# Run tests when the container starts
+CMD ["python", "-m", "pytest", "tests/", "-v"] 

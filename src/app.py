@@ -6,7 +6,7 @@ import argparse
 from agent.agent_main import get_agent
 from utils.database_init import init_db, init_vector_db
 import matplotlib.pyplot as plt
-from langchain_openai import ChatOpenAI
+from utils.throttling import ThrottledChatOpenAI
 
 # parser = argparse.ArgumentParser()
 # # Use local environment variables by default
@@ -42,7 +42,7 @@ if "database" not in st.session_state:
     cba_db = init_vector_db('cba', open_ai_key)
 
 if "agent_chain" not in st.session_state:
-    NHLStatsAgent = get_agent(db, rules_db, cba_db, llm=ChatOpenAI(model="gpt-4o", api_key=open_ai_key))
+    NHLStatsAgent = get_agent(db, rules_db, cba_db, llm=ThrottledChatOpenAI(model="gpt-4o", api_key=open_ai_key))
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
@@ -129,8 +129,11 @@ if user_query is not None and user_query.strip() != "":
                 st.markdown("Sorry, I couldn't understand that request. Please try again.")
 
     except Exception as e:
-            # Check for the specific backend error message
-            if str(e) == "There was an error with the query. Please try again with a different query.":
+            # Check for rate limiting error
+            if "API rate limit exceeded" in str(e):
+                st.error(str(e))
+            # Check for other specific errors
+            elif str(e) == "There was an error with the query. Please try again with a different query.":
                 st.error("There was an issue with your query. Please modify your query and try again.")
             else:
                 st.error("An unexpected error occurred. Please try again later.")
