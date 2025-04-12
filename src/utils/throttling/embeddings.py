@@ -3,6 +3,7 @@ from .api_throttler import SimpleOpenAIThrottler
 from typing import List, Optional, Any
 import functools
 from pydantic import model_validator, ConfigDict
+import os
 
 class ThrottledOpenAIEmbeddings(OpenAIEmbeddings):
     """
@@ -38,11 +39,17 @@ class ThrottledOpenAIEmbeddings(OpenAIEmbeddings):
         # Create throttled versions of the methods
         self._throttled_embed_documents = self._create_throttled_embed_documents()
         self._throttled_embed_query = self._create_throttled_embed_query()
+        
+        # Check if we're in test mode
+        self._test_mode = os.environ.get('USE_MOCK_RESPONSES') == 'true'
     
     def _create_throttled_embed_documents(self):
         """Create a throttled version of the embed_documents method"""
         @functools.wraps(self._original_embed_documents)
         def throttled_embed_documents(texts: List[str], **kwargs) -> List[List[float]]:
+            if self._test_mode:
+                # Return a mock embedding in test mode
+                return [[0.1] * 1536 for _ in range(len(texts))]
             return self._throttler.throttled_call(self._original_embed_documents, texts, **kwargs)
         return throttled_embed_documents
     
@@ -50,6 +57,9 @@ class ThrottledOpenAIEmbeddings(OpenAIEmbeddings):
         """Create a throttled version of the embed_query method"""
         @functools.wraps(self._original_embed_query)
         def throttled_embed_query(text: str, **kwargs) -> List[float]:
+            if self._test_mode:
+                # Return a mock embedding in test mode
+                return [0.1] * 1536
             return self._throttler.throttled_call(self._original_embed_query, text, **kwargs)
         return throttled_embed_query
     

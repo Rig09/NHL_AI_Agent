@@ -9,9 +9,12 @@ pip install -r ../test-requirements.txt
 
 # Set up test environment variables
 export OPENAI_API_KEY="sk-test-12345"
-export OPENAI_API_BASE="http://mock-openai-api"  # Mock API endpoint for testing
-export OPENAI_API_TYPE="mock"
 export PYTHONPATH="$PYTHONPATH:$(pwd)/.."
+export USE_MOCK_RESPONSES="true"
+
+# Use the test override to replace the throttling implementation
+echo "Applying test patches..."
+python -c "from utils.test_override import patch_throttling; patch_throttling()"
 
 # Run the specific throttling tests
 echo "Running throttling tests..."

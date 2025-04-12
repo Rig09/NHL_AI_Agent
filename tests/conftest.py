@@ -86,5 +86,8 @@ def setup_test_env():
     """Set up test environment variables."""
     os.environ['TESTING'] = 'true'
     os.environ['OPENAI_API_KEY'] = 'sk-test-12345'
-    os.environ['OPENAI_API_BASE'] = 'http://mock-openai-api'
-    os.environ['OPENAI_API_TYPE'] = 'mock' 
+    
+    yield
+    
+    # Clean up any test environment variables if needed
+    # This runs after each test 
