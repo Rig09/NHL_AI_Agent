@@ -80,14 +80,21 @@ sample_queries_by_category = {
         "Generate an expected goal heatmap of all shots in the 2023-24 season",
         "Show me a heatmap of shots for the Capitals on the powerplay in 2023-24",
         "Generate a shot scatterplot of Auston Matthews shots this season",
-        "Player card for Jaccob Slavin since 2020-21"
+        "Player card for Jaccob Slavin since 2020-21",
+        "Player card for Connor McDavid this season"
+
     ],
     "Rules & Regulations": [
         "Explain what determines whether a body check that makes head contact is legal or illegal",
-        "Explain escrow and hockey related revenue in the NHL CBA"
+        "Explain escrow and hockey related revenue in the NHL CBA",
+        # "What is the NHL's off-season schedule?"
     ],
     "Player Info": [
-        "How tall is Matt Rempe?"
+        "How tall is Matt Rempe?",
+        "What is Auston Matthews' jersey number?",
+        # "What is the height of the tallest player in the NHL?",
+        # "What is the weight of the lightest player in the NHL?",
+        # "What is the average height of NHL defensemen?"
     ]
 }
 
