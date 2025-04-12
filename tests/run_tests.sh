@@ -3,30 +3,34 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# Get the directory of this script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+PROJECT_ROOT="$( dirname "$SCRIPT_DIR" )"
+
 # Install test dependencies
 echo "Installing test dependencies..."
-pip install -r ../test-requirements.txt
+if [ -f "$PROJECT_ROOT/test-requirements.txt" ]; then
+    pip install -r "$PROJECT_ROOT/test-requirements.txt"
+else
+    echo "Warning: test-requirements.txt not found at $PROJECT_ROOT/test-requirements.txt"
+fi
 
 # Set up test environment variables
 export OPENAI_API_KEY="sk-test-12345"
-export PYTHONPATH="$PYTHONPATH:$(pwd)/.."
-export USE_MOCK_RESPONSES="true"
+export PYTHONPATH="$PYTHONPATH:$PROJECT_ROOT"
 
-# Use the test override to replace the throttling implementation
-echo "Applying test patches..."
-python -c "from utils.test_override import patch_throttling; patch_throttling()"
-
-# Run the specific throttling tests
+# Use pytest's built-in monkeypatching instead of environment variables
 echo "Running throttling tests..."
-python -m pytest utils/test_api_throttling.py \
-               utils/test_openai_throttled.py \
-               utils/test_throttling_integration.py \
-               -v --cov=../src/utils/throttling --no-cov-on-fail
+python -m pytest $SCRIPT_DIR/utils/test_api_throttling.py \
+               $SCRIPT_DIR/utils/test_openai_throttled.py \
+               $SCRIPT_DIR/utils/test_throttling_integration.py \
+               $SCRIPT_DIR/utils/test_embeddings.py \
+               -v --cov=$PROJECT_ROOT/src/utils/throttling --no-cov-on-fail
 
 # If running with coverage report
 if [ "$1" == "--coverage" ]; then
     echo "Generating coverage report..."
-    python -m pytest --cov=../src --cov-report=term-missing
+    python -m pytest --cov=$PROJECT_ROOT/src --cov-report=term-missing
 fi
 
 echo "Tests completed!" 

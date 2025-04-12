@@ -43,20 +43,11 @@ class ThrottledChatOpenAI(ChatOpenAI):
         # Create throttled versions of the methods
         self._throttled_invoke = self._create_throttled_invoke()
         self._throttled_generate = self._create_throttled_generate()
-        
-        # Check if we're in test mode
-        self._test_mode = os.environ.get('USE_MOCK_RESPONSES') == 'true'
     
     def _create_throttled_invoke(self):
         """Create a throttled version of the invoke method"""
         @functools.wraps(self._original_invoke)
         def throttled_invoke(*args, **kwargs):
-            if self._test_mode:
-                # Even in test mode, we want the throttler for exception tests
-                if hasattr(self._throttler, '_is_exception_test') and self._throttler._is_exception_test:
-                    return self._throttler.throttled_call(self._original_invoke, *args, **kwargs)
-                # Otherwise return a mock response in test mode
-                return {"output": "This is a mock response from the test implementation."}
             return self._throttler.throttled_call(self._original_invoke, *args, **kwargs)
         return throttled_invoke
     
@@ -64,14 +55,6 @@ class ThrottledChatOpenAI(ChatOpenAI):
         """Create a throttled version of the generate method"""
         @functools.wraps(self._original_generate)
         def throttled_generate(*args, **kwargs):
-            if self._test_mode:
-                # Even in test mode, we want the throttler for exception tests
-                if hasattr(self._throttler, '_is_exception_test') and self._throttler._is_exception_test:
-                    return self._throttler.throttled_call(self._original_generate, *args, **kwargs)
-                # Otherwise return a mock response in test mode
-                message = AIMessage(content="This is a mock response from the test implementation.")
-                generation = ChatGeneration(message=message)
-                return LLMResult(generations=[[generation]])
             return self._throttler.throttled_call(self._original_generate, *args, **kwargs)
         return throttled_generate
     
