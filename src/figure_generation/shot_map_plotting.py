@@ -145,6 +145,11 @@ def goal_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
     # else:
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound+1} to {season_upper_bound}- {season_upper_bound+1} Seasons {situation} Goals", fontsize=16)    
     fig.suptitle(caption, fontsize=16)
+    
+    # Add citation for data sources
+    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
+    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
+    
     return fig
     
 
@@ -199,7 +204,11 @@ def shot_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
     ).content
 
     fig.suptitle(caption, fontsize=16)
-
+    
+    # Add citation for data sources
+    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
+    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
+    
     return fig
 
 
@@ -250,6 +259,10 @@ def shot_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season
 
     fig.suptitle(caption, fontsize=16)
 
+    # Add citation for data sources
+    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
+    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
+
     return fig
 
 # TODO: Include heatmaps in this file
@@ -296,6 +309,10 @@ def goal_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season
 
     fig.suptitle(caption, fontsize=16)
 
+    # Add citation for data sources
+    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
+    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
+
     return fig
 
 def xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type):
@@ -330,5 +347,9 @@ def xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_u
     ).content
 
     fig.suptitle(caption, fontsize=16)
+
+    # Add citation for data sources
+    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
+    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
 
     return fig

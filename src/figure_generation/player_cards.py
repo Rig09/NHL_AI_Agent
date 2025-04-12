@@ -505,6 +505,10 @@ def fetch_player_card(db, player_name, season):
             x_value = 0.0
             y_value -= 0.15
 
+    # Add citation for data sources
+    ax.text(0.0, -0.08, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
+    ax.text(1.0, -0.08, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
+
     return fig
 
 # db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)

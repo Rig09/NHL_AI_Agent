@@ -58,6 +58,7 @@ st.set_page_config(page_title="NHL Stats Chatbot", page_icon="🏒", layout="wid
 
 st.title("NHL Chatbot 🏒")
 st.write("Credit [moneypuck.com](https://moneypuck.com/) for all the player, shot, line, and goalie data used in this project.")
+st.write("Follow us on X: [@ChatbotNHL](https://twitter.com/ChatbotNHL)")
 
 with st.expander("More about this chatbot"):
     st.info("""This chatbot leverages LangChain and OpenAI's GPT-4 model to interact with user queries for information about the NHL. To use the chatbot simply type a question into the bar or click on one of the sample questions\n
