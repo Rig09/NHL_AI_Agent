@@ -7,6 +7,7 @@ from agent.agent_main import get_agent
 from utils.database_init import init_db, init_vector_db
 import matplotlib.pyplot as plt
 from utils.throttling import ThrottledChatOpenAI
+from utils.throttling.api_throttler import SimpleOpenAIThrottler
 
 # parser = argparse.ArgumentParser()
 # # Use local environment variables by default
@@ -40,6 +41,10 @@ if "database" not in st.session_state:
     db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
     rules_db = init_vector_db('rules', open_ai_key)
     cba_db = init_vector_db('cba', open_ai_key)
+
+# Initialize the openai_throttle session state globally
+if "openai_throttle" not in st.session_state:
+    st.session_state.openai_throttle = {"timestamps": []}
 
 if "agent_chain" not in st.session_state:
     NHLStatsAgent = get_agent(db, rules_db, cba_db, llm=ThrottledChatOpenAI(model="gpt-4o", api_key=open_ai_key))
@@ -105,6 +110,10 @@ if user_query is not None and user_query.strip() != "":
     try:
         with st.chat_message("AI"):
             with st.spinner("processing..."):
+                # Ensure openai_throttle is initialized before agent invocation
+                if "openai_throttle" not in st.session_state:
+                    st.session_state.openai_throttle = {"timestamps": []}
+                
                 # Pass the entire chat history to the agent
                 agent_input = "\n".join([message.content for message in st.session_state.chat_history])  # Join all messages
                 response = NHLStatsAgent.invoke({"input": agent_input})

@@ -32,6 +32,9 @@ class SimpleOpenAIThrottler:
         Returns:
             bool: True if the request can proceed, False otherwise
         """
+        # Ensure session state is initialized
+        self._initialize_tracking()
+        
         now = datetime.now()
         minute_ago = now - timedelta(minutes=1)
         
@@ -46,6 +49,9 @@ class SimpleOpenAIThrottler:
     
     def record_request(self):
         """Record that a request has been made"""
+        # Ensure session state is initialized
+        self._initialize_tracking()
+        
         st.session_state.openai_throttle["timestamps"].append(datetime.now())
     
     def throttled_call(self, func, *args, **kwargs):
@@ -63,6 +69,9 @@ class SimpleOpenAIThrottler:
         Raises:
             Exception: If the rate limit is exceeded
         """
+        # Ensure session state is initialized
+        self._initialize_tracking()
+        
         if not self.check_rate_limit():
             # If we can't proceed, raise an exception
             # This could be modified to wait instead
