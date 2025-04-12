@@ -81,7 +81,8 @@ sample_queries_by_category = {
         "Show me a heatmap of shots for the Capitals on the powerplay in 2023-24",
         "Generate a shot scatterplot of Auston Matthews shots this season",
         "Player card for Jaccob Slavin since 2020-21",
-        "Player card for Connor McDavid this season"
+        "Player card for Connor McDavid this season",
+        # "Show me a heatmap of all slapshots scored in the 2023-24 season",
 
     ],
     "Rules & Regulations": [
@@ -92,6 +93,8 @@ sample_queries_by_category = {
     "Player Info": [
         "How tall is Matt Rempe?",
         "What is Auston Matthews' jersey number?",
+        "Which way does John Tavares shoot?",
+        "Which hand does Joseph Woll catch with?",
         # "What is the height of the tallest player in the NHL?",
         # "What is the weight of the lightest player in the NHL?",
         # "What is the average height of NHL defensemen?"
