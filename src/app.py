@@ -64,28 +64,56 @@ with st.expander("More about this chatbot"):
     st.info("""This chatbot leverages LangChain and OpenAI's GPT-4 model to interact with user queries for information about the NHL. To use the chatbot simply type a question into the bar or click on one of the sample questions\n
     The chatbot can answer questions about NHL statistics regarding teams, lines, players, and goalies. All of this data is sourced from moneypuck.com. As they allow non commercial use of their data.\n
     The chatbot can also answer questions about the NHL rule book, and the collective bargaining agreement (CBA). Using the PDF files that can be found on the NHL website.\n
-    In addition to answeing those questions, this chatbot can generate two types of plots: \n
+    In addition to answering those questions, this chatbot can generate two types of plots: \n
             \t 1. Scatterplots of shots or goals given custom conditions given by a user \n
             \t 2. A heatmap of shots, goals, or expected goals given custom conditions given by a user""")
 
-sample_queries = [
-    "Who led the NHL in goals in the 2023-24 season?",
-    "Generate an expected goal heatmap of all shots in the 2023-24 season",
-    "Explain what determines whether a body check that makes head contact is legal or illegal",
-    "Show me a heatmap of shots for the Capital's on the powerplay in 2023-24",
-    "What is the Edmonton Oilers record in games with a powerplay goal since March 1st?",
-    "Generate a shot scatterplot of Auston Matthews shots this season",
-    "Explain escrow and hockey related revenue in the NHL CBA", 
-    "Top 10 pairs in expected goals percentage with at least 50 minutes played",
-    "How tall is Matt Rempe?",
-    "What is the Guentzel Point Kucherov line's expected goals percentage in the last 10 games?",
-    "Player card for Jaccob Slavin since 2020-21"
-]
+# Organize sample queries by category
+sample_queries_by_category = {
+    "Player & Team Stats": [
+        "Who led the NHL in goals in the 2023-24 season?",
+        "What is the Edmonton Oilers record in games with a powerplay goal since March 1st?",
+        "Top 10 pairs in expected goals percentage with at least 50 minutes played",
+        "What is the Guentzel Point Kucherov line's expected goals percentage in the last 10 games?",
+    ],
+    "Visualizations": [
+        "Generate an expected goal heatmap of all shots in the 2023-24 season",
+        "Show me a heatmap of shots for the Capitals on the powerplay in 2023-24",
+        "Generate a shot scatterplot of Auston Matthews shots this season",
+        "Player card for Jaccob Slavin since 2020-21"
+    ],
+    "Rules & Regulations": [
+        "Explain what determines whether a body check that makes head contact is legal or illegal",
+        "Explain escrow and hockey related revenue in the NHL CBA"
+    ],
+    "Player Info": [
+        "How tall is Matt Rempe?"
+    ]
+}
 
-# Display sample queries as pills
-selected_query = st.pills("Here are some examples of questions you can try:", sample_queries)
+# Flatten the queries for overall display if needed
+all_sample_queries = []
+for category_queries in sample_queries_by_category.values():
+    all_sample_queries.extend(category_queries)
 
-# Display the chat history
+# Create a more streamlined category selection
+st.markdown("### Sample Questions")
+categories = ["All"] + list(sample_queries_by_category.keys())
+selected_category = st.selectbox(
+    "Select category:",
+    options=categories,
+    index=0
+)
+
+# Get queries for the selected category
+if selected_category == "All":
+    category_queries = all_sample_queries
+else:
+    category_queries = sample_queries_by_category[selected_category]
+
+# Display selected category's sample queries as pills
+selected_query = st.pills("", category_queries)
+
 # Display the chat history
 for message in st.session_state.chat_history:
     if isinstance(message, AIMessage):
