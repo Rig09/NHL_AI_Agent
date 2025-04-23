@@ -380,7 +380,7 @@ def fetch_player_card(db, player_name, season):
     ax_headshot.axis('off')
 
     # Add team logo
-    ax_logo = fig.add_axes([0.1, 0.6, 0.35, 0.9])
+    ax_logo = fig.add_axes([0.5, 0.4, 0.15, 0.5])
     ax_logo.imshow(team_logo)
     ax_logo.axis('off')
 
