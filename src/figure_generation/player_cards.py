@@ -427,12 +427,12 @@ def fetch_player_card(db, player_name, season):
     bio_infoy = 1.08
 
     ax.text(bio_infox, bio_infoy, f"Number: #{sweaterNumber}", fontsize=12, ha='left')
-    ax.text(bio_infox, bio_infoy-0.4, f"Position: {position}", fontsize=12, ha='left')
-    ax.text(bio_infox, bio_infoy-0.8, f"Age: {age}", fontsize=12, ha='left')
-    ax.text(bio_infox, bio_infoy-1.2, f"Born: {birthCountry}", fontsize=12, ha='left')
-    ax.text(bio_infox, bio_infoy-1.6, f"Height: {feet_height}", fontsize=12, ha='left')
-    ax.text(bio_infox, bio_infoy-2.0, f"Weight: {weightInPounds} lbs", fontsize=12, ha='left')
-    ax.text(bio_infox, bio_infoy-2.4, f"Shoots: {shootsCatches}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.04, f"Position: {position}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.08, f"Age: {age}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.12, f"Born: {birthCountry}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.16, f"Height: {feet_height}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.2, f"Weight: {weightInPounds} lbs", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.24, f"Shoots: {shootsCatches}", fontsize=12, ha='left')
 
     if len(season) == 1:
         percentile_string = "Percentile: "
