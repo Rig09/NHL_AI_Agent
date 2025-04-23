@@ -551,7 +551,7 @@ def fetch_player_card(db, player_name, season):
         #inset_ax.set_title("xG Value by Index", fontsize=8)
         inset_ax.set_ylim(0, 100)
     # inset_ax.set_yticks([0, 50, 100])
-        inset_ax.set_ylabel("League Percentile", fontsize=6, labelpad=0)
+        inset_ax.set_ylabel("EV League Percentile", fontsize=6, labelpad=0)
         inset_ax.tick_params(labelsize=6)
         inset_ax.grid(True, linestyle='--', alpha=0.4)
 

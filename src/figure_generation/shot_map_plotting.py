@@ -200,6 +200,9 @@ def shot_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
 
     fig.suptitle(caption, fontsize=16)
 
+    ax.text(-0.1, -0.085, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left')
+    ax.text(1.075, -0.085, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right')
+
     return fig
 
 
@@ -328,7 +331,7 @@ def xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_u
     f"""Return a figure caption for a heatmap of expected goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
     in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
     ).content
-
+    
     fig.suptitle(caption, fontsize=16)
 
     return fig
