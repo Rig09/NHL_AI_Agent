@@ -5,7 +5,7 @@ from utils.database_init import run_query_mysql, init_db
 import requests
 from dotenv import load_dotenv
 import os
-import cairosvg
+#import cairosvg
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from PIL import Image
@@ -14,6 +14,8 @@ import mysql.connector
 from decimal import Decimal
 import matplotlib.patches as patches
 import matplotlib.colors as mcolors
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
 """
 Generate player cards for the NHL AI agent.
 Add Team logo and headshot image to card from the NHL API
@@ -33,7 +35,16 @@ def load_image_from_url(url):
     return Image.open(BytesIO(response.content))
 
 
-
+def svg_url_to_pil_image(svg_url):
+    response = requests.get(svg_url)
+    drawing = svg2rlg(BytesIO(response.content))
+    
+    # Render as PNG
+    png_bytes = BytesIO()
+    renderPM.drawToFile(drawing, png_bytes, fmt="PNG")
+    png_bytes.seek(0)
+    
+    return Image.open(png_bytes)
 # load_dotenv()
 
 # MYSQL_HOST = os.getenv("MYSQL_HOST")
@@ -371,16 +382,14 @@ def fetch_player_card(db, player_name, season):
     headshot = load_image_from_url(headshot_url)
 
     # # Convert SVG to PNG if needed using cairosvg (install with pip install cairosvg)
-    team_logo_png = BytesIO()
-    cairosvg.svg2png(url=team_logo_url, write_to=team_logo_png)
-    team_logo = Image.open(team_logo_png)
+    team_logo = svg_url_to_pil_image(team_logo_url)
     # Add headshot
     ax_headshot = fig.add_axes([0.05, 0.75, 0.2, 0.2]) # [left, bottom, width, height]
     ax_headshot.imshow(headshot)
     ax_headshot.axis('off')
 
     # Add team logo
-    ax_logo = fig.add_axes([0.5, 0.4, 0.15, 0.5])
+    ax_logo = fig.add_axes([0.1, 0.65, 0.35, 0.8])
     ax_logo.imshow(team_logo)
     ax_logo.axis('off')
 
