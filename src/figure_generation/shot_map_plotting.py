@@ -200,8 +200,11 @@ def shot_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
 
     fig.suptitle(caption, fontsize=16)
 
-    ax.text(-0.175, -0.3, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left')
-    ax.text(0.4, -0.5, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right')
+    # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
+
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
 
     return fig
 
