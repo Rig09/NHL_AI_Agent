@@ -27,3 +27,4 @@ requests==2.32.3
 svglib==1.5.1
 reportlab==4.1.0
 Pillow==9.4.0
+svgpathtools==0.4.0

@@ -8,7 +8,7 @@ import os
 #import cairosvg
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-from PIL import Image
+from PIL import Image, ImageDraw
 from io import BytesIO
 import mysql.connector
 from decimal import Decimal
@@ -16,6 +16,7 @@ import matplotlib.patches as patches
 import matplotlib.colors as mcolors
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
+from svgpathtools import svg2paths
 """
 Generate player cards for the NHL AI agent.
 Add Team logo and headshot image to card from the NHL API
@@ -38,15 +39,34 @@ def load_image_from_url(url):
 def svg_url_to_pil_image(svg_url):
     # Fetch the SVG file from the URL
     response = requests.get(svg_url)
-    drawing = svg2rlg(BytesIO(response.content))
-    
-    # Render the SVG as a PNG into a BytesIO buffer
-    png_output = BytesIO()
-    renderPM.drawToFile(drawing, png_output, fmt="PNG")
-    png_output.seek(0)
-    
-    # Use Pillow to open the PNG image
-    return Image.open(png_output)
+    svg_data = response.content
+
+    # Parse the SVG content
+    paths, attributes = svg2paths(BytesIO(svg_data))
+
+    # Get the dimensions of the SVG (width and height) from the attributes
+    width = int(attributes.get('width', 400))  # Set default if not present
+    height = int(attributes.get('height', 400))  # Set default if not present
+
+    # Create a blank canvas with Pillow
+    img = Image.new("RGBA", (width, height), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(img)
+
+    # Iterate over the paths and draw them on the image
+    for path in paths:
+        # Convert the path into drawing commands
+        for segment in path:
+            start, end = segment.start, segment.end
+            draw.line([start.real, start.imag, end.real, end.imag], fill="black", width=1)
+
+    # Convert the drawing to a PNG in memory
+    img_io = BytesIO()
+    img.save(img_io, format="PNG")
+    img_io.seek(0)
+
+    return Image.open(img_io)
+
+
 # load_dotenv()
 
 # MYSQL_HOST = os.getenv("MYSQL_HOST")
