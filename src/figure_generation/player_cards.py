@@ -36,15 +36,17 @@ def load_image_from_url(url):
 
 
 def svg_url_to_pil_image(svg_url):
+    # Fetch the SVG file from the URL
     response = requests.get(svg_url)
     drawing = svg2rlg(BytesIO(response.content))
     
-    # Render as PNG
-    png_bytes = BytesIO()
-    renderPM.drawToFile(drawing, png_bytes, fmt="PNG")
-    png_bytes.seek(0)
+    # Render the SVG as a PNG into a BytesIO buffer
+    png_output = BytesIO()
+    renderPM.drawToFile(drawing, png_output, fmt="PNG")
+    png_output.seek(0)
     
-    return Image.open(png_bytes)
+    # Use Pillow to open the PNG image
+    return Image.open(png_output)
 # load_dotenv()
 
 # MYSQL_HOST = os.getenv("MYSQL_HOST")
