@@ -5,7 +5,7 @@ from utils.database_init import run_query_mysql, init_db
 import requests
 from dotenv import load_dotenv
 import os
-import cairosvg
+import cairocffi as cairo
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from PIL import Image
