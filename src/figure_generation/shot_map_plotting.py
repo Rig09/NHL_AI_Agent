@@ -145,6 +145,13 @@ def goal_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
     # else:
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound+1} to {season_upper_bound}- {season_upper_bound+1} Seasons {situation} Goals", fontsize=16)    
     fig.suptitle(caption, fontsize=16)
+    
+        # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
+
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
+    
     return fig
     
 
@@ -256,6 +263,11 @@ def shot_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season
 
     fig.suptitle(caption, fontsize=16)
 
+        # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
+
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
     return fig
 
 # TODO: Include heatmaps in this file
@@ -301,7 +313,12 @@ def goal_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season
     ).content
 
     fig.suptitle(caption, fontsize=16)
+    
+    # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
 
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
     return fig
 
 def xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type):
@@ -336,5 +353,10 @@ def xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_u
     ).content
     
     fig.suptitle(caption, fontsize=16)
+    
+    # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
 
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
     return fig
