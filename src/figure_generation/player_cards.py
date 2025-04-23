@@ -5,7 +5,7 @@ from utils.database_init import run_query_mysql, init_db
 import requests
 from dotenv import load_dotenv
 import os
-import cairocffi as cairo
+#import cairosvg
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from PIL import Image
@@ -371,18 +371,18 @@ def fetch_player_card(db, player_name, season):
     headshot = load_image_from_url(headshot_url)
 
     # # Convert SVG to PNG if needed using cairosvg (install with pip install cairosvg)
-    team_logo_png = BytesIO()
-    cairosvg.svg2png(url=team_logo_url, write_to=team_logo_png)
-    team_logo = Image.open(team_logo_png)
+    # team_logo_png = BytesIO()
+    # cairosvg.svg2png(url=team_logo_url, write_to=team_logo_png)
+    # team_logo = Image.open(team_logo_png)
     # Add headshot
     ax_headshot = fig.add_axes([0.05, 0.75, 0.2, 0.2]) # [left, bottom, width, height]
     ax_headshot.imshow(headshot)
     ax_headshot.axis('off')
 
-    # Add team logo
-    ax_logo = fig.add_axes([0.5, 0.4, 0.15, 0.5])
-    ax_logo.imshow(team_logo)
-    ax_logo.axis('off')
+    # # Add team logo
+    # ax_logo = fig.add_axes([0.5, 0.4, 0.15, 0.5])
+    # ax_logo.imshow(team_logo)
+    # ax_logo.axis('off')
 
     # Add player name
     fig.text(0.05, 0.72, player_name, fontsize=14, fontweight='bold', ha='left')
@@ -424,14 +424,15 @@ def fetch_player_card(db, player_name, season):
     # Create feet_height variable
     feet_height = f"{feet} {inches}'"
     bio_infox = 0.19
+    bio_infoy = 1.08
 
-    ax.text(bio_infox, 1.04, f"Number: #{sweaterNumber}", fontsize=12, ha='left')
-    ax.text(bio_infox, 1.00, f"Position: {position}", fontsize=12, ha='left')
-    ax.text(bio_infox, 0.96, f"Age: {age}", fontsize=12, ha='left')
-    ax.text(bio_infox, 0.92, f"Born: {birthCountry}", fontsize=12, ha='left')
-    ax.text(bio_infox, 0.88, f"Height: {feet_height}", fontsize=12, ha='left')
-    ax.text(bio_infox, 0.84, f"Weight: {weightInPounds} lbs", fontsize=12, ha='left')
-    ax.text(bio_infox, 0.80, f"Shoots: {shootsCatches}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy, f"Number: #{sweaterNumber}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.4, f"Position: {position}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.8, f"Age: {age}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-1.2, f"Born: {birthCountry}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-1.6, f"Height: {feet_height}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-2.0, f"Weight: {weightInPounds} lbs", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-2.4, f"Shoots: {shootsCatches}", fontsize=12, ha='left')
 
     if len(season) == 1:
         percentile_string = "Percentile: "
