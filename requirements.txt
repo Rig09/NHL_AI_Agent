@@ -26,5 +26,6 @@ python-dotenv
 requests==2.32.3
 svglib==1.5.1
 reportlab==4.1.0
-Pillow==9.4.0
-svgpathtools
+Pillow==9.4.0p
+cairocffi==1.2.0
+cairosvg==2.7.0

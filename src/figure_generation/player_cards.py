@@ -5,18 +5,15 @@ from utils.database_init import run_query_mysql, init_db
 import requests
 from dotenv import load_dotenv
 import os
-#import cairosvg
+import cairosvg
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-from PIL import Image, ImageDraw
+from PIL import Image
 from io import BytesIO
 import mysql.connector
 from decimal import Decimal
 import matplotlib.patches as patches
 import matplotlib.colors as mcolors
-from svglib.svglib import svg2rlg
-from reportlab.graphics import renderPM
-from svgpathtools import svg2paths
 """
 Generate player cards for the NHL AI agent.
 Add Team logo and headshot image to card from the NHL API
@@ -35,36 +32,6 @@ def load_image_from_url(url):
     response = requests.get(url)
     return Image.open(BytesIO(response.content))
 
-
-def svg_url_to_pil_image(svg_url):
-    # Fetch the SVG file from the URL
-    response = requests.get(svg_url)
-    svg_data = response.content
-
-    # Parse the SVG content
-    paths, attributes = svg2paths(BytesIO(svg_data))
-
-    # Get the dimensions of the SVG (width and height) from the attributes
-    width = int(attributes.get('width', 400))  # Set default if not present
-    height = int(attributes.get('height', 400))  # Set default if not present
-
-    # Create a blank canvas with Pillow
-    img = Image.new("RGBA", (width, height), (255, 255, 255, 0))
-    draw = ImageDraw.Draw(img)
-
-    # Iterate over the paths and draw them on the image
-    for path in paths:
-        # Convert the path into drawing commands
-        for segment in path:
-            start, end = segment.start, segment.end
-            draw.line([start.real, start.imag, end.real, end.imag], fill="black", width=1)
-
-    # Convert the drawing to a PNG in memory
-    img_io = BytesIO()
-    img.save(img_io, format="PNG")
-    img_io.seek(0)
-
-    return Image.open(img_io)
 
 
 # load_dotenv()
@@ -404,14 +371,16 @@ def fetch_player_card(db, player_name, season):
     headshot = load_image_from_url(headshot_url)
 
     # # Convert SVG to PNG if needed using cairosvg (install with pip install cairosvg)
-    team_logo = svg_url_to_pil_image(team_logo_url)
+    team_logo_png = BytesIO()
+    cairosvg.svg2png(url=team_logo_url, write_to=team_logo_png)
+    team_logo = Image.open(team_logo_png)
     # Add headshot
     ax_headshot = fig.add_axes([0.05, 0.75, 0.2, 0.2]) # [left, bottom, width, height]
     ax_headshot.imshow(headshot)
     ax_headshot.axis('off')
 
     # Add team logo
-    ax_logo = fig.add_axes([0.1, 0.65, 0.35, 0.8])
+    ax_logo = fig.add_axes([0.5, 0.4, 0.15, 0.5])
     ax_logo.imshow(team_logo)
     ax_logo.axis('off')
 
