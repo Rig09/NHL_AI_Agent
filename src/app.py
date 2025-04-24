@@ -60,7 +60,8 @@ with st.expander("More about this chatbot"):
     The chatbot can also answer questions about the NHL rule book, and the collective bargaining agreement (CBA). Using the PDF files that can be found on the NHL website.\n
     In addition to answeing those questions, this chatbot can generate two types of plots: \n
             \t 1. Scatterplots of shots or goals given custom conditions given by a user \n
-            \t 2. A heatmap of shots, goals, or expected goals given custom conditions given by a user""")
+            \t 2. A heatmap of shots, goals, or expected goals given custom conditions given by a user \n
+    The chatbot can also fetch standings, schedule, and broadcasting information from the NHL API. There is also a player card feature to get a summary of a player's performance.""")
 
 sample_queries = [
     "Who led the NHL in goals in the 2023-24 season?",
@@ -73,7 +74,8 @@ sample_queries = [
     "Top 10 pairs in expected goals percentage with at least 50 minutes played",
     "How tall is Matt Rempe?",
     "What is the Guentzel Point Kucherov line's expected goals percentage in the last 10 games?",
-    "Player card for Jaccob Slavin since 2020-21"
+    "Player card for Jaccob Slavin since 2020-21",
+    "NHL Standings on January 10th this year"
 ]
 
 # Display sample queries as pills
