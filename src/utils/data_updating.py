@@ -281,7 +281,13 @@ def process_lines_csv(url, table_name):
         
         print(f"✔ Lines and pairs data from {table_name} processed and added to database.")
 
-
+def ping_url(url):
+    try:
+        response = requests.get(url)
+        print(f"Status Code: {response.status_code}")
+        print("Website is reachable!" if response.ok else "Website is not reachable!")
+    except requests.RequestException as e:
+        print(f"Failed to reach the website. Error: {e}")
 # Modify the main processing loop to handle the linestats_{game_type}_2024 URL differently
 for table_name, url in urls.items():
     if f"linestats_{game_type}_2024" in table_name:
@@ -292,3 +298,6 @@ for table_name, url in urls.items():
         process_csv(url, table_name)
 
 print("All specified tables have been updated in the database.")
+ping_url('https://nhlchatbot.streamlit.app/')
+
+print("Streamlit app up")

@@ -388,7 +388,9 @@ def get_agent(db, rules_db, cba_db, llm):
                             For example: if the user asks where does the Makar-Toews pairing rank in expected goals percentage, YOU MUST PASS THAT YOU WOULD LIKE THE RANKING. Pass: ranking for Makar Toews pairing in expected goals percentage.
                             Also infer similair meanings to what rank, like what place are they in, or where are they in the league ect. pass those asking for a ranking.
                             When there is an ambigious date argument, like 'since January' where the year is not provided, use the date tool to pass the year when you invoke this tool.
-                            Invoke this tool for some game queries around things like "when was the last time 2 powerplay goals for the oilers happened in a game", or in how many games did _ happen this season ect."""
+                            Invoke this tool for some game queries around things like "when was the last time 2 powerplay goals for the oilers happened in a game", or in how many games did _ happen this season ect.
+                            Make sure you inboke this tool when someone asks for who lead in a statistic during a certain time period. Allways invoke this tool for questions about complete seasons in any stat that is not expected goals percentage. 
+                            INVOKE THIS TOOL for questions like 'who lead the NHL in goals this season.'"""
         ),
         Tool(
             name="Player_BIO_information",
