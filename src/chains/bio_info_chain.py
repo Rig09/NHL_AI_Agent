@@ -27,7 +27,7 @@ def get_bio_chain(db, llm):
     {schema}
 
     Player positions: C = Center, L = Left Wing, R = Right Wing, D = Defenseman, G = Goalies.  
-
+    Note that the title 'forward' refers to all players who are have the position, C, L, or R
     Teams are stored as abbreviations (e.g., "Toronto Maple Leafs" → "TOR"). Infer references like "Leafs" → "TOR".
 
     The shootsCatches attribute indicates which way a player shoots if it is a skater (C, L, R, D). This can also be refered to as handedness. For each player this is right or left.
