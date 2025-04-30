@@ -37,7 +37,8 @@ def get_bio_chain(db, llm):
     For goalies, this can also be refered to as southpaw (aka right), or regular (aka left).
 
     Nations are stored as abbreviations (e.g., "Canada" -> CAN). Infer references like "Canadian" -> CAN
-
+    Also When someone asks for a list of where someone ranks. Order by that value, like height or weight and then return the row number.
+    This may come with some conditions, like currently playing. Someone also may ask for all the of the top players in that, or bottom ect.
     DO NOT INCLUDE ``` in the response.
     Question: {question}
     SQL Query:
