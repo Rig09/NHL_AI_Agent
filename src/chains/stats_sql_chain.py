@@ -199,6 +199,11 @@ def get_sql_chain(db, llm):
 
     A user may also request a list of gameID's that meet a certain condition. This may mean finding the destinct nhl_game_id values that meet a certain shot condition, for example, games where 'Connor Mcdavid scored' would be destinct nhl_game_id values for shots_data where there were connor mcdavid goals.
     Use shots_data if the user requests a a list of gameIDs given a condition about a player, or very specific information like where the Montreal Canadians scored in the second period ect. Use game_logs for TEAM level information that is about the entire game. 
+    
+    When a user asks how many times something has been done in a single game. Use the shots table. Use the nhl_game_Id to group the shots. And see if that feat was accomplished in that single game.
+    For example, If somoene asks, how many times has "Auston Matthews" scored 4 goals in a game. Use the shots_data table, group the shots by the nhl_game_id, and count the number of unique gameid values where Auston Matthews scored 4 goals. 
+
+    If somoeone were to ask, how many players have scored 4 goals in a single game. Group the shots by nhl_game_id, and shooterPlayerId. Then find where a single player scored 4 goals in a single game. Count the number of unique PLAYERIDS that have accomplished this and return it.
 
     When someone asks who leads a statistic sort by the statistic and give the number one response.
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
