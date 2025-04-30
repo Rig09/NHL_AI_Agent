@@ -396,7 +396,8 @@ def get_agent(db, rules_db, cba_db, llm):
             name="Player_BIO_information",
             func=lambda input, **kwargs: bio_chain.invoke({"question": input}),
             description="""Useful when you want BIO information about a player, including position, handedness, height, weight, Nationality, Birthday, and team.
-                            The tool should not be invoked with an sql query. It should be invoked with a natural language question about what statistics are needed to answer the user query."""
+                            The tool should not be invoked with an sql query. It should be invoked with a natural language question about what statistics are needed to answer the user query.
+                            This should also be invoked to decide who are the _ heaviest, or tallest, ect players in the NHL. Any question about this bio information in any format should invoke this tool."""
         )
     ]
     # TODO: Add the tools for the goal map scatter and shot map scatter
