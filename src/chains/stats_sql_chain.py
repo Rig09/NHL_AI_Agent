@@ -202,8 +202,10 @@ def get_sql_chain(db, llm):
     
     When a user asks how many times something has been done in a single game. Use the shots table. Use the nhl_game_Id and shooterPlayerID to group the shots and see if that feat was accomplished in that single game.
     For example, If somoene asks, how many times has "Auston Matthews" scored 4 goals in a game. Use the shots_data table, group the shots by the nhl_game_id, and count the number of unique gameid values where Auston Matthews scored 4 goals (so 4 different shots have a value for goal of 1 within the same game, all taken by Auston Matthews). 
-
+    ENSURE THAT IF SOMEONE ASKS FOR GOALS YOU ARE ONLY COUNTING SHOTS WHERE goal = 1. Not when it equals zero. Count only rows that are goals, not all shots.
+    
     If somoeone were to ask, how many players have scored 4 goals in a single game. Group the shots by nhl_game_id, and shooterPlayerId. Then find where a single player scored 4 goals in a single game. Count the number of unique PLAYERIDS that have accomplished this(ie 4 of the shots in a single nhl_game_id and ShooterPlayerID grouping have a goal value of 1) and return it.
+    For that example, its very important to ensure that you are returning games with 4 GOALS not shots. Ensure the goal column has a vlaue of 1.
 
     When someone asks who leads a statistic sort by the statistic and give the number one response.
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
