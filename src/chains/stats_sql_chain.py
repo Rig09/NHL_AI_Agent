@@ -207,6 +207,21 @@ def get_sql_chain(db, llm):
     If somoeone were to ask, how many players have scored 4 goals in a single game. Group the shots by nhl_game_id, and shooterPlayerId. Then find where a single player scored 4 goals in a single game. Count the number of unique PLAYERIDS that have accomplished this(ie 4 of the shots in a single nhl_game_id and ShooterPlayerID grouping have a goal value of 1) and return it.
     For that example, its very important to ensure that you are returning games with 4 GOALS not shots. Ensure the goal column has a vlaue of 1.
 
+    Here is an example query for the above:
+    'WITH rel_games AS (
+    SELECT 
+            nhl_game_id,
+            shooterName,
+            COUNT(goal) AS goalNum
+        FROM shots_data
+        WHERE shooterName = 'Auston Matthews' AND goal = 1
+        GROUP BY nhl_game_id, shooterName
+    )
+
+    SELECT COUNT(DISTINCT nhl_game_id)
+    FROM rel_games
+    WHERE goalNum >= 4;'
+
     When someone asks who leads a statistic sort by the statistic and give the number one response.
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
