@@ -60,8 +60,8 @@ class ngames_stats_schema(BaseModel):
 class ngames_xg_percent_schema(BaseModel):
     player_name: str = Field(..., description= 'The name of the player for which the request is being made')
     game_number: int = Field(..., description= "The number of games being asked about. So if someone says what is Connor Mcdavid's expected goals percentage in the last 10 games. Then this would take the value of 10.")
-    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
-                          Only invoke with one of those two. If it is not specified, default to 'even strength'""")
+    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'Even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
+                          Only invoke with one of those two. If it is not specified, default to 'Even strength'""")
 class ngames_xg_team_percent_schema(BaseModel):
     teamCode: str = Field(..., description= """The team code for the team which is being asked about, Note for the team codes: Anaheim Ducks -> ANA, Arizona Coyotes -> ARI, Boston Bruins -> BOS, 
                           Buffalo Sabres -> BUF, Calgary Flames -> CGY, Carolina Hurricanes -> CAR, Chicago Blackhawks -> CHI, Colorado Avalanche -> COL, Columbus Blue Jackets -> CBJ, 
@@ -70,15 +70,15 @@ class ngames_xg_team_percent_schema(BaseModel):
                            Philadelphia Flyers -> PHI, Pittsburgh Penguins -> PIT, San Jose Sharks -> SJS, Seattle Kraken -> SEA, St. Louis Blues -> STL, Tampa Bay Lightning -> TBL, 
                           Toronto Maple Leafs -> TOR, Vancouver Canucks -> VAN, Washington Capitals -> WSH, Winnipeg Jets -> WPG. Also imply nicknames, like The jets, leafs, habs, sharks, ect.""")
     game_number: int = Field(..., description= "The number of games being asked about. So if someone says what is the Jets expected goals percentage in the last 10 games. Then this would take the value of 10.")
-    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
-                          Only invoke with one of those two. If it is not specified, default to 'even strength'""")
+    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'Even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
+                          Only invoke with one of those two. If it is not specified, default to 'Even strength'""")
 
 class date_xg_percent_schema(BaseModel):
     player_name: str = Field(..., description= 'The name of the player for which the request is being made')
     start_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Connor Mcdavid's expected goals percentage Since January 1st. Then this would take the value of 2024-01-01.")
     end_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Connor Mcdavid's expected goals percentage from January 1st to January 10th. Then this would take the value of 2024-01-10. If someone says since _ or doesnt give an end date use todays date")
-    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
-                          Only invoke with one of those two. If it is not specified, default to 'even strength'""")
+    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'Even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
+                          Only invoke with one of those two. If it is not specified, default to 'Even strength'""")
 class date_team_xg_percent_schema(BaseModel):
     teamCode: str = Field(..., description= """The team code for the team which is being asked about, Note for the team codes: Anaheim Ducks -> ANA, Arizona Coyotes -> ARI, Boston Bruins -> BOS, 
                           Buffalo Sabres -> BUF, Calgary Flames -> CGY, Carolina Hurricanes -> CAR, Chicago Blackhawks -> CHI, Colorado Avalanche -> COL, Columbus Blue Jackets -> CBJ, 
@@ -88,8 +88,8 @@ class date_team_xg_percent_schema(BaseModel):
                           Toronto Maple Leafs -> TOR, Vancouver Canucks -> VAN, Washington Capitals -> WSH, Winnipeg Jets -> WPG. Also imply nicknames, like The jets, leafs, habs, sharks, ect.""")
     start_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is the Habs expected goals percentage Since January 1st. Then this would take the value of 2024-01-01.")
     end_date: date = Field(..., description= "The start of the date range being asked about. So if someone says what is Oiler's expected goals percentage from January 1st to January 10th. Then this would take the value of 2024-01-10. If someone says since _ or doesnt give an end date use todays date")
-    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
-                          Only invoke with one of those two. If it is not specified, default to 'even strength'""")
+    strength: str = Field(title="Strength", description="""The strength of the game. This refers to the number of players on the ice for each time. For xg percents, this can either be 'Even strength'(aka 5 on 5, or ev, or 5v5) or 'all'
+                          Only invoke with one of those two. If it is not specified, default to 'Even strength'""")
 class date_lines_xg_percent_schema(BaseModel):
     player_one: str = Field(..., description= 'The name of the first player for which the request is being made')
     player_two: str = Field(..., description= 'The name of the second player for which the request is being made')
@@ -222,21 +222,21 @@ def get_agent(db, rules_db, cba_db, llm):
         return get_stats_ngames(llm, db, sql_chain, natural_language_query)
     
     @tool(args_schema=ngames_xg_percent_schema)
-    def n_games_xgpercent_getter(player_name, game_number, strength: str = 'even strength'):
+    def n_games_xgpercent_getter(player_name, game_number, strength: str = 'Even strength'):
         """
         This tool should be invoked when someone asks for a player's expected goals percentage over the last _ number of games. This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
         """
         return ngames_player_xgpercent(db, player_name, game_number, strength)
     
     @tool(args_schema=ngames_xg_percent_schema)
-    def n_games_team_xgpercent_getter(teamCode, game_number, strength: str = 'even strength'):
+    def n_games_team_xgpercent_getter(teamCode, game_number, strength: str = 'Even strength'):
         """
         This tool should be invoked when someone asks for a team's expected goals percentage over the last _ number of games. This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
         """
         return ngames_team_xgpercent(db, teamCode, game_number, strength)
 
     @tool(args_schema=date_xg_percent_schema)
-    def date_xg_percent_getter(player_name, start_date, end_date = todays_date, strength: str = 'even strength'):
+    def date_xg_percent_getter(player_name, start_date, end_date = todays_date, strength: str = 'Even strength'):
         """
         This tool should be invoked when someone asks for a player's expected goals percentage over a certain date range.
         This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
