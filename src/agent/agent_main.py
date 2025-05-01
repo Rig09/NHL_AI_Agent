@@ -225,6 +225,7 @@ def get_agent(db, rules_db, cba_db, llm):
     def n_games_xgpercent_getter(player_name, game_number, strength: str = 'Even strength'):
         """
         This tool should be invoked when someone asks for a player's expected goals percentage over the last _ number of games. This is the only use. It will return the percentage value as a decimal. Translate this as a percentage.
+        Do not invoke this tool when someone is asking for xg percentage over an entire playoffs or over an entire regular season.
         """
         return ngames_player_xgpercent(db, player_name, game_number, strength)
     
@@ -390,7 +391,8 @@ def get_agent(db, rules_db, cba_db, llm):
                             When there is an ambigious date argument, like 'since January' where the year is not provided, use the date tool to pass the year when you invoke this tool.
                             Invoke this tool for some game queries around things like "when was the last time 2 powerplay goals for the oilers happened in a game", or in how many games did _ happen this season ect.
                             Make sure you inboke this tool when someone asks for who lead in a statistic during a certain time period. Allways invoke this tool for questions about complete seasons in any stat that is not expected goals percentage. 
-                            INVOKE THIS TOOL for questions like 'who lead the NHL in goals this season.'"""
+                            INVOKE THIS TOOL for questions like 'who lead the NHL in goals this season.'
+                            Also invoke this tool if someone asks for expected goals percentage for an entire regular season, or for an entire playoffs. This tool should be invoked for these total xg percentages."""
         ),
         Tool(
             name="Player_BIO_information",
