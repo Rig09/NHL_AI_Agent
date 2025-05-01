@@ -207,8 +207,8 @@ def get_sql_chain(db, llm):
     If somoeone were to ask, how many players have scored 4 goals in a single game. Group the shots by nhl_game_id, and shooterPlayerId. Then find where a single player scored 4 goals in a single game. Count the number of unique PLAYERIDS that have accomplished this(ie 4 of the shots in a single nhl_game_id and ShooterPlayerID grouping have a goal value of 1) and return it.
     For that example, its very important to ensure that you are returning games with 4 GOALS not shots. Ensure the goal column has a vlaue of 1.
 
-    Here is an example query for the above:
-    'WITH rel_games AS (
+    Here is an example query for the above:'
+    WITH rel_games AS (
     SELECT 
             nhl_game_id,
             shooterName,
@@ -223,6 +223,10 @@ def get_sql_chain(db, llm):
     WHERE goalNum >= 4;'
 
     When someone asks who leads a statistic sort by the statistic and give the number one response.
+
+    If a user requests a player 5 on 5 expected goals percentage you are returning the onIce_xGoalsPercentage where situation is 5on5 and the name is the player name.
+    This means if a user asks for this value in the _playoffs or _regular season look in the right table and return that value.
+    
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
