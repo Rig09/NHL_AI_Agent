@@ -18,6 +18,7 @@ from api_tools.api_endpoints import get_nhl_standings, nhl_schedule_info_by_date
 from stat_hardcode.game_information import game_information
 from stat_hardcode.team_record import team_record
 from figure_generation.player_cards import fetch_player_card
+from chains.single_games import get_single_game_chain
 
 class goal_map_scatter_schema(BaseModel):
     conditions : str = Field(title="Conditions", description="""The conditions to filter the data by. This should be a natural language description of the data for the scatterplot. This should include information like the team, player, home or away, ect.
@@ -342,6 +343,8 @@ def get_agent(db, rules_db, cba_db, llm):
 
     sql_chain = get_sql_chain(db, llm)
 
+    single_game_chain = get_single_game_chain(db, llm)
+
     memory = ConversationBufferMemory(
         memory_key="chat_history", return_messages=True)
 
@@ -400,9 +403,15 @@ def get_agent(db, rules_db, cba_db, llm):
             description="""Useful when you want BIO information about a player, including position, handedness, height, weight, Nationality, Birthday, and team.
                             The tool should not be invoked with an sql query. It should be invoked with a natural language question about what statistics are needed to answer the user query.
                             This should also be invoked to decide who are the _ heaviest, or tallest, ect players in the NHL. Any question about this bio information in any format should invoke this tool."""
+        ), 
+        Tool(
+            name="Game_by_game",
+            func=lambda input, **kwargs: single_game_chain.invoke({"question": input}),
+            description="""This is the stat getter for game by game statistics. So when someone asks how many games has happend. For example,
+            How many times did a player score 3 goals in a game in the 2024 season or how many players were on the ice for 3 goals for in a game this season.
+            Anything that is about things happening in a single game should invoke this tool."""
         )
     ]
-    # TODO: Add the tools for the goal map scatter and shot map scatter
     
     # Pull the prompt template from the hub
     prompt = hub.pull("hwchase17/openai-tools-agent")
