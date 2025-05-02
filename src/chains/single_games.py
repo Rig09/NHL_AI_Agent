@@ -9,6 +9,8 @@ from langchain.globals import set_verbose
 from utils.database_init import get_table_info, run_query_mysql, init_db
 import os
 import mysql.connector
+
+
 # load_dotenv()
 # MYSQL_HOST = os.getenv("MYSQL_HOST")
 # MYSQL_USER = os.getenv("MYSQL_USER")
@@ -103,8 +105,27 @@ def single_game_sql(db, llm):
                     shooterName
                     FROM rel_games
                     WHERE goalNum >= 4
-                    GROUP BY shooterName;"
+                    GROUP BY shooterName;" If someone simply asked how many times has a player scored 4 goals in a single game you would generate:
+                "
+                    WITH rel_games AS (
+                    SELECT 
+                            nhl_game_id,
+                            shooterName,
+                            COUNT(goal) AS goalNum
+                        FROM shots_data
+                        WHERE goal = 1
+                        GROUP BY nhl_game_id, shooterName
+                    )
+
+                    SELECT COUNT(DISTINCT nhl_game_id)
+                    FROM rel_games
+                    WHERE goalNum >= 4;
+                "remember when somebody asks how many times something has happened in a game, they want to count up the number of games it has happened in. AKA counting destinct nhl_game_ids
+                When someone asks how many PLAYERS have done something, then you count the distinct player name vlaues. Also when someone asks for the games where a player has accomplished a task, 
+                you must group by the player_name as well as the nhl_game_id
                 
+                When someone asks how many times something has happned they dont need the shooter names, just a number. PLEASE STICK AS CLOSE AS YOU CAN TO MY EXAMPLES.
+
                 Someone may ask how many times something has been done in a playoff game. For this simply check if the isPlayoffGame column is 1 or 0.
 
                 The code of the team that took the shot is teamCode. Crossrefrencing this with the values for homeTeamCode, awayTeamCode, homeSkatersOnIce, and awaySkatersOnIce you can find the 'strength'.
@@ -138,13 +159,13 @@ def single_game_sql(db, llm):
 def get_single_game_chain(db, llm):
     def run_query(query, db):
         try:
-            cursor = db.cursor(dictionary=True)  # Use dictionary=True to get results as dictionaries
+            cursor = db.cursor(dictionary=True, buffered= True)  # Use dictionary=True to get results as dictionaries
             cursor.execute(query)
-            result = cursor.fetchone()  # Use fetchone() since we expect only a single row as output
+            result = cursor.fetchall() 
             cursor.close()
 
             if result:
-                    #print(result)
+                    print(result)
                     return result
             else:
                     print("No data found")
@@ -189,4 +210,6 @@ def get_single_game_chain(db, llm):
     )
     return full_chain
 
-# print(full_chain.invoke({'question':'How many has Auston Matthews been on the ice for 4 even strength goals against his team in a single game'}))
+# full_chain = get_single_game_chain(db, llm)
+# print(full_chain.invoke({'question':'how many players have scored 4 goals in a single game and who were they'}))
+#print(full_chain.invoke({'question':'How many has Auston Matthews been on the ice for 4 even strength goals against his team in a single game'}))
