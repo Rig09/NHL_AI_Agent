@@ -8,7 +8,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.globals import set_verbose
 from utils.database_init import get_table_info, run_query_mysql, init_db
 import os
-
+import mysql.connector
 # load_dotenv()
 # MYSQL_HOST = os.getenv("MYSQL_HOST")
 # MYSQL_USER = os.getenv("MYSQL_USER")
@@ -111,6 +111,7 @@ def single_game_sql(db, llm):
                 If someone asks for a stat at even strength this means when homeSkatersOnIce and awaySkatersOnIce are equal. If they say 5on5 then when both these values are at 5. If they say on the powerplay,
                 this means with the opposition team having fewer skaters on the ice as the requested team. Shorthanded, or on the penalty kill, or just on the kill, mean when the oposition team has more players than the shooting team.
 
+                Reminder that if you are finding games where a condition means a player was on ice for an event, do NOT group by shooterName, its asking for instances or games so do not group by the shooter since its irrelevant.
 
                 DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
                 Question:{question}
@@ -136,7 +137,25 @@ def single_game_sql(db, llm):
 
 def get_single_game_chain(db, llm):
     def run_query(query, db):
-        return run_query_mysql(query, db)
+        try:
+            cursor = db.cursor(dictionary=True)  # Use dictionary=True to get results as dictionaries
+            cursor.execute(query)
+            result = cursor.fetchone()  # Use fetchone() since we expect only a single row as output
+            cursor.close()
+
+            if result:
+                    #print(result)
+                    return result
+            else:
+                    print("No data found")
+                    return None
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return None
+        except Exception as ex:
+            print(f"Unexpected Error: {ex}")
+            return None
+
     
     def get_table_schema(db):
         relevent_tables = ['shots_data']
