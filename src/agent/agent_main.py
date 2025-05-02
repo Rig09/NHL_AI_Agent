@@ -409,7 +409,7 @@ def get_agent(db, rules_db, cba_db, llm):
             func=lambda input, **kwargs: single_game_chain.invoke({"question": input}),
             description="""This is the stat getter for game by game statistics. So when someone asks how many games has happend. For example,
             How many times did a player score 3 goals in a game in the 2024 season or how many players were on the ice for 3 goals for in a game this season.
-            Anything that is about things happening in a single game should invoke this tool."""
+            Anything that is about things happening in a single game should invoke this tool. If any query asks about a player has done _ in a game, or in a single game, ect. Invoke this tool."""
         )
     ]
     
