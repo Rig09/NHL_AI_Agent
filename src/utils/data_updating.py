@@ -251,7 +251,7 @@ def process_shots_data(zip_url, table_name):
         #existing_data = existing_data[existing_data['season'] == 2024]
         df = df.drop(columns=['_merge'], errors='ignore')
         existing_data = existing_data.drop(columns=['_merge'], errors='ignore')
-
+        df = df[df['isPlayoffGame' == 1]]
         merge_keys = required_columns + ['nhl_game_id']
 
         merged = pd.merge(df, existing_data, how="left", indicator=True)
