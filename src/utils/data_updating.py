@@ -176,7 +176,7 @@ def download_and_extract_zip(url):
 def get_existing_data(table_name):
     try:
         if table_name == 'shots_data':
-            query = f"SELECT * FROM {table_name} WHERE season=2024;"
+            query = f"SELECT * FROM {table_name} WHERE season=2024 AND isPlayoffGame=1;"
         else:
             query =  f"SELECT * FROM {table_name};"
         return pd.read_sql(query, engine)
