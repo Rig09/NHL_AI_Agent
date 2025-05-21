@@ -175,7 +175,7 @@ def download_and_extract_zip(url):
 
 def get_existing_data(table_name):
     try:
-        query = f"SELECT * FROM {table_name} LIMIT 1;"
+        query = f"SELECT * FROM {table_name};"
         return pd.read_sql(query, engine)
     except Exception as e:
         if "doesn't exist" in str(e).lower() or "no such table" in str(e).lower():
@@ -238,8 +238,7 @@ def process_shots_data(zip_url, table_name):
         
         # Read the CSV into a DataFrame
         df = pd.read_csv(csv_file_path, encoding="utf-8", low_memory=False)
-        
-        # Keep only the required columns
+
         df = df[required_columns]
 
         df['nhl_game_id'] = df['season'].astype(str) + df['game_id'].astype(str).str.zfill(6)
@@ -250,12 +249,15 @@ def process_shots_data(zip_url, table_name):
         df = df.drop(columns=['_merge'], errors='ignore')
         existing_data = existing_data.drop(columns=['_merge'], errors='ignore')
 
+        merge_keys = required_columns + ['nhl_game_id']
+
         merged = pd.merge(df, existing_data, how="left", indicator=True)
         new_records = merged[merged['_merge'] == 'left_only'].drop('_merge', axis=1)
 
         new_records = process_shots(new_records)
         new_records = add_game_dates(new_records)
         # Write to MySQL (replace table each time)
+
         new_records.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
         print(f"✔ Data saved in table '{table_name}'")
         
