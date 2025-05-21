@@ -130,9 +130,9 @@ def goal_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
     )
 
     goal_count = (player_shots['event'] == 'GOAL').sum()
-    # ax.text(-0.35, 1.0, f"Non empty net goals: {goal_count}", 
-    #         transform=ax.transAxes, fontsize=12, verticalalignment='top', 
-    #         bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+    ax.text(-0.35, 1.0, f"Non empty net goals: {goal_count}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', 
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
     caption = llm.invoke(
     f"""Return a figure caption for a scatterplot of goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
@@ -191,10 +191,10 @@ def shot_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
     # Calculate and display totals (moved up and to the left)
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    # ax.text(-0.35, 1.0, f"Shots: {shot_count}\nNon empty net goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
-    #         transform=ax.transAxes, fontsize=12, verticalalignment='top', 
-    #         bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
-    # # Title for the figure
+    ax.text(-0.35, 1.0, f"Shots: {shot_count}\nNon empty net goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', 
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+    # Title for the figure
     # if season_lower_bound == season_upper_bound:
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
     # else:
@@ -249,9 +249,9 @@ def shot_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season
     
     goal_count = (player_shots['event'] == 'GOAL').sum()
     shot_count = goal_count + (player_shots['event'] == 'SHOT').sum()
-    # ax.text(-0.35, 1.0, f"Shots: {shot_count}\nNon empty net goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
-    #         transform=ax.transAxes, fontsize=12, verticalalignment='top', 
-    #         bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+    ax.text(-0.35, 1.0, f"Shots: {shot_count}\nNon empty net goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', 
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
     cbar = fig.colorbar(contour, ax=ax, orientation="horizontal")
     cbar.set_label("Number of Shots")
@@ -300,9 +300,9 @@ def goal_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season
     )
 
     goal_count = (player_shots['event'] == 'GOAL').sum()
-    # ax.text(-0.35, 1.0, f"Non empty net goals: {goal_count}", 
-    #         transform=ax.transAxes, fontsize=12, verticalalignment='top', 
-    #         bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+    ax.text(-0.35, 1.0, f"Non empty net goals: {goal_count}", 
+            transform=ax.transAxes, fontsize=12, verticalalignment='top', 
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
 
     cbar = fig.colorbar(contour, ax=ax, orientation="horizontal")
     cbar.set_label("Number of Goals")
