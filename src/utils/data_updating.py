@@ -175,7 +175,10 @@ def download_and_extract_zip(url):
 
 def get_existing_data(table_name):
     try:
-        query = f"SELECT * FROM {table_name};"
+        if table_name == 'shots_data':
+            query = f"SELECT * FROM {table_name} WHERE season=2024;"
+        else:
+            query =  f"SELECT * FROM {table_name};"
         return pd.read_sql(query, engine)
     except Exception as e:
         if "doesn't exist" in str(e).lower() or "no such table" in str(e).lower():
@@ -245,7 +248,7 @@ def process_shots_data(zip_url, table_name):
         df['nhl_game_id'] = df['nhl_game_id'].astype(int)
         
         existing_data = get_existing_data(table_name)
-
+        #existing_data = existing_data[existing_data['season'] == 2024]
         df = df.drop(columns=['_merge'], errors='ignore')
         existing_data = existing_data.drop(columns=['_merge'], errors='ignore')
 
