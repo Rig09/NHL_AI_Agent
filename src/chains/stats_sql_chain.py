@@ -145,7 +145,7 @@ def get_sql_chain(db, llm):
     
     A user may request a list or table from the shots_data table. Give a list back that can be interperated to find the stat of the user query. So for example if you are prompted to return a table of shots for finding expected goals percentage, then find the table and include the xgoals column.
     Here is a data dictionary with correct titles for the shots_data table to help you return lists of shots: 
-    shotID: Unique id for each shot
+    shotID: Unique id for each shot. Note this is only unique for each game, this requires nhl_game_id to be used with it to uniquely identify each shot.
     homeTeamCode: The home team in the game. For example: TOR, MTL, NYR, etc
     awayTeamCode: The away team in the game
     season: Season the shot took place in. Example: 2009 for the 2009-2010 season
@@ -200,11 +200,15 @@ def get_sql_chain(db, llm):
     A user may also request a list of gameID's that meet a certain condition. This may mean finding the destinct nhl_game_id values that meet a certain shot condition, for example, games where 'Connor Mcdavid scored' would be destinct nhl_game_id values for shots_data where there were connor mcdavid goals.
     Use shots_data if the user requests a a list of gameIDs given a condition about a player, or very specific information like where the Montreal Canadians scored in the second period ect. Use game_logs for TEAM level information that is about the entire game. 
 
-    
+    If a user requests a player 5 on 5 expected goals percentage you are returning the onIce_xGoalsPercentage where situation is 5on5 and the name is the player name.
+    This means if a user asks for this value in the _playoffs or _regular season look in the right table and return that value.
+
+    When someone asks who leads a statistic sort by the statistic and give the number one response.
+
     DO NOT INCLUDE ``` in the response. Do not include a period at the end of the response.
     Question: {question}
     SQL Query:
-    """
+    '"""
 
     prompt = ChatPromptTemplate.from_template(template)
 

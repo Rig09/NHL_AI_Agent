@@ -146,9 +146,11 @@ def goal_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound+1} to {season_upper_bound}- {season_upper_bound+1} Seasons {situation} Goals", fontsize=16)    
     fig.suptitle(caption, fontsize=16)
     
-    # Add citation for data sources
-    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
-    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
+        # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
+
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
     
     return fig
     
@@ -192,7 +194,7 @@ def shot_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
     ax.text(-0.35, 1.0, f"Shots: {shot_count}\nNon empty net goals: {goal_count}\nShooting %: {goal_count/shot_count:.2%}", 
             transform=ax.transAxes, fontsize=12, verticalalignment='top', 
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
-    # # Title for the figure
+    # Title for the figure
     # if season_lower_bound == season_upper_bound:
     #     fig.suptitle(f"{season_lower_bound}-{season_lower_bound + 1} Season {situation} Shots (Grey) and Goals (Orange)", fontsize=16)
     # else:
@@ -204,11 +206,13 @@ def shot_map_scatter_get(db, llm, sql_chain, conditions, season_lower_bound, sea
     ).content
 
     fig.suptitle(caption, fontsize=16)
-    
-    # Add citation for data sources
-    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
-    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
-    
+
+    # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
+
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
+
     return fig
 
 
@@ -259,10 +263,11 @@ def shot_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season
 
     fig.suptitle(caption, fontsize=16)
 
-    # Add citation for data sources
-    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
-    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
+        # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
 
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
     return fig
 
 # TODO: Include heatmaps in this file
@@ -308,11 +313,12 @@ def goal_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season
     ).content
 
     fig.suptitle(caption, fontsize=16)
+    
+    # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
 
-    # Add citation for data sources
-    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
-    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
-
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
     return fig
 
 def xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_upper_bound, situation, season_type):
@@ -345,11 +351,12 @@ def xg_heat_map_get(db, llm, sql_chain, conditions, season_lower_bound, season_u
     f"""Return a figure caption for a heatmap of expected goals that was made based on the following criteria: '{conditions}', in the seasons between {season_lower_bound} to {season_upper_bound}, 
     in the {situation} situation, and in the {season_type} season type. Provide only the caption, no extra information. DO not include the figure number. For example 'Figure 1:' Do not include that."""
     ).content
-
+    
     fig.suptitle(caption, fontsize=16)
+    
+    # Bottom left
+    ax.text(0.01, -0.07, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left', transform=ax.transAxes)
 
-    # Add citation for data sources
-    fig.text(0.01, 0.01, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
-    fig.text(0.99, 0.01, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
-
+    # Bottom right
+    ax.text(0.99, -0.07, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right', transform=ax.transAxes)
     return fig

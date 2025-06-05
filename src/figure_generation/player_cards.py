@@ -5,13 +5,14 @@ from utils.database_init import run_query_mysql, init_db
 import requests
 from dotenv import load_dotenv
 import os
-import cairosvg
+#import cairosvg
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from PIL import Image
 from io import BytesIO
 import mysql.connector
 from decimal import Decimal
+import matplotlib.patches as patches
 import matplotlib.colors as mcolors
 """
 Generate player cards for the NHL AI agent.
@@ -31,12 +32,7 @@ def load_image_from_url(url):
     response = requests.get(url)
     return Image.open(BytesIO(response.content))
 
-# Helper to load SVG image and convert to PNG
-def load_svg_from_url(url):
-    team_logo_png = BytesIO()
-    cairosvg.svg2png(url=url, write_to=team_logo_png)
-    team_logo_png.seek(0)  # Reset buffer position to the start
-    return Image.open(team_logo_png)
+
 
 # load_dotenv()
 
@@ -86,9 +82,9 @@ def get_percentile_query(db_connection, situation, player_name, season_value):
                         offIce_corsiPercentage, I_F_xGoals, I_F_primaryAssists, I_F_shotsOnGoal, I_F_points, I_F_goals, 
                         I_F_penalityMinutes, I_F_takeaways, I_F_giveaways, I_F_lowDangerShots, I_F_mediumDangerShots, 
                         I_F_highDangerShots, OnIce_F_xGoals, OnIce_F_goals, OnIce_A_xGoals, OnIce_A_goals, OffIce_F_xGoals, 
-                        OffIce_A_xGoals, I_F_hits, shotsBlockedByPlayer
+                        OffIce_A_xGoals, I_F_hits, shotsBlockedByPlayer, position
                     FROM skaterstats_regular_{season_value}
-                    WHERE SITUATION = '{situation}'AND ICETIME IS NOT NULL AND ICETIME > 6000
+                    WHERE SITUATION = '{situation}'AND ICETIME IS NOT NULL AND ICETIME > 150
                 ),
                 all_players_stats AS (
                     SELECT 
@@ -96,55 +92,65 @@ def get_percentile_query(db_connection, situation, player_name, season_value):
                         offIce_corsiPercentage, I_F_xGoals, I_F_primaryAssists, I_F_shotsOnGoal, I_F_points, I_F_goals, 
                         I_F_penalityMinutes, I_F_takeaways, I_F_giveaways, I_F_lowDangerShots, I_F_mediumDangerShots, 
                         I_F_highDangerShots, OnIce_F_xGoals, OnIce_F_goals, OnIce_A_xGoals, OnIce_A_goals, OffIce_F_xGoals, 
-                        OffIce_A_xGoals, I_F_hits, shotsBlockedByPlayer
+                        OffIce_A_xGoals, I_F_hits, shotsBlockedByPlayer, position
                     FROM skaterstats_regular_{season_value}
-                    WHERE SITUATION = '{situation}' AND ICETIME IS NOT NULL AND ICETIME > 6000
+                    WHERE SITUATION = '{situation}' AND ICETIME IS NOT NULL AND ICETIME > 150
                 ),
+                player_data AS (
+                    SELECT 
+                    ps.*,
+                    CASE 
+                        WHEN ps.position = 'D' THEN 'D' 
+                        ELSE 'F' 
+                    END AS position_group
+                    FROM player_stats ps
+                    ),
                 player_rank AS (
                     SELECT 
                         ps.name,
+                        ps.position_group,
                         ROW_NUMBER() OVER (ORDER BY ps.onIce_xGoalsPercentage DESC) AS onIce_xGoalsPercentage_rank,
-                        ROW_NUMBER() OVER (ORDER BY ((ps.I_F_goals / ps.ICETIME)*3600) DESC) AS goals_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY ((ps.I_F_points / ps.ICETIME)*3600) DESC) AS points_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY ((ps.I_F_primaryAssists / ps.ICETIME)*3600) DESC) AS primary_assists_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY ((ps.I_F_goals / ps.ICETIME)*3600) DESC) AS goals_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY ((ps.I_F_points / ps.ICETIME)*3600) DESC) AS points_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY ((ps.I_F_primaryAssists / ps.ICETIME)*3600) DESC) AS primary_assists_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY (ps.OnIce_F_xGoals/ps.ICETIME) DESC) AS OnIce_F_xGoals_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY (ps.OnIce_A_xGoals/ps.ICETIME) ASC) AS OnIce_A_xGoals_per_60_rank,
                         ROW_NUMBER() OVER (ORDER BY ((ps.OnIce_F_xGoals/ps.ICETIME) - (ps.OffIce_F_xGoals/((ps.GAMES_PLAYED*3600) - ICETIME)))  DESC) AS Offense_impact_rank,
                         ROW_NUMBER() OVER (ORDER BY ((ps.OnIce_A_xGoals/ps.ICETIME) - (ps.OffIce_A_xGoals/((ps.GAMES_PLAYED*3600) - ICETIME)))  ASC) AS Defense_impact_rank,
-                        ROW_NUMBER() OVER (ORDER BY ((ps.I_F_goals / ps.I_F_shotsOnGoal) * 100) DESC) AS shooting_percentage_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.I_F_goals / ps.I_F_xGoals) DESC) AS goals_per_xg_rank,
-                        ROW_NUMBER() OVER (ORDER BY ((ps.I_F_points - ps.I_F_goals)/ps.ICETIME) DESC) AS assists_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.I_F_hits/ps.ICETIME) DESC) AS hits_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.shotsBlockedByPlayer/ps.ICETIME) DESC) AS shotsBlockedByPlayer_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.I_F_highDangerShots/ps.ICETIME) DESC) AS highDangerShots_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.I_F_takeaways/ps.ICETIME) DESC) AS takeaways_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.I_F_xGoals/ps.ICETIME) DESC) AS I_F_xGoals_per_60_rank,
-                        ROW_NUMBER() OVER (ORDER BY (ps.I_F_shotsOnGoal/ps.ICETIME) DESC) AS shotsOnGoal_per_60_rank
-                    FROM player_stats ps
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY ((ps.I_F_goals / ps.I_F_shotsOnGoal) * 100) DESC) AS shooting_percentage_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY (ps.I_F_goals / ps.I_F_xGoals) DESC) AS goals_per_xg_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY ((ps.I_F_points - ps.I_F_goals)/ps.ICETIME) DESC) AS assists_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY (ps.I_F_hits/ps.ICETIME) DESC) AS hits_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY (ps.shotsBlockedByPlayer/ps.ICETIME) DESC) AS shotsBlockedByPlayer_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY (ps.I_F_highDangerShots/ps.ICETIME) DESC) AS highDangerShots_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY (ps.I_F_takeaways/ps.ICETIME) DESC) AS takeaways_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY (ps.I_F_xGoals/ps.ICETIME) DESC) AS I_F_xGoals_per_60_rank,
+                        ROW_NUMBER() OVER (PARTITION BY ps.position_group  ORDER BY (ps.I_F_shotsOnGoal/ps.ICETIME) DESC) AS shotsOnGoal_per_60_rank
+                    FROM player_data ps
                 )
                 SELECT 
                     pr.name,
-                    (100 - (pr.onIce_xGoalsPercentage_rank / (SELECT COUNT(*) FROM all_players_stats WHERE onIce_xGoalsPercentage IS NOT NULL AND ICETIME > 6000) * 100)) AS onIce_xGoalsPercentage_percentile,
-                    (100 - (pr.goals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((I_F_goals / ICETIME) * 3600) IS NOT NULL AND ICETIME > 6000) * 100)) AS goals_per_60_percentile,
-                    (100 - (pr.points_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((I_F_points / ICETIME) * 3600) IS NOT NULL AND ICETIME > 6000) * 100)) AS points_per_60_percentile,
-                    (100 - (pr.primary_assists_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_primaryAssists IS NOT NULL AND ICETIME > 6000) * 100)) AS primary_assists_per_60_percentile,
-                    (100 - (pr.OnIce_F_xGoals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE (OnIce_F_xGoals / ICETIME) IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_F_xGoals_per_60_percentile,
-                    (100 - (pr.OnIce_A_xGoals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE (OnIce_A_xGoals / ICETIME) IS NOT NULL AND ICETIME > 6000) * 100)) AS OnIce_A_xGoals_per_60_percentile,
-                    (100 - (pr.Offense_impact_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((OnIce_F_xGoals / ICETIME) - (OffIce_F_xGoals / ((GAMES_PLAYED * 3600) - ICETIME))) IS NOT NULL AND ICETIME > 6000) * 100)) AS Offense_impact_percentile,
-                    (100 - (pr.Defense_impact_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((OnIce_A_xGoals / ICETIME) - (OffIce_A_xGoals / ((GAMES_PLAYED * 3600) - ICETIME))) IS NOT NULL AND ICETIME > 6000) * 100)) AS Defense_impact_percentile,
-                    (100 - (pr.shooting_percentage_rank / (SELECT COUNT(*) FROM all_players_stats WHERE ((I_F_goals / I_F_shotsOnGoal) * 100) IS NOT NULL AND ICETIME > 6000) * 100)) AS shooting_percentage_percentile,
-                    (100 - (pr.goals_per_xg_rank / (SELECT COUNT(*) FROM all_players_stats WHERE (I_F_goals / I_F_xGoals) IS NOT NULL AND ICETIME > 6000) * 100)) AS goals_per_xg_percentile,
-                    (100 - (pr.assists_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_points IS NOT NULL AND ICETIME > 6000) * 100)) AS assists_per_60_percentile,
-                    (100 - (pr.hits_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_hits IS NOT NULL AND ICETIME > 6000) * 100)) AS hits_per_60_percentile,
-                    (100 - (pr.shotsBlockedByPlayer_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE shotsBlockedByPlayer IS NOT NULL AND ICETIME > 6000) * 100)) AS shotsBlockedByPlayer_per_60_percentile,
-                    (100 - (pr.highDangerShots_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_highDangerShots IS NOT NULL AND ICETIME > 6000) * 100)) AS highDangerShots_per_60_percentile,
-                    (100 - (pr.takeaways_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_takeaways IS NOT NULL AND ICETIME > 6000) * 100)) AS takeaways_per_60_percentile,
-                    (100 - (pr.I_F_xGoals_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_xGoals IS NOT NULL AND ICETIME > 6000) * 100)) AS I_F_xGoals_per_60_percentile,
-                    (100 - (pr.shotsOnGoal_per_60_rank / (SELECT COUNT(*) FROM all_players_stats WHERE I_F_shotsOnGoal IS NOT NULL AND ICETIME > 6000) * 100)) AS shotsOnGoal_per_60_percentile
+                    (100 - (pr.onIce_xGoalsPercentage_rank / (SELECT COUNT(*) FROM player_data pd WHERE onIce_xGoalsPercentage IS NOT NULL AND ICETIME > 150) * 100)) AS onIce_xGoalsPercentage_percentile,
+                    (100 - (pr.goals_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND ((I_F_goals / ICETIME) * 3600) IS NOT NULL AND ICETIME > 150) * 100)) AS goals_per_60_percentile,
+                    (100 - (pr.points_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND ((I_F_points / ICETIME) * 3600) IS NOT NULL AND ICETIME > 150) * 100)) AS points_per_60_percentile,
+                    (100 - (pr.primary_assists_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND I_F_primaryAssists IS NOT NULL AND ICETIME > 150) * 100)) AS primary_assists_per_60_percentile,
+                    (100 - (pr.OnIce_F_xGoals_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE (OnIce_F_xGoals / ICETIME) IS NOT NULL AND ICETIME > 150) * 100)) AS OnIce_F_xGoals_per_60_percentile,
+                    (100 - (pr.OnIce_A_xGoals_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE (OnIce_A_xGoals / ICETIME) IS NOT NULL AND ICETIME > 150) * 100)) AS OnIce_A_xGoals_per_60_percentile,
+                    (100 - (pr.Offense_impact_rank / (SELECT COUNT(*) FROM player_data pd WHERE ((OnIce_F_xGoals / ICETIME) - (OffIce_F_xGoals / ((GAMES_PLAYED * 3600) - ICETIME))) IS NOT NULL AND ICETIME > 150) * 100)) AS Offense_impact_percentile,
+                    (100 - (pr.Defense_impact_rank / (SELECT COUNT(*) FROM player_data pd WHERE ((OnIce_A_xGoals / ICETIME) - (OffIce_A_xGoals / ((GAMES_PLAYED * 3600) - ICETIME))) IS NOT NULL AND ICETIME > 150) * 100)) AS Defense_impact_percentile,
+                    (100 - (pr.shooting_percentage_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND ((I_F_goals / I_F_shotsOnGoal) * 100) IS NOT NULL AND ICETIME > 150) * 100)) AS shooting_percentage_percentile,
+                    (100 - (pr.goals_per_xg_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND (I_F_goals / I_F_xGoals) IS NOT NULL AND ICETIME > 150) * 100)) AS goals_per_xg_percentile,
+                    (100 - (pr.assists_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND I_F_points IS NOT NULL AND ICETIME > 150) * 100)) AS assists_per_60_percentile,
+                    (100 - (pr.hits_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND I_F_hits IS NOT NULL AND ICETIME > 150) * 100)) AS hits_per_60_percentile,
+                    (100 - (pr.shotsBlockedByPlayer_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND shotsBlockedByPlayer IS NOT NULL AND ICETIME > 150) * 100)) AS shotsBlockedByPlayer_per_60_percentile,
+                    (100 - (pr.highDangerShots_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND I_F_highDangerShots IS NOT NULL AND ICETIME > 150) * 100)) AS highDangerShots_per_60_percentile,
+                    (100 - (pr.takeaways_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND I_F_takeaways IS NOT NULL AND ICETIME > 150) * 100)) AS takeaways_per_60_percentile,
+                    (100 - (pr.I_F_xGoals_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND I_F_xGoals IS NOT NULL AND ICETIME > 150) * 100)) AS I_F_xGoals_per_60_percentile,
+                    (100 - (pr.shotsOnGoal_per_60_rank / (SELECT COUNT(*) FROM player_data pd WHERE pd.position_group = pr.position_group AND I_F_shotsOnGoal IS NOT NULL AND ICETIME > 150) * 100)) AS shotsOnGoal_per_60_percentile
                 FROM player_rank pr
                 WHERE pr.name = '{player_name}'
                 """
-    print(query)
+    #print(query)
     try:
         cursor = db_connection.cursor(dictionary=True)  # Use dictionary=True to get results as dictionaries
         cursor.execute(query)
@@ -152,7 +158,7 @@ def get_percentile_query(db_connection, situation, player_name, season_value):
         cursor.close()
 
         if result:
-                print(result)
+                #print(result)
                 return result
         else:
                 print("No data found for the player:", player_name)
@@ -185,9 +191,7 @@ def fetch_player_card(db, player_name, season):
     birthDate = data.get("birthDate", None)
     shootsCatches = data.get("shootsCatches", None)
     birthCountry = data.get("birthCountry", None)
-    
-    # Get properly formatted player name from the API
-    formatted_player_name = f"{data.get('firstName', {}).get('default', '')} {data.get('lastName', {}).get('default', '')}"
+
     
     ev_total = {}
     non_ev_total = {}
@@ -201,6 +205,10 @@ def fetch_player_card(db, player_name, season):
     ev_percentiles_total = {}
     non_ev_percentiles_total = {}
     valid_seasons = 0
+    ev_xg_percentages = []
+    ev_defense_xgs = []
+    ev_offense_xgs = []
+    valid_seasons_list = []
 
     if len(season) == 0:
         season_value = 2015
@@ -231,8 +239,11 @@ def fetch_player_card(db, player_name, season):
             total_data = Basic_stats_seasons[total_key]
             ev_percentiles = percentile_seasons[ev_percentile_key]
             total_percentiles = percentile_seasons[total_percentile_key]
-            if ev_data and ev_data[0].get("ICETIME", 0) > 100:
 
+            if ev_data and ev_data[0].get("ICETIME", 0) > 100:
+                ev_xg_percentages.append(ev_percentiles.get('onIce_xGoalsPercentage_percentile'))
+                ev_offense_xgs.append(ev_percentiles.get('OnIce_F_xGoals_per_60_percentile'))
+                ev_defense_xgs.append(ev_percentiles.get('OnIce_A_xGoals_per_60_percentile'))
                 for k, v in ev_data[0].items():
                     if isinstance(v, (int, float)):
                         if isinstance(v, float) and 0 < v < 1:
@@ -240,6 +251,8 @@ def fetch_player_card(db, player_name, season):
                             ev_counts[k] = ev_counts.get(k, 0) + 1
                         else:
                             ev_total[k] = ev_total.get(k, 0) + v
+                next_season = int(season_value) + 1
+                valid_seasons_list.append(f"{season_value}-{str(next_season)[2:]}")
 
                 # Calculate average percentile for each stat in `ev_percentiles`
                 for key in ev_percentiles.keys():
@@ -286,6 +299,9 @@ def fetch_player_card(db, player_name, season):
             total_percentiles = percentile_seasons[total_percentile_key]
 
             if ev_data:
+                ev_xg_percentages.append(ev_percentiles.get('onIce_xGoalsPercentage_percentile'))
+                ev_offense_xgs.append(ev_percentiles.get('OnIce_F_xGoals_per_60_percentile'))
+                ev_defense_xgs.append(ev_percentiles.get('OnIce_A_xGoals_per_60_percentile'))
                 for k, v in ev_data[0].items():
                     if isinstance(v, (int, float)):
                         if isinstance(v, float) and 0 < v < 1:
@@ -293,7 +309,8 @@ def fetch_player_card(db, player_name, season):
                             ev_counts[k] = ev_counts.get(k, 0) + 1
                         else:
                             ev_total[k] = ev_total.get(k, 0) + v
-
+                next_season = int(season_value) + 1
+                valid_seasons_list.append(f"{season_value}-{str(next_season)[2:]}")
                 # Calculate average percentile for each stat in `ev_percentiles`
                 for key in ev_percentiles.keys():
                     if isinstance(ev_percentiles[key], (int, float, Decimal)):
@@ -353,21 +370,22 @@ def fetch_player_card(db, player_name, season):
     # Load headshot
     headshot = load_image_from_url(headshot_url)
 
-    # Load team logo as SVG and convert to PNG
-    team_logo = load_svg_from_url(team_logo_url)
-    
+    # # Convert SVG to PNG if needed using cairosvg (install with pip install cairosvg)
+    # team_logo_png = BytesIO()
+    # cairosvg.svg2png(url=team_logo_url, write_to=team_logo_png)
+    # team_logo = Image.open(team_logo_png)
     # Add headshot
     ax_headshot = fig.add_axes([0.05, 0.75, 0.2, 0.2]) # [left, bottom, width, height]
     ax_headshot.imshow(headshot)
     ax_headshot.axis('off')
 
-    # Add team logo beside headshot and make it smaller
-    ax_logo = fig.add_axes([0.27, 0.78, 0.12, 0.12])
-    ax_logo.imshow(team_logo)
-    ax_logo.axis('off')
+    # # Add team logo
+    # ax_logo = fig.add_axes([0.5, 0.4, 0.15, 0.5])
+    # ax_logo.imshow(team_logo)
+    # ax_logo.axis('off')
 
-    # Add player name using the formatted name from the API
-    fig.text(0.05, 0.72, formatted_player_name, fontsize=14, fontweight='bold', ha='left')
+    # Add player name
+    fig.text(0.05, 0.72, player_name, fontsize=14, fontweight='bold', ha='left')
     if len(season) == 0:
         fig.text(0.05, 0.7, f"Career Stats", fontsize=8, ha='left')
     elif len(season) == 1:
@@ -403,16 +421,18 @@ def fetch_player_card(db, player_name, season):
     feet = heightInches // 12
     inches = heightInches % 12
 
-# Create feet_height variable
+    # Create feet_height variable
     feet_height = f"{feet} {inches}'"
+    bio_infox = 0.19
+    bio_infoy = 1.08
 
-    ax.text(0.8, 1.04, f"Number: #{sweaterNumber}", fontsize=12, ha='left')
-    ax.text(0.8, 1.00, f"Position: {position}", fontsize=12, ha='left')
-    ax.text(0.8, 0.96, f"Age: {age}", fontsize=12, ha='left')
-    ax.text(0.8, 0.92, f"Born: {birthCountry}", fontsize=12, ha='left')
-    ax.text(0.8, 0.88, f"Height: {feet_height}", fontsize=12, ha='left')
-    ax.text(0.8, 0.84, f"Weight: {weightInPounds} lbs", fontsize=12, ha='left')
-    ax.text(0.8, 0.80, f"Shoots: {shootsCatches}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy, f"Number: #{sweaterNumber}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.04, f"Position: {position}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.08, f"Age: {age}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.12, f"Born: {birthCountry}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.16, f"Height: {feet_height}", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.2, f"Weight: {weightInPounds} lbs", fontsize=12, ha='left')
+    ax.text(bio_infox, bio_infoy-0.24, f"Shoots: {shootsCatches}", fontsize=12, ha='left')
 
     if len(season) == 1:
         percentile_string = "Percentile: "
@@ -505,15 +525,78 @@ def fetch_player_card(db, player_name, season):
             x_value = 0.0
             y_value -= 0.15
 
-    # Add citation for data sources
-    ax.text(0.0, -0.08, "Data Sources: MoneyPuck.com and NHL API", fontsize=8, ha='left', style='italic')
-    ax.text(1.0, -0.08, "@ChatbotNHL", fontsize=8, ha='right', style='italic')
+    ax.text(-0.1, -0.085, "Made with: nhlchatbot.streamlit.app", fontsize=6, ha='left')
+    ax.text(1.075, -0.085, "All data courtesy of MoneyPuck.com and the NHL API", fontsize=6, ha='right')
 
+    # xg_values = np.array(ev_xg_percentages)
+    # # X-axis will be the index of each value
+    # x_indices = np.arange(len(ev_xg_percentages))
+    # Insert the inset axes
+    if season != 1:
+        inset_ax = fig.add_axes([0.45, 0.63, 0.5, 0.335])
+
+        # Plot the scatter with index on x-axis
+        inset_ax.scatter(valid_seasons_list, ev_xg_percentages, s=15, color='dodgerblue')
+
+        inset_ax.scatter(valid_seasons_list, ev_offense_xgs, s=15, color='green')
+
+        inset_ax.scatter(valid_seasons_list, ev_defense_xgs, s=15, color='orangered')
+
+        # Optional: Add a line to show the trend
+        inset_ax.plot(valid_seasons_list, ev_xg_percentages,  color='lightblue', linewidth=1, alpha=0.6)
+
+        inset_ax.plot(valid_seasons_list, ev_offense_xgs,  color='lightgreen', linewidth=1, alpha=0.6)
+
+        inset_ax.plot(valid_seasons_list, ev_defense_xgs,  color='orangered', linewidth=1, alpha=0.6)
+        # Formatting
+        #inset_ax.set_title("xG Value by Index", fontsize=8)
+        inset_ax.set_ylim(0, 100)
+    # inset_ax.set_yticks([0, 50, 100])
+        inset_ax.set_ylabel("EV League Percentile", fontsize=6, labelpad=0)
+        inset_ax.tick_params(labelsize=6)
+        inset_ax.grid(True, linestyle='--', alpha=0.4)
+
+        #inset_ax.legend(loc='upper left', fontsize=6)
+        print(ev_xg_percentages)
+        print(valid_seasons_list)
+
+        box_x, box_y = 0.35, 0.65  # top-right area
+        box_width, box_height = 0.05, 0.025
+
+        # Add a white rectangle as the background box with a black border
+        fig.patches.append(
+            patches.FancyBboxPatch(
+                (box_x, box_y),
+                box_width,
+                box_height,
+                boxstyle="round,pad=0.02",
+                linewidth=0.5,
+                edgecolor="black",
+                facecolor="white",
+                transform=fig.transFigure,
+                #zorder=5
+            )
+        )
+
+        # Now add small colored boxes and labels inside
+        fig.text(box_x - 0.002, box_y + 0.0305, '■', 
+            fontsize=10, color='dodgerblue', transform=fig.transFigure, va='center')
+        fig.text(box_x + 0.02, box_y + 0.03, 'xG %', fontsize=6, va='center')
+
+        fig.text(box_x - 0.002, box_y + 0.0105, '■', 
+            fontsize=10, color='green', transform=fig.transFigure, va='center')
+        fig.text(box_x + 0.02, box_y + 0.01, 'xG for/60', fontsize=6, va='center')
+
+        fig.text(box_x - 0.002, box_y - 0.0095, '■', 
+            fontsize=10, color='orangered', transform=fig.transFigure, va='center')
+        fig.text(box_x + 0.02, box_y - 0.01, 'xGA/60', fontsize=6, va='center')
+
+    #plt.show()
     return fig
 
 # db = init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
 
-# fetch_player_card(db, "Simon Benoit", [2023])
+# fetch_player_card(db, "Auston Matthews", [])
         
 
 

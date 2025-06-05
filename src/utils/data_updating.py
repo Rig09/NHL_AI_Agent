@@ -26,6 +26,23 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor()
 
+def get_game_type_or_exit():
+    today = datetime.today()
+    year = today.year
+    
+    april_20 = datetime(year, 4, 20)
+    july_1 = datetime(year, 7, 1)
+    sept_1 = datetime(year, 9, 1)
+
+    if april_20 <= today < july_1:
+        return "playoffs"
+    elif july_1 <= today < sept_1:
+        print("Offseason: The program will not run during this time.")
+        exit(0)
+    else:
+        return "regular"
+    
+game_type = get_game_type_or_exit()
 # Create database if it doesn't exist
 #cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_DATABASE};")
 cursor.execute(f"USE {MYSQL_DATABASE};")
@@ -35,12 +52,12 @@ engine = create_engine(f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{M
 
 # Define the URLs for the CSV files
 urls = {
-    'skaterstats_regular_2024': "https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/skaters.csv",
-    'goaliestats_regular_2024': "https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/goalies.csv",
-    'linestats_regular_2024': "https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/lines.csv",
-    'teamstats_regular_2024': "https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/regular/teams.csv",
-    'shots_data': "https://peter-tanner.com/moneypuck/downloads/shots_2024.zip",  # New shots data URL
-    'game_logs': "https://moneypuck.com/moneypuck/playerData/careers/gameByGame/all_teams.csv"
+    f'skaterstats_{game_type}_2024': f"https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/{game_type}/skaters.csv",
+    f'goaliestats_{game_type}_2024': f"https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/{game_type}/goalies.csv",
+    f'linestats_{game_type}_2024': f"https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/{game_type}/lines.csv",
+    f'teamstats_{game_type}_2024': f"https://moneypuck.com/moneypuck/playerData/seasonSummary/2024/{game_type}/teams.csv",
+    f'shots_data': f"https://peter-tanner.com/moneypuck/downloads/shots_2024.zip",  # New shots data URL
+    f'game_logs': f"https://moneypuck.com/moneypuck/playerData/careers/gameByGame/all_teams.csv"
 }
 
 required_columns = [
@@ -157,9 +174,18 @@ def download_and_extract_zip(url):
         return None
 
 def get_existing_data(table_name):
-    # Query the existing data from the table
-    query = f"SELECT * FROM {table_name};"
-    return pd.read_sql(query, engine)
+    try:
+        if table_name == 'shots_data':
+            query = f"SELECT * FROM {table_name} WHERE season=2024 AND isPlayoffGame=1;"
+        else:
+            query =  f"SELECT * FROM {table_name};"
+        return pd.read_sql(query, engine)
+    except Exception as e:
+        if "doesn't exist" in str(e).lower() or "no such table" in str(e).lower():
+            print(f"Table '{table_name}' does not exist yet.")
+            return pd.DataFrame()
+        else:
+            raise Exception(f"Unknown error querying table '{table_name}': {e}")
 
 def update_table(df, table_name):
     # Retrieve existing data from the table
@@ -215,17 +241,18 @@ def process_shots_data(zip_url, table_name):
         
         # Read the CSV into a DataFrame
         df = pd.read_csv(csv_file_path, encoding="utf-8", low_memory=False)
-        
-        # Keep only the required columns
+
         df = df[required_columns]
 
         df['nhl_game_id'] = df['season'].astype(str) + df['game_id'].astype(str).str.zfill(6)
         df['nhl_game_id'] = df['nhl_game_id'].astype(int)
         
         existing_data = get_existing_data(table_name)
-
+        #existing_data = existing_data[existing_data['season'] == 2024]
         df = df.drop(columns=['_merge'], errors='ignore')
         existing_data = existing_data.drop(columns=['_merge'], errors='ignore')
+        df = df[df['isPlayoffGame'] == 1]
+        merge_keys = required_columns + ['nhl_game_id']
 
         merged = pd.merge(df, existing_data, how="left", indicator=True)
         new_records = merged[merged['_merge'] == 'left_only'].drop('_merge', axis=1)
@@ -233,6 +260,7 @@ def process_shots_data(zip_url, table_name):
         new_records = process_shots(new_records)
         new_records = add_game_dates(new_records)
         # Write to MySQL (replace table each time)
+
         new_records.to_sql(table_name, engine, if_exists="append", index=False, chunksize=5000, method="multi")
         print(f"✔ Data saved in table '{table_name}'")
         
@@ -254,14 +282,20 @@ def process_lines_csv(url, table_name):
         update_table(df_lines, f"{table_name}")  # Update the 'lines' table
         
         # Handle pairs (just like the other DataFrames)
-        update_table(df_pairs, f"pairstats_regular_2024")  # Update the 'pairs' table
+        update_table(df_pairs, f"pairstats_{game_type}_2024")  # Update the 'pairs' table
         
         print(f"✔ Lines and pairs data from {table_name} processed and added to database.")
 
-
-# Modify the main processing loop to handle the linestats_regular_2024 URL differently
+def ping_url(url):
+    try:
+        response = requests.get(url)
+        print(f"Status Code: {response.status_code}")
+        print("Website is reachable!" if response.ok else "Website is not reachable!")
+    except requests.RequestException as e:
+        print(f"Failed to reach the website. Error: {e}")
+# Modify the main processing loop to handle the linestats_{game_type}_2024 URL differently
 for table_name, url in urls.items():
-    if "linestats_regular_2024" in table_name:
+    if f"linestats_{game_type}_2024" in table_name:
         process_lines_csv(url, table_name)
     elif "shots_data" in table_name:  # Process the ZIP for shots_data
         process_shots_data(url, table_name)
@@ -269,3 +303,6 @@ for table_name, url in urls.items():
         process_csv(url, table_name)
 
 print("All specified tables have been updated in the database.")
+ping_url('https://nhlchatbot.streamlit.app/')
+
+print("Streamlit app up")
