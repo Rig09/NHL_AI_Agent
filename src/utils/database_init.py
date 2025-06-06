@@ -4,6 +4,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from utils.throttling import ThrottledChatOpenAI, ThrottledOpenAIEmbeddings
 import os
 import pandas as pd
 
@@ -21,7 +22,7 @@ load_dotenv()
 # MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 # open_ai_key = os.getenv("OPENAI_API_KEY")
 
-model = ChatOpenAI(model="gpt-4o")
+model = ThrottledChatOpenAI(model="gpt-4o")
 
 def init_db(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD,MYSQL_DATABASE):
     """Initialize and return the database connection"""
@@ -76,7 +77,8 @@ def find_persistent_dir(db_name):
 def init_vector_db(db_name, api_key):
     assert db_name in ['cba', 'rules']
     persistent_dir = find_persistent_dir(db_name)
-    return Chroma(persist_directory=persistent_dir, embedding_function=OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key))
+    # Use throttled embeddings to manage API rate limits
+    return Chroma(persist_directory=persistent_dir, embedding_function=ThrottledOpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key))
     
 
 def get_table_info(db_connection, table_names=None):
